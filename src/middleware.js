@@ -16,6 +16,8 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
+  console.log(req.auth)
+
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicroutes.includes(nextUrl.pathname);
 
@@ -36,9 +38,16 @@ export default auth((req) => {
     return Response.redirect(new URL("/login", nextUrl));
   }
 
+  if(!req.auth.user.hascompany){
+    if(nextUrl.pathname === "/company"){
+      return null
+    }
+    return Response.redirect(new URL("/company", nextUrl));
+  }
+
   return null;
 });
 
 export const config = {
-  matcher: ["/(api|trpc)(.*)", "/", "/dashboard", "/login", "/signup"],
+  matcher: ["/(api|trpc)(.*)", "/", "/dashboard", "/company", "/login", "/signup"],
 };
