@@ -38,7 +38,7 @@ export default auth((req) => {
     return Response.redirect(new URL("/login", nextUrl));
   }
 
-  if(!req.auth.user.hascompany){
+  if(!req?.auth?.user?.hascompany){
     if(nextUrl.pathname === "/company"){
       return null
     }
