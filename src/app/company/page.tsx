@@ -1,13 +1,11 @@
+import CompanySetup from '@/components/company/companySetup'
 import Link from 'next/link'
 import React from 'react'
 
 const page = () => {
     return (
-        <div>
-
-            set up company
-            <Link href={"/api/auth/signout"}>logout</Link>
-
+        <div className='md:h-screen w-full mx-auto'>
+            <CompanySetup />
         </div>
     )
 }

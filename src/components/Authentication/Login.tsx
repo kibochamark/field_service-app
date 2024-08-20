@@ -3,41 +3,46 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 import { signIn } from "next-auth/react";
-import { Bounce, toast } from "react-toastify";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { error } from "console";
+import { Loader } from "lucide-react";
 
 const Login = () => {
+  const router = useRouter()
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const res = await signIn("credentials", {
+        redirect: false,
         email: formData.get("email") as string,
         password: formData.get("password") as string,
-      });
+      },
+
+      );
+
+      console.log(res)
       return res;
     },
-    onSuccess() {
-      toast.success("Login Operation Successfully", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+    onSuccess(data) {
+      console.log(data)
+      if (data?.error) {
+        toast.error("Invalid credentials", {
+          position: "top-center",
+        });
+      } else {
+        toast.success("Login Operation Successfully", {
+          position: "top-center",
+
+        });
+        router.push("/dashboard")
+
+      }
     },
-    onError: () => {
+    onError: (error) => {
+      console.log(error)
+
       toast.error("Error, try again!", {
         position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
       });
     },
   });
@@ -74,7 +79,7 @@ const Login = () => {
                   <p className="text-titleSmall">Log in</p>
                 </div>
                 <div className="md:grid md:grid-cols-2 gap-6">
-                  <div className="">
+                  {/* <div className="">
                     <div className="flex md:flex-row gap-2 content-center">
                       <label
                         htmlFor=""
@@ -89,7 +94,7 @@ const Login = () => {
                       name="identifier"
                       className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                     />
-                  </div>
+                  </div> */}
                   <div className="">
                     <div className="flex md:flex-row gap-2 content-center">
                       <label
@@ -125,7 +130,7 @@ const Login = () => {
                     className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                   />
                 </div>
-                <div>
+                {/* <div>
                   <input
                     id="default-checkbox"
                     type="checkbox"
@@ -135,16 +140,17 @@ const Login = () => {
                   <label className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 disabled:text-gray-400">
                     Remember Me
                   </label>
-                </div>
+                </div> */}
 
                 <div>
                   <button
                     type="submit"
-                    className="bg-primary600 hover:bg-primary800 rounded-md w-full py-3 shadow-md text-white text-bodyMedium font-semibold"
+                    className="bg-primary600 hover:bg-primary800 text-center rounded-md w-full py-3 shadow-md flex items-center justify-center text-white text-bodyMedium font-semibold"
                     disabled={mutation.isPending}
                   >
                     {mutation.isPending ? (
-                      <span className="loading loading-spinner loading-lg"></span>
+                      // <span className="loading loading-spinner loading-lg"></span>
+                      <Loader className="animate animate-spin text-center" />
                     ) : (
                       <div>Login</div>
                     )}

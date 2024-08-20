@@ -12,11 +12,13 @@ const DEFAULT_LOGIN_REDIRECT = "/dashboard";
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+export default auth(async(req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
+  
   console.log(req.auth)
+  
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicroutes.includes(nextUrl.pathname);
@@ -38,11 +40,16 @@ export default auth((req) => {
     return Response.redirect(new URL("/login", nextUrl));
   }
 
-  if(!req?.auth?.user?.hascompany){
-    if(nextUrl.pathname === "/company"){
+
+  if (!(req?.auth?.user?.hascompany)) {
+    if (nextUrl.pathname === "/company") {
       return null
     }
     return Response.redirect(new URL("/company", nextUrl));
+  }
+
+  if (nextUrl.pathname === "/company") {
+    return Response.redirect(new URL("/dashboard", nextUrl))
   }
 
   return null;
