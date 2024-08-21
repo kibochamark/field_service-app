@@ -111,10 +111,10 @@ export function Dashboard() {
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <Package className="h-5 w-5" />
-                <span className="sr-only">Products</span>
+                <span className="sr-only">Employees</span>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Products</TooltipContent>
+            <TooltipContent side="right">Employees</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -193,7 +193,7 @@ export function Dashboard() {
                   className="flex items-center gap-4 px-2.5 text-foreground"
                 >
                   <Package className="h-5 w-5" />
-                  Products
+                  Employees
                 </Link>
                 <Link
                   href="#"
@@ -222,12 +222,12 @@ export function Dashboard() {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="#">Products</Link>
+                  <Link href="#">Employees</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>All Products</BreadcrumbPage>
+                <BreadcrumbPage>All Employees</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -307,7 +307,7 @@ export function Dashboard() {
                 <Button size="sm" className="h-8 gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Product
+                    Add Employee
                   </span>
                 </Button>
               </div>
@@ -315,9 +315,9 @@ export function Dashboard() {
             <TabsContent value="all">
               <Card x-chunk="dashboard-06-chunk-0">
                 <CardHeader>
-                  <CardTitle>Products</CardTitle>
+                  <CardTitle>Employees</CardTitle>
                   <CardDescription>
-                    Manage your products and view their sales performance.
+                    Manage your Employees and view their sales performance.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -347,7 +347,7 @@ export function Dashboard() {
                       <TableRow>
                         <TableCell className="hidden sm:table-cell">
                           <Image
-                            alt="Product image"
+                            alt="Image"
                             className="aspect-square rounded-md object-cover"
                             height="64"
                             src="/placeholder.svg"
@@ -392,7 +392,7 @@ export function Dashboard() {
                       <TableRow>
                         <TableCell className="hidden sm:table-cell">
                           <Image
-                            alt="Product image"
+                            alt="Image"
                             className="aspect-square rounded-md object-cover"
                             height="64"
                             src="/placeholder.svg"
@@ -437,7 +437,7 @@ export function Dashboard() {
                       <TableRow>
                         <TableCell className="hidden sm:table-cell">
                           <Image
-                            alt="Product image"
+                            alt="Image"
                             className="aspect-square rounded-md object-cover"
                             height="64"
                             src="/placeholder.svg"
@@ -482,7 +482,7 @@ export function Dashboard() {
                       <TableRow>
                         <TableCell className="hidden sm:table-cell">
                           <Image
-                            alt="Product image"
+                            alt="Image"
                             className="aspect-square rounded-md object-cover"
                             height="64"
                             src="/placeholder.svg"
@@ -527,7 +527,7 @@ export function Dashboard() {
                       <TableRow>
                         <TableCell className="hidden sm:table-cell">
                           <Image
-                            alt="Product image"
+                            alt="Image"
                             className="aspect-square rounded-md object-cover"
                             height="64"
                             src="/placeholder.svg"
@@ -572,7 +572,7 @@ export function Dashboard() {
                       <TableRow>
                         <TableCell className="hidden sm:table-cell">
                           <Image
-                            alt="Product image"
+                            alt="Image"
                             className="aspect-square rounded-md object-cover"
                             height="64"
                             src="/placeholder.svg"
@@ -620,7 +620,7 @@ export function Dashboard() {
                 <CardFooter>
                   <div className="text-xs text-muted-foreground">
                     Showing <strong>1-10</strong> of <strong>32</strong>{" "}
-                    products
+                    Employees
                   </div>
                 </CardFooter>
               </Card>
