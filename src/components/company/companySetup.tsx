@@ -49,11 +49,18 @@ const CompanySetup = () => {
             return await company(values);
         },
         onSuccess(data) {
-            toast.success("Company Details Added Successfully", {
-                position: "top-center",
-            });
-            // companyFormik.resetForm();
-            router.push("/dashboard");
+            if(data.message){
+                toast.error("Something went wrong", {
+                    position: "top-center",
+                });
+            }else{
+                toast.success("Company Details Added Successfully", {
+                    position: "top-center",
+                });
+                companyFormik.resetForm();
+                router.push("/dashboard");
+            }
+            
         },
         onError(error) {
 
