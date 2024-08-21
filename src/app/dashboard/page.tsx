@@ -10,7 +10,7 @@ const page = () => {
   };
   return (
     <div>
-      Dashboard
+      Dashboardiiiii
       <Link href={"/api/auth/signout"}>Logout</Link>
     </div>
   );
