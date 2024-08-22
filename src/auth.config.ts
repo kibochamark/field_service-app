@@ -5,6 +5,40 @@ import axios from "axios";
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+
+async function refreshAccessToken(token: any) {
+  try {
+    const url = ""
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      method: "POST",
+    })
+
+    const refreshedTokens = await response.json()
+
+    if (!response.ok) {
+      throw refreshedTokens
+    }
+
+    return {
+      ...token,
+      access_token: refreshedTokens.access_token,
+      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      refresh_token: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
+    }
+  } catch (error) {
+    console.log(error)
+
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    }
+  }
+}
+
+
 export default {
   providers: [
     Credentials({
@@ -18,23 +52,23 @@ export default {
         console.log(credentials, "cred");
         let user = null;
 
-      
-          const res = await axios.post(
-            "http://localhost:8000/api/v1/auth/login",
-            {
-              email: credentials.email,
-              password: credentials.password,
-            }
-          );
 
-          console.log(res)
-
-          if (res.status === 200) {
-            return user = res.data;
-          }else{
-            return user;
-
+        const res = await axios.post(
+          "http://localhost:8000/api/v1/auth/login",
+          {
+            email: credentials.email,
+            password: credentials.password,
           }
+        );
+
+        console.log(res)
+
+        if (res.status === 200) {
+          return user = res.data;
+        } else {
+          return user;
+
+        }
       },
     }),
     GoogleProvider({
@@ -50,52 +84,62 @@ export default {
       //   };
       // },
     }),
-    
+
   ],
   session: {
     strategy: "jwt",
+    maxAge: 15 * 60,
+    updateAge: 10 * 60
   },
   callbacks: {
-    jwt: async ({ token, user, profile, account }) => {
-
-      if (!profile) {
-        if (user) {
-          token.id = user?.id;
-          token.access_token = (user as any)?.accessToken;
-          token.refresh_token = (user as any)?.refreshToken;
-          token.hascompany = (user as any)?.hascompany;
-        }
-
+    jwt: async ({ token, user, profile, session, account, trigger }) => {
+      if (trigger === "update") {
+        console.log(session, "in update trigger")
+        token.hascompany = session?.hascompany
       } else {
-        try {
-          const res = await axios.post("http://localhost:8000/api/v1/auth/google", {
-            firstname: profile?.given_name,
-            lastname: profile?.family_name,
-            email: profile?.email,
-            googleId: account?.providerAccountId,
-          });
-
-          if (res.status === 200 || res.status === 201) {
-            token.access_token = res.data?.data?.token?.accessToken;
-            token.refresh_token = res.data?.data?.token?.refreshToken;
-            token.hascompany = res.data?.data?.token?.hascompany;
+        if (!profile) {
+          if (user) {
+            token.id = user?.id;
+            token.access_token = (user as any)?.accessToken;
+            token.refresh_token = (user as any)?.refreshToken;
+            token.hascompany = (user as any)?.hascompany;
           }
-        } catch (error) {
-          console.error("Error fetching tokens from your API:", error);
+
+        } else {
+          try {
+            const res = await axios.post(process.env.BASEURL! +"auth/google", {
+              firstname: profile?.given_name,
+              lastname: profile?.family_name,
+              email: profile?.email,
+              googleId: account?.providerAccountId,
+            });
+
+            if (res.status === 200 || res.status === 201) {
+              token.access_token = res.data?.data?.token?.accessToken;
+              token.refresh_token = res.data?.data?.token?.refreshToken;
+              token.hascompany = res.data?.data?.token?.hascompany;
+            }
+          } catch (error) {
+            console.error("Error fetching tokens from your API:", error);
+          }
         }
       }
+
+
       return token;
     },
     session: async ({ session, token }) => {
-      session={
-        ...session,
-        ...token
-      }
-      session.user.access_token = token?.access_token!;
-      session.user.refresh_token = token?.refresh_token!;
-      session.user.hascompany = token?.hascompany!;
+      console.log(token, "o")
 
-      return session;
+      return {
+        ...session,
+        user: {
+          ...session?.user,
+          access_token: token?.access_token!,
+          refresh_token: token?.refresh_token!,
+          hascompany: token?.hascompany!
+        }
+      }
     },
   },
   secret: process.env.AUTH_SECRET!,

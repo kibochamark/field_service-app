@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { ReactQueryProvider } from "./QueryClientProvider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from 'react-hot-toast';
+import { AutoLogoutProvider } from "@/utils/AutoLogout";
+import NextAuthProvider from "./NexAuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -24,6 +26,7 @@ export default function RootLayout({
     <html lang="en" className={montserrat.className}>
       <body className={cn("min-h-screen")}>
         <main className="text-bodyLarge">
+
           <Toaster
             position="top-right"
             reverseOrder={false}
@@ -46,10 +49,16 @@ export default function RootLayout({
             }}
           />
           <ReactQueryProvider>
-            <SessionProvider>{children}</SessionProvider>
+            <NextAuthProvider>
+              {/* <AutoLogoutProvider> */}
+                {children}
+              {/* </AutoLogoutProvider> */}
+
+            </NextAuthProvider>
           </ReactQueryProvider>
+
         </main>
       </body>
-    </html>
+    </html >
   );
 }

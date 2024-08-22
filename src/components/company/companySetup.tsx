@@ -12,13 +12,18 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/shadcn/ui/tooltip"
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { company } from "./companyserveraction";
 import toast from "react-hot-toast";
 
 
 const CompanySetup = () => {
     const router = useRouter()
+
+    // get client session
+    const {data:session, status, update} = useSession()
+
+    console.log(session, "use session hook")
 
 
     const CompanySchema: any = Yup.object().shape({});
@@ -49,6 +54,8 @@ const CompanySetup = () => {
             return await company(values);
         },
         onSuccess(data) {
+            console.log(data)
+            update({hascompany:true})
             if(data.message){
                 toast.error("Something went wrong", {
                     position: "top-center",
@@ -58,7 +65,10 @@ const CompanySetup = () => {
                     position: "top-center",
                 });
                 companyFormik.resetForm();
-                router.push("/dashboard");
+                setTimeout(()=>{
+                    router.push("/dashboard");
+                }, 4000)
+               
             }
             
         },
