@@ -5,16 +5,22 @@ import axios from "axios";
 import { getSession } from "next-auth/react";
 import React from "react";
 
-export const signup = async (values: {}) => {
+export const signup = async (values: any) => {
   try {
     const result = await axios.post(
       "http://localhost:8000/api/v1/auth/signup",
-      { ...values}
+      { 
+        firstname:values.firstname,
+        lastname:values.lastname,
+        email:values.email,
+        password:values.password,
+        phonenumber:values.phonenumber
+      }
     );
-    console.log(result.data);
     return result.data;
-  } catch (error) {
+  } catch (error:any) {
     console.error("Error creating user account", error);
+    return error.message
   }
 };
 

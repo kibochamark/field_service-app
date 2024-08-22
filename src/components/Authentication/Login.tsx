@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { error } from "console";
 import { Loader } from "lucide-react";
+import Image from "next/image";
 
 const Login = () => {
   const router = useRouter()
@@ -95,7 +96,7 @@ const Login = () => {
                       className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                     />
                   </div> */}
-                  <div className="">
+                  <div className="col-span-2">
                     <div className="flex md:flex-row gap-2 content-center">
                       <label
                         htmlFor=""
@@ -163,8 +164,9 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={handleGoogleSignIn}
-                    className="bg-white w-full hover:bg-primary50 border border-purple-600 py-3 shadow-md text-bodyMedium font-semibold text-primary600 rounded-md"
+                    className="bg-white w-full flex items-center justify-center gap-2 hover:bg-primary50 border border-purple-600 py-3 shadow-md text-bodyMedium font-semibold text-primary600 rounded-md"
                   >
+                    <Image src={"/google.png"} width={30} height={30} alt="google svg"/>
                     Continue with Google
                   </button>
                 </div>

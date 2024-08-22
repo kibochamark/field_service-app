@@ -15,6 +15,7 @@ const { auth } = NextAuth(authConfig);
 export default auth(async(req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const date = new Date()
 
   
   console.log(req.auth)

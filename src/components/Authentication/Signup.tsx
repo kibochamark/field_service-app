@@ -11,6 +11,7 @@ import { googlsingUp } from "./Requests";
 import { signIn, useSession } from "next-auth/react";
 import { company } from "../company/companyserveraction";
 import toast from "react-hot-toast";
+import Image from "next/image";
 import { Loader } from "lucide-react";
 
 const Signup = ({ role }: { role: any }) => {
@@ -29,7 +30,8 @@ const Signup = ({ role }: { role: any }) => {
     firstname: Yup.string().required("Required"),
     lastname: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email").required("Required"),
-    password: Yup.string().required("Required"),
+    password: Yup.string().min(6).required("Required"),
+    confirmpassword: Yup.string().required("required").oneOf([Yup.ref('password')], "should match"),
     phonenumber: Yup.string().required("Required"),
   });
 
@@ -69,6 +71,7 @@ const Signup = ({ role }: { role: any }) => {
       lastname: "",
       email: "",
       password: "",
+      confirmpassword: "",
       phonenumber: "",
     },
     validationSchema: SignupSchema,
@@ -128,7 +131,11 @@ const Signup = ({ role }: { role: any }) => {
                       >
                         First Name
                       </label>
+
                     </div>
+                    {formik.touched.firstname && formik.errors.firstname && (
+                      <p className="text-red-500 text-sm">{formik.errors.firstname}</p>
+                    )}
                     <input
                       type="text"
                       id="firstname"
@@ -148,6 +155,9 @@ const Signup = ({ role }: { role: any }) => {
                         Last Name
                       </label>
                     </div>
+                    {formik.touched.lastname && formik.errors.lastname && (
+                      <p className="text-red-500 text-sm">{formik.errors.lastname}</p>
+                    )}
                     <input
                       type="text"
                       id="lastname"
@@ -168,6 +178,9 @@ const Signup = ({ role }: { role: any }) => {
                       Email
                     </label>
                   </div>
+                  {formik.touched.email && formik.errors.email && (
+                    <p className="text-red-500 text-sm">{formik.errors.email}</p>
+                  )}
                   <input
                     type="email"
                     id="email"
@@ -188,6 +201,9 @@ const Signup = ({ role }: { role: any }) => {
                         Password
                       </label>
                     </div>
+                    {formik.touched.password && formik.errors.password && (
+                      <p className="text-red-500 text-sm">{formik.errors.password}</p>
+                    )}
                     <input
                       type="password"
                       id="password"
@@ -207,10 +223,16 @@ const Signup = ({ role }: { role: any }) => {
                         Confirm Password
                       </label>
                     </div>
+                    {formik.touched.confirmpassword && formik.errors.confirmpassword && (
+                      <p className="text-red-500 text-sm">{formik.errors.confirmpassword}</p>
+                    )}
                     <input
                       type="password"
                       id="confirm"
-                      name="remarks"
+                      name="confirmpassword"
+                      value={formik.values.confirmpassword}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                     />
                   </div>
@@ -255,9 +277,11 @@ const Signup = ({ role }: { role: any }) => {
                 <div>
                   <button
                     type="button"
-                    className="bg-white w-full border border-purple-600 py-3 shadow-md text-bodyMedium font-semibold text-primary600 rounded-md"
+                    className="bg-white flex items-center justify-center w-full border border-purple-600 py-3 shadow-md text-bodyMedium font-semibold text-primary600 rounded-md"
                     onClick={handleGoogleSignIn}
                   >
+                    <Image src={"/google.png"} width={30} height={30} alt="google svg" />
+
                     Sign up with Google
                   </button>
                 </div>
