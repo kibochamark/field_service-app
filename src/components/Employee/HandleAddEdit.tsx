@@ -84,7 +84,7 @@ interface HandleAddEditProps {
     return (
         <div className='w-full'>
             {isadd ? (
-                <AddEmployee/>
+                <AddEmployee roles={[]} companies={[]}/>
             ) : (
                 <Tabs defaultValue="all">
                     <div className="flex items-center">

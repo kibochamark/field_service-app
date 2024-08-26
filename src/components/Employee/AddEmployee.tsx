@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// pages/add-employee.tsx (or the appropriate path for your page)
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/shadcn/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shadcn/ui/card";
@@ -8,8 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/shadcn/ui/toggle-group";
 import { toast } from "@/shadcn/ui/use-toast";
 import { LockIcon, PenIcon, ShieldIcon } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { handleAdd } from '../../../store/EmployeeSlice';
+import { GetServerSideProps } from 'next';
+import { baseUrl } from '@/utils/constants';
+
+interface AddEmployeeProps {
+    roles: any[];
+    companies: any[]; 
+}
 
 interface FormDataState {
     firstname: string;
@@ -22,11 +28,8 @@ interface FormDataState {
     permissions: string[];
 }
 
-export default function AddEmployee() {
+const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
     const router = useRouter();
-    const dispatch = useDispatch();
-    const [roles, setRoles] = useState([]);
-    const [companies, setCompanies] = useState([]);
     const [formData, setFormData] = useState<FormDataState>({
         firstname: '',
         lastname: '',
@@ -37,38 +40,6 @@ export default function AddEmployee() {
         companyId: '',
         permissions: []
     });
-
-    useEffect(() => {
-        
-        const fetchRolesAndCompanies = async () => {
-            try {
-                const [rolesRes, companiesRes] = await Promise.all([
-                    fetch('/api/roles'),  // Endpoint to fetch roles
-                    fetch('/api/companies')  // Endpoint to fetch companies
-                ]);
-
-                if (!rolesRes.ok || !companiesRes.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-
-                const rolesData = await rolesRes.json();
-                const companiesData = await companiesRes.json();
-
-                setRoles(rolesData);
-                setCompanies(companiesData);
-            } catch (error) {
-                const err = error as Error;
-                toast({
-                    title: "Error",
-                    description: err.message,
-                    variant: "destructive",
-                });
-            }
-            
-        };
-
-        fetchRolesAndCompanies();
-    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -96,7 +67,7 @@ export default function AddEmployee() {
         }
 
         try {
-            const response = await fetch('/api/employees', {
+            const response = await fetch('/api/v1/employees', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -126,7 +97,7 @@ export default function AddEmployee() {
                 permissions: []
             });
 
-            router.push('/employees');
+            router.push('/v1/employees');
         } catch (error) {
             toast({
                 title: "Error",
@@ -137,7 +108,7 @@ export default function AddEmployee() {
     };
 
     const handleCancel = () => {
-        dispatch(handleAdd({ isadd: false }));
+        router.push('/v1/employees'); 
     };
 
     return (
@@ -260,4 +231,6 @@ export default function AddEmployee() {
             </form>
         </Card>
     );
-}
+};
+
+export default AddEmployee;
