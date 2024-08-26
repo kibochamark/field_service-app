@@ -11,9 +11,10 @@ import { toast } from "@/shadcn/ui/use-toast";
 import { LockIcon, PenIcon, ShieldIcon } from 'lucide-react';
 import { GetServerSideProps } from 'next';
 import { baseUrl } from '@/utils/constants';
+import { useSession } from 'next-auth/react';
 
 interface AddEmployeeProps {
-    roles: any[];
+    roles:any[] ;
     companies: any[]; 
 }
 
@@ -54,6 +55,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
         setFormData(prev => ({ ...prev, permissions: values }));
     };
 
+    const {data:session} = useSession() 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -67,10 +70,13 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
         }
 
         try {
-            const response = await fetch('/api/v1/employees', {
+            const response = await fetch('http://localhost:8000/api/v1/employee', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization' :"Bearer " + session?.user.access_token
+
+                    
                 },
                 body: JSON.stringify(formData),
             });
@@ -93,11 +99,11 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
                 email: '',
                 password: '',
                 roleId: '',
-                companyId: '',
+                companyId: session?.user.companyId as string,
                 permissions: []
             });
 
-            router.push('/v1/employees');
+            router.push('http://localhost:8000/api/v1/employee');
         } catch (error) {
             toast({
                 title: "Error",
@@ -105,10 +111,10 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
                 variant: "destructive",
             });
         }
-    };
+    };   
 
     const handleCancel = () => {
-        router.push('/v1/employees'); 
+        router.push('http://localhost:8000/api/v1/employee'); 
     };
 
     return (
@@ -188,7 +194,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                         <Label htmlFor="company">Company</Label>
                         <Select onValueChange={value => handleSelectChange('companyId', value)} value={formData.companyId} required>
                             <SelectTrigger>
@@ -200,7 +206,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
+                    </div> */}
                     <div className="space-y-2">
                         <Label>Permissions</Label>
                         <ToggleGroup

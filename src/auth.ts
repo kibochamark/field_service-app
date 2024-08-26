@@ -10,12 +10,14 @@ declare module "next-auth" {
       access_token: string;
       refresh_token: string;
       hascompany: boolean;
+      companyId: string;
     } & DefaultSession["user"];
   }
 
   interface User {
     access_token: string;
     refresh_token: string;
+    companyId: string;
     hascompany: boolean;
   }
 
@@ -23,6 +25,7 @@ declare module "next-auth" {
     access_token: string;
     refresh_token: string;
     hascompany: boolean;
+    companyId: string;
   }
 }
 
@@ -32,6 +35,7 @@ declare module "next-auth/jwt" {
     refresh_token?: string;
     id?: string;
     hascompany?: boolean;
+    companyId?: string;
   }
 }
 

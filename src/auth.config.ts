@@ -103,6 +103,7 @@ export default {
             token.access_token = (user as any)?.accessToken;
             token.refresh_token = (user as any)?.refreshToken;
             token.hascompany = (user as any)?.hascompany;
+            token.companyId = (user as any)?.companyId;
           }
 
         } else {
@@ -120,6 +121,7 @@ export default {
               token.access_token = res.data?.data?.token?.accessToken;
               token.refresh_token = res.data?.data?.token?.refreshToken;
               token.hascompany = res.data?.data?.token?.hascompany;
+              token.companyId = res.data?.data?.token?.companyId;
             }
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
@@ -139,7 +141,8 @@ export default {
           ...session?.user,
           access_token: token?.access_token!,
           refresh_token: token?.refresh_token!,
-          hascompany: token?.hascompany!
+          hascompany: token?.hascompany!,
+          companyId: token?.companyId!,
         }
       }
     },
