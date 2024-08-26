@@ -1,7 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/shadcn/ui/accordion";
 import { ScrollArea } from "@/shadcn/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, Home, ListVideo, Menu, Mic2, Music, Play, RadioIcon, SquareStack, User } from "lucide-react";
+import { ChevronDownIcon, Home, ListVideo, Menu, Mic2, Music, Play, RadioIcon, SquareStack, User, Users } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -22,71 +22,71 @@ type Submenu = {
 export function SidebarMenu() {
     const menus: Menu[] = [
         {
-            label: "Discover",
-            name: "Home",
+            label: "home",
+            name: "Dashboard",
             icon: <Home size={15} className="mr-2" />,
-            href: "/home",
+            href: "/callpro/dashboard",
         },
         {
-            label: "Discover",
-            name: "Browse",
-            icon: <SquareStack size={15} className="mr-2" />,
-            href: "/home",
+            label: "Employee management",
+            name: "employees",
+            icon: <Users size={15} className="mr-2" />,
+            href: "/callpro/employee",
         },
-        {
-            label: "Discover",
-            name: "Radio",
-            icon: <RadioIcon size={15} className="mr-2" />,
-            href: "/home/",
-        },
-        {
-            label: "Library",
-            name: "Playlist",
-            icon: <Play size={15} className="mr-2" />,
-            href: "/home/playlist",
-            submenu: [
-                {
-                    name: "Playlist 1",
-                    icon: <ListVideo size={15} className="mr-2" />,
-                    href: "/home/",
-                },
-                {
-                    name: "Playlist 2",
-                    icon: <ListVideo size={15} className="mr-2" />,
-                    href: "/home/",
-                },
-                {
-                    name: "Playlist 3",
-                    icon: <ListVideo size={15} className="mr-2" />,
-                    href: "/home/",
-                },
-            ],
-        },
-        {
-            label: "Library",
-            name: "Songs",
-            icon: <Music size={15} className="mr-2" />,
-            href: "/home/",
-        },
-        {
-            label: "Library",
-            name: "Made for You",
-            icon: <User size={15} className="mr-2" />,
-            href: "/home/",
-        },
-        {
-            label: "Library",
-            name: "Artist",
-            icon: <Mic2 size={15} className="mr-2" />,
-            href: "/home/",
-        },
+        // {
+        //     label: "Discover",
+        //     name: "Radio",
+        //     icon: <RadioIcon size={15} className="mr-2" />,
+        //     href: "/home/",
+        // },
+        // {
+        //     label: "Library",
+        //     name: "Playlist",
+        //     icon: <Play size={15} className="mr-2" />,
+        //     href: "/home/playlist",
+        //     submenu: [
+        //         {
+        //             name: "Playlist 1",
+        //             icon: <ListVideo size={15} className="mr-2" />,
+        //             href: "/home/",
+        //         },
+        //         {
+        //             name: "Playlist 2",
+        //             icon: <ListVideo size={15} className="mr-2" />,
+        //             href: "/home/",
+        //         },
+        //         {
+        //             name: "Playlist 3",
+        //             icon: <ListVideo size={15} className="mr-2" />,
+        //             href: "/home/",
+        //         },
+        //     ],
+        // },
+        // {
+        //     label: "Library",
+        //     name: "Songs",
+        //     icon: <Music size={15} className="mr-2" />,
+        //     href: "/home/",
+        // },
+        // {
+        //     label: "Library",
+        //     name: "Made for You",
+        //     icon: <User size={15} className="mr-2" />,
+        //     href: "/home/",
+        // },
+        // {
+        //     label: "Library",
+        //     name: "Artist",
+        //     icon: <Mic2 size={15} className="mr-2" />,
+        //     href: "/home/",
+        // },
     ];
 
     const uniqueLabels = Array.from(new Set(menus.map((menu) => menu.label)));
 
     return (
-        <ScrollArea className="h-screen lg:w-48 sm:w-full rounded-md">
-            <div className="md:px-4 sm:p-0 mt-5 ">
+        <ScrollArea className="h-screen  lg:w-64 sm:w-full rounded-md">
+            <div className="md:px-4 md:fixed  sm:p-0 mt-5 ">
                 {uniqueLabels.map((label, index) => (
                     <React.Fragment key={label}>
                         {label && (

@@ -43,10 +43,10 @@ export default auth(async(req) => {
 
 
   if (!(req?.auth?.user?.hascompany)) {
-    if (nextUrl.pathname === "/company") {
+    if (nextUrl.pathname === "/callpro/company") {
       return null
     }
-    return Response.redirect(new URL("/company", nextUrl));
+    return Response.redirect(new URL("/callpro/company", nextUrl));
   }
 
   if (nextUrl.pathname === "/company") {
@@ -57,5 +57,5 @@ export default auth(async(req) => {
 });
 
 export const config = {
-  matcher: ["/(api|trpc)(.*)", "/", "/dashboard", "/company", "/login", "/signup"],
+  matcher: ["/(api|trpc)(.*)", "/", "/dashboard", "/callpro/:path*", "/login", "/signup"],
 };

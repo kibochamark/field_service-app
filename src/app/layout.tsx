@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from 'react-hot-toast';
 import { AutoLogoutProvider } from "@/utils/AutoLogout";
 import NextAuthProvider from "./NexAuthProvider";
+import ReactReduxProvider from "./ReactReduxProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -50,10 +51,12 @@ export default function RootLayout({
           />
           <ReactQueryProvider>
             <NextAuthProvider>
-              {/* <AutoLogoutProvider> */}
-                {children}
-              {/* </AutoLogoutProvider> */}
+              <ReactReduxProvider>
 
+                {/* <AutoLogoutProvider> */}
+                {children}
+                {/* </AutoLogoutProvider> */}
+              </ReactReduxProvider>
             </NextAuthProvider>
           </ReactQueryProvider>
 

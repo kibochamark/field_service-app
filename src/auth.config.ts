@@ -114,6 +114,8 @@ export default {
               googleId: account?.providerAccountId,
             });
 
+            console.log(res.data, "res from my backend")
+
             if (res.status === 200 || res.status === 201) {
               token.access_token = res.data?.data?.token?.accessToken;
               token.refresh_token = res.data?.data?.token?.refreshToken;
