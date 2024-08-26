@@ -13,14 +13,14 @@ const Page = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Navbar at the top */}
+      
       <NavbarComponent />
 
       <div className="flex flex-1">
-        {/* Sidebar on the left */}
+       =
         <SidebarMenu />
 
-        {/* Main content (Dashboard) on the right/center */}
+       
         <div className="flex-1 p-4">
           <Dashboard />
         </div>
