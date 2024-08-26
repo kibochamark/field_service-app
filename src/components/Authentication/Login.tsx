@@ -35,7 +35,7 @@ const Login = () => {
           position: "top-center",
 
         });
-        router.push("/dashboard")
+        router.push("/callpro/dashboard")
 
       }
     },
