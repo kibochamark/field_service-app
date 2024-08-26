@@ -182,7 +182,7 @@ export function Dashboard() {
                   Dashboard
                 </Link>
                 <Link
-                  href="#"
+                  href="/employee"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -203,7 +203,7 @@ export function Dashboard() {
                   Customers
                 </Link>
                 <Link
-                  href="#"
+                  href="/employee"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                 >
                   <LineChart className="h-5 w-5" />
@@ -304,12 +304,13 @@ export function Dashboard() {
                     Export
                   </span>
                 </Button>
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Employee
-                  </span>
-                </Button>
+                <a href="/employee" className="inline-flex items-center h-8 gap-1 px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+  <PlusCircle className="h-3.5 w-3.5" />
+  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+    Add Employee
+  </span>
+</a>
+
               </div>
             </div>
             <TabsContent value="all">
