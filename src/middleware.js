@@ -8,7 +8,7 @@ export const authroutes = ["/login", "/signup"];
 
 const apiAuthPrefix = "/api/auth";
 
-const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+const DEFAULT_LOGIN_REDIRECT = "/callpro/dashboard";
 
 const { auth } = NextAuth(authConfig);
 
@@ -50,12 +50,12 @@ export default auth(async(req) => {
   }
 
   if (nextUrl.pathname === "/company") {
-    return Response.redirect(new URL("/dashboard", nextUrl))
+    return Response.redirect(new URL("/callpro/dashboard", nextUrl))
   }
 
   return null;
 });
 
 export const config = {
-  matcher: ["/(api|trpc)(.*)", "/", "/dashboard", "/callpro/:path*", "/login", "/signup"],
+  matcher: ["/(api|trpc)(.*)", "/", "/callpro/:path*", "/login", "/signup"],
 };

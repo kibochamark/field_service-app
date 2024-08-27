@@ -1,4 +1,5 @@
 import { auth } from '@/auth'
+import { getEmployees } from '@/components/Employee/EmployeeActions'
 import { EmployeeManagement } from '@/components/Employee/EmployeeManagement'
 import { baseUrl } from '@/utils/constants'
 import axios from 'axios'
@@ -23,7 +24,12 @@ export async function getRoles(token:string){
     }
 }
 
+
+
 const page = async() => {
+
+  const employees = await getEmployees()
+  console.log(employees)
     
 
   return (

@@ -94,7 +94,6 @@ export default {
   callbacks: {
     jwt: async ({ token, user, profile, session, account, trigger }) => {
       if (trigger === "update") {
-        console.log(session, "in update trigger")
         token.hascompany = session?.hascompany
       } else {
         if (!profile) {
@@ -115,7 +114,6 @@ export default {
               googleId: account?.providerAccountId,
             });
 
-            console.log(res.data, "res from my backend")
 
             if (res.status === 200 || res.status === 201) {
               token.access_token = res.data?.data?.token?.accessToken;
@@ -133,7 +131,6 @@ export default {
       return token;
     },
     session: async ({ session, token }) => {
-      console.log(token, "o")
 
       return {
         ...session,

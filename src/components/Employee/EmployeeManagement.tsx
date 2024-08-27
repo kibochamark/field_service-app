@@ -1,18 +1,23 @@
 import HandleAddEdit from "./HandleAddEdit"
 import { auth } from "@/auth"
 import { getRoles } from "@/app/callpro/employee/page"
+import { Suspense } from "react"
+import { Loader } from "lucide-react"
+import { getEmployees } from "./EmployeeActions"
 
 
 export async function EmployeeManagement() {
   const session = await auth()
   if (!session) return null
   const roles = await getRoles(session?.user?.access_token as string ?? "") ?? []
+  const employees = await getEmployees() ?? []
 
-  console.log(roles)
   return (
 
     <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-      <HandleAddEdit roles={roles} />
+      <Suspense fallback={<Loader className="animate animate-spin text-primary600"/>}>
+        <HandleAddEdit roles={roles} employees={employees} />
+      </Suspense>
     </main>
 
   )

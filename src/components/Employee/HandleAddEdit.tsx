@@ -58,33 +58,23 @@ import axios from 'axios'
 
 interface HandleAddEditProps {
     roles: any;
-  }
+    employees: any;
+}
 //   const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles }) => {
 //     const isadd = useSelector((state: RootState) => state.employee.isadd)
 //     const dispatch = useDispatch()
-    const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles }) => {
-    const [employees, setEmployees] = useState<any[]>([]);
+const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const isadd = useSelector((state: RootState) => state.employee.isadd);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        // Fetch employee data from the API
-        const fetchEmployees = async () => {
-            try {
-                const response = await axios.get('/api/employees'); 
-                setEmployees(response.data);
-            } catch (error) {
-                console.error('Error fetching employees:', error);
-            }
-        };
 
-        fetchEmployees();
-    }, []);
+
+    console.log(employees, "emp")
 
     return (
         <div className='w-full'>
             {isadd ? (
-                <AddEmployee roles={roles} companies={[]}/>
+                <AddEmployee roles={roles}/>
             ) : (
                 <Tabs defaultValue="all">
                     <div className="flex items-center">
@@ -168,7 +158,7 @@ interface HandleAddEditProps {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {employees.map((employee) => (
+                                        {employees?.map((employee:any) => (
                                             <TableRow key={employee.id}>
                                                 <TableCell className="hidden sm:table-cell">
                                                     <Image

@@ -15,7 +15,6 @@ import { useSession } from 'next-auth/react';
 
 interface AddEmployeeProps {
     roles:any[] ;
-    companies: any[]; 
 }
 
 interface FormDataState {
@@ -29,7 +28,8 @@ interface FormDataState {
     permissions: string[];
 }
 
-const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
+const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
+    const {data:session} = useSession() 
     const router = useRouter();
     const [formData, setFormData] = useState<FormDataState>({
         firstname: '',
@@ -38,7 +38,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
         email: '',
         password: '',
         roleId: '',
-        companyId: '',
+        companyId: session?.user?.companyId as string,
         permissions: []
     });
 
@@ -55,7 +55,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
         setFormData(prev => ({ ...prev, permissions: values }));
     };
 
-    const {data:session} = useSession() 
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -82,6 +82,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
             });
 
             if (!response.ok) {
+                console.log(response)
                 throw new Error('Failed to add employee');
             }
 
@@ -104,7 +105,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
             });
 
             router.push('http://localhost:8000/api/v1/employee');
-        } catch (error) {
+        } catch (error:any) {
+            console.log(error?.message)
             toast({
                 title: "Error",
                 description: (error as Error).message,
@@ -116,6 +118,8 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles, companies }) => {
     const handleCancel = () => {
         router.push('http://localhost:8000/api/v1/employee'); 
     };
+
+    console.log(formData, "data")
 
     return (
         <Card className="w-full max-w-2xl mx-auto">
