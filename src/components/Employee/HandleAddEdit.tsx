@@ -1,7 +1,6 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import Image from "next/image";
 import { RootState } from '../../../store/Store';
 import AddEmployee from './AddEmployee';
 import { Button } from "@/shadcn/ui/button";
@@ -52,10 +51,27 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const isadd = useSelector((state: RootState) => state.employee.isadd);
     const dispatch = useDispatch();
 
-    
+    const [selectedFirstName, setSelectedFirstName] = useState<string>('');
+    const [selectedRole, setSelectedRole] = useState<string>('');
+
     const fieldsToDisplay = [
         "firstName", "lastName", "email", "role", "createdAt", "updatedAt", "permissions"
     ];
+
+    const handleFilterChange = (filterType: string, value: string) => {
+        if (filterType === 'firstName') {
+            setSelectedFirstName(value);
+        } else if (filterType === 'role') {
+            setSelectedRole(value);
+        }
+    };
+
+    const filteredEmployees = employees.filter((employee: any) => {
+        return (
+            (selectedFirstName ? employee.firstName === selectedFirstName : true) &&
+            (selectedRole ? employee.role?.name === selectedRole : true)
+        );
+    });
 
     const renderTableHeaders = () => {
         return fieldsToDisplay.map((field) => (
@@ -76,9 +92,11 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                     employee[field]
                 )}
             </TableCell>
-        ));   
-    
+        ));
     };
+
+    const uniqueFirstNames = [...new Set(employees.map((employee: any) => employee.firstName))];
+    const uniqueRoles = [...new Set(employees.map((employee: any) => employee.role?.name))];
 
     return (
         <div className='w-full'>
@@ -106,10 +124,36 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                                    <DropdownMenuItem>Active</DropdownMenuItem>
-                                    <DropdownMenuItem>Draft</DropdownMenuItem>
-                                    <DropdownMenuItem>Archived</DropdownMenuItem>
+                                    <DropdownMenuLabel>Filter by First Name</DropdownMenuLabel>
+                                    {uniqueFirstNames.map((firstName) => (
+                                        <DropdownMenuItem
+                                            key={firstName}
+                                            onClick={() => handleFilterChange('firstName', firstName)}
+                                        >
+                                            {firstName}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                                        <ListFilter className="h-3.5 w-3.5" />
+                                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                            Filter by Role
+                                        </span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Filter by Role</DropdownMenuLabel>
+                                    {uniqueRoles.map((role) => (
+                                        <DropdownMenuItem
+                                            key={role}
+                                            onClick={() => handleFilterChange('role', role)}
+                                        >
+                                            {role}
+                                        </DropdownMenuItem>
+                                    ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
                             <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -149,7 +193,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {employees?.map((employee: any) => (
+                                        {filteredEmployees?.map((employee: any) => (
                                             <TableRow key={employee.id}>
                                                 {renderTableCells(employee)}
                                                 <TableCell>
@@ -178,7 +222,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                             </CardContent>
                             <CardFooter>
                                 <div className="text-xs text-muted-foreground">
-                                    Showing <strong>1-{employees.length}</strong> of <strong>{employees.length}</strong> Employees
+                                    Showing <strong>1-{filteredEmployees.length}</strong> of <strong>{filteredEmployees.length}</strong> Employees
                                 </div>
                             </CardFooter>
                         </Card>

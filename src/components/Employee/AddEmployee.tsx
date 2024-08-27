@@ -12,6 +12,9 @@ import { LockIcon, PenIcon, ShieldIcon } from 'lucide-react';
 import { GetServerSideProps } from 'next';
 import { baseUrl } from '@/utils/constants';
 import { useSession } from 'next-auth/react';
+import HandleAddEdit from './HandleAddEdit';
+import { handleAdd } from '../../../store/EmployeeSlice';
+import { useDispatch } from 'react-redux';
 
 interface AddEmployeeProps {
     roles:any[] ;
@@ -31,6 +34,7 @@ interface FormDataState {
 const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
     const {data:session} = useSession() 
     const router = useRouter();
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState<FormDataState>({
         firstname: '',
         lastname: '',
@@ -53,13 +57,12 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
 
     const handlePermissionsChange = (values: string[]) => {
         setFormData(prev => ({ ...prev, permissions: values }));
-    };
+    }; 
 
-    
-
+  
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+    
         if (formData.permissions.length === 0) {
             toast({
                 title: "Error",
@@ -68,31 +71,28 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
             });
             return;
         }
-
+    
         try {
             const response = await fetch('http://localhost:8000/api/v1/employee', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization' :"Bearer " + session?.user.access_token
-
-                    
+                    'Authorization': "Bearer " + session?.user.access_token,
                 },
                 body: JSON.stringify(formData),
             });
-
+    
             if (!response.ok) {
-                console.log(response)
                 throw new Error('Failed to add employee');
             }
-
+    
             const data = await response.json();
-
+    
             toast({
                 title: "Employee Added",
                 description: `${data.newuser.firstName} ${data.newuser.lastName} has been added as a ${data.newuser.role.name} to ${data.newuser.company.name} with selected permissions`,
             });
-
+    
             setFormData({
                 firstname: '',
                 lastname: '',
@@ -101,22 +101,30 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                 password: '',
                 roleId: '',
                 companyId: session?.user.companyId as string,
-                permissions: []
+                permissions: [],
             });
-
-            router.push('http://localhost:8000/api/v1/employee');
-        } catch (error:any) {
-            console.log(error?.message)
+    
+            
+            dispatch(handleAdd({
+                isadd: false
+            }));
+            
+        } catch (error: any) {
             toast({
                 title: "Error",
-                description: (error as Error).message,
+                description: error.message,
                 variant: "destructive",
             });
         }
-    };   
-
+    };
+    
+    
     const handleCancel = () => {
-        router.push('http://localhost:8000/api/v1/employee'); 
+       
+        dispatch(handleAdd({
+
+            isadd:false
+        }))
     };
 
     console.log(formData, "data")
@@ -197,20 +205,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-                    {/* <div className="space-y-2">
-                        <Label htmlFor="company">Company</Label>
-                        <Select onValueChange={value => handleSelectChange('companyId', value)} value={formData.companyId} required>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a company" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {companies.map((company: any) => (
-                                    <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div> */}
+                    </div>                    
                     <div className="space-y-2">
                         <Label>Permissions</Label>
                         <ToggleGroup
@@ -236,7 +231,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                     <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
-                    <Button type="submit">Add Employee</Button>
+                    <Button type ="submit">Add Employee</Button>
                 </CardFooter>
             </form>
         </Card>
