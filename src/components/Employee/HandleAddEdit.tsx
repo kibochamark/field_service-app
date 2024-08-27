@@ -54,6 +54,18 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const [selectedFirstName, setSelectedFirstName] = useState<string>('');
     const [selectedRole, setSelectedRole] = useState<string>('');
 
+    // Extract unique first names and roles
+    const uniqueFirstNames: string[] = Array.from(new Set(employees.map((employee: any) => employee.firstName)));
+    const uniqueRoles: string[] = Array.from(new Set(employees.map((employee: any) => employee.role?.name)));
+
+    // Filter employees based on selected first name and role
+    const filteredEmployees = employees.filter((employee: any) => {
+        return (
+            (selectedFirstName ? employee.firstName === selectedFirstName : true) &&
+            (selectedRole ? employee.role?.name === selectedRole : true)
+        );
+    });
+
     const fieldsToDisplay = [
         "firstName", "lastName", "email", "role", "createdAt", "updatedAt", "permissions"
     ];
@@ -65,13 +77,6 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
             setSelectedRole(value);
         }
     };
-
-    const filteredEmployees = employees.filter((employee: any) => {
-        return (
-            (selectedFirstName ? employee.firstName === selectedFirstName : true) &&
-            (selectedRole ? employee.role?.name === selectedRole : true)
-        );
-    });
 
     const renderTableHeaders = () => {
         return fieldsToDisplay.map((field) => (
@@ -95,9 +100,6 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
         ));
     };
 
-    const uniqueFirstNames = [...new Set(employees.map((employee: any) => employee.firstName))];
-    const uniqueRoles = [...new Set(employees.map((employee: any) => employee.role?.name))];
-
     return (
         <div className='w-full'>
             {isadd ? (
@@ -119,7 +121,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                     <Button variant="outline" size="sm" className="h-8 gap-1">
                                         <ListFilter className="h-3.5 w-3.5" />
                                         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                            Filter
+                                            Filter by First Name
                                         </span>
                                     </Button>
                                 </DropdownMenuTrigger>
