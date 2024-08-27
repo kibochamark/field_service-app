@@ -1,26 +1,17 @@
-"use client"
-import React, { useEffect, useState } from 'react'
-import Image from "next/image"
-import { useDispatch, useSelector } from "react-redux"
-import { RootState } from '../../../store/Store'
-import AddEmployee from './AddEmployee'
-import { Button } from "@/shadcn/ui/button"
-import { Badge } from "@/shadcn/ui/badge"
+"use client";
+import React from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import Image from "next/image";
+import { RootState } from '../../../store/Store';
+import AddEmployee from './AddEmployee';
+import { Button } from "@/shadcn/ui/button";
+import { Badge } from "@/shadcn/ui/badge";
 import {
     File,
-    Home,
-    LineChart,
     ListFilter,
     MoreHorizontal,
-    Package,
-    Package2,
-    PanelLeft,
     PlusCircle,
-    Search,
-    Settings,
-    ShoppingCart,
-    Users2,
-} from "lucide-react"
+} from "lucide-react";
 import {
     Card,
     CardContent,
@@ -28,7 +19,7 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/shadcn/ui/card"
+} from "@/shadcn/ui/card";
 import {
     Table,
     TableBody,
@@ -36,45 +27,63 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/shadcn/ui/table"
+} from "@/shadcn/ui/table";
 import {
     Tabs,
     TabsContent,
     TabsList,
     TabsTrigger,
-} from "@/shadcn/ui/tabs"
+} from "@/shadcn/ui/tabs";
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/shadcn/ui/dropdown-menu"
-import { handleAdd } from '../../../store/EmployeeSlice'
-import axios from 'axios'
-
+} from "@/shadcn/ui/dropdown-menu";
+import { handleAdd } from '../../../store/EmployeeSlice';
 
 interface HandleAddEditProps {
     roles: any;
     employees: any;
 }
-//   const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles }) => {
-//     const isadd = useSelector((state: RootState) => state.employee.isadd)
-//     const dispatch = useDispatch()
+
 const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const isadd = useSelector((state: RootState) => state.employee.isadd);
     const dispatch = useDispatch();
 
+    
+    const fieldsToDisplay = [
+        "firstName", "lastName", "email", "role", "createdAt", "updatedAt", "permissions"
+    ];
 
+    const renderTableHeaders = () => {
+        return fieldsToDisplay.map((field) => (
+            <TableHead key={field}>
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+            </TableHead>
+        ));
+    };
 
-    console.log(employees, "emp")
+    const renderTableCells = (employee: any) => {
+        return fieldsToDisplay.map((field) => (
+            <TableCell key={field}>
+                {field === "permissions" ? (
+                    <Badge variant="outline">{employee[field].join(", ")}</Badge>
+                ) : field === "role" ? (
+                    <Badge variant="outline">{employee[field]?.name}</Badge>
+                ) : (
+                    employee[field]
+                )}
+            </TableCell>
+        ));   
+    
+    };
 
     return (
         <div className='w-full'>
             {isadd ? (
-                <AddEmployee roles={roles}/>
+                <AddEmployee roles={roles} />
             ) : (
                 <Tabs defaultValue="all">
                     <div className="flex items-center">
@@ -98,14 +107,9 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuCheckboxItem checked>
-                                        Active
-                                    </DropdownMenuCheckboxItem>
-                                    <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-                                    <DropdownMenuCheckboxItem>
-                                        Archived
-                                    </DropdownMenuCheckboxItem>
+                                    <DropdownMenuItem>Active</DropdownMenuItem>
+                                    <DropdownMenuItem>Draft</DropdownMenuItem>
+                                    <DropdownMenuItem>Archived</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                             <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -127,63 +131,27 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                         </div>
                     </div>
                     <TabsContent value="all">
-                        <Card x-chunk="dashboard-06-chunk-0">
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Employees</CardTitle>
                                 <CardDescription>
-                                    Manage your Employees and view their sales performance.
+                                    Manage your Employees and view their performance.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead className="hidden w-[100px] sm:table-cell">
-                                                <span className="sr-only">Image</span>
-                                            </TableHead>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="hidden md:table-cell">
-                                                Price
-                                            </TableHead>
-                                            <TableHead className="hidden md:table-cell">
-                                                Total Sales
-                                            </TableHead>
-                                            <TableHead className="hidden md:table-cell">
-                                                Created at
-                                            </TableHead>
+                                            {renderTableHeaders()}
                                             <TableHead>
                                                 <span className="sr-only">Actions</span>
                                             </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {employees?.map((employee:any) => (
+                                        {employees?.map((employee: any) => (
                                             <TableRow key={employee.id}>
-                                                <TableCell className="hidden sm:table-cell">
-                                                    <Image
-                                                        alt="Image"
-                                                        className="aspect-square rounded-md object-cover"
-                                                        height="64"
-                                                        src={employee.image || '/placeholder.svg'}
-                                                        width="64"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="font-medium">
-                                                    {employee.name}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline">{employee.status}</Badge>
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">
-                                                    {employee.price}
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">
-                                                    {employee.totalSales}
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">
-                                                    {employee.createdAt}
-                                                </TableCell>
+                                                {renderTableCells(employee)}
                                                 <TableCell>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
