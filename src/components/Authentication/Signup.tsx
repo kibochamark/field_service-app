@@ -277,7 +277,7 @@ const Signup = ({ role }: { role: any }) => {
                 <div>
                   <button
                     type="button"
-                    className="bg-white flex items-center justify-center w-full border border-purple-600 py-3 shadow-md text-bodyMedium font-semibold text-primary600 rounded-md"
+                    className="bg-white gap-4 flex items-center justify-center w-full border border-purple-600 py-3 shadow-md text-bodyMedium font-semibold text-primary600 rounded-md"
                     onClick={handleGoogleSignIn}
                   >
                     <Image src={"/google.png"} width={30} height={30} alt="google svg" />

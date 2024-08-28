@@ -41,6 +41,8 @@ import {
     DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu";
 import { handleAdd } from '../../../store/EmployeeSlice';
+import { DataTable } from '../Test/data-table';
+import { columns } from '../Test/columns';
 
 interface HandleAddEditProps {
     roles: any;
@@ -185,7 +187,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <Table>
+                                {/* <Table>
                                     <TableHeader>
                                         <TableRow>
                                             {renderTableHeaders()}
@@ -220,7 +222,8 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                             </TableRow>
                                         ))}
                                     </TableBody>
-                                </Table>
+                                </Table> */}
+                                <DataTable data={employees} columns={columns}/>
                             </CardContent>
                             <CardFooter>
                                 <div className="text-xs text-muted-foreground">

@@ -7,7 +7,6 @@ import { Input } from "@/shadcn/ui/input";
 import { Label } from "@/shadcn/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/shadcn/ui/toggle-group";
-import { toast } from "@/shadcn/ui/use-toast";
 import { LockIcon, PenIcon, ShieldIcon } from 'lucide-react';
 import { GetServerSideProps } from 'next';
 import { baseUrl } from '@/utils/constants';
@@ -15,9 +14,10 @@ import { useSession } from 'next-auth/react';
 import HandleAddEdit from './HandleAddEdit';
 import { handleAdd } from '../../../store/EmployeeSlice';
 import { useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
 
 interface AddEmployeeProps {
-    roles:any[] ;
+    roles: any[];
 }
 
 interface FormDataState {
@@ -31,8 +31,8 @@ interface FormDataState {
     permissions: string[];
 }
 
-const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
-    const {data:session} = useSession() 
+const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
+    const { data: session } = useSession()
     const router = useRouter();
     const dispatch = useDispatch();
     const [formData, setFormData] = useState<FormDataState>({
@@ -57,21 +57,17 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
 
     const handlePermissionsChange = (values: string[]) => {
         setFormData(prev => ({ ...prev, permissions: values }));
-    }; 
+    };
 
-  
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         if (formData.permissions.length === 0) {
-            toast({
-                title: "Error",
-                description: "Please select at least one permission",
-                variant: "destructive",
-            });
-            return;
+            toast.error("Permissions should have atleast one value ");
+
         }
-    
+
         try {
             const response = await fetch('http://localhost:8000/api/v1/employee', {
                 method: 'POST',
@@ -81,18 +77,17 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                 },
                 body: JSON.stringify(formData),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to add employee');
             }
-    
+
             const data = await response.json();
-    
-            toast({
-                title: "Employee Added",
-                description: `${data.newuser.firstName} ${data.newuser.lastName} has been added as a ${data.newuser.role.name} to ${data.newuser.company.name} with selected permissions`,
-            });
-    
+            handleCancel()
+
+
+            toast.success("Employee Added");
+
             setFormData({
                 firstname: '',
                 lastname: '',
@@ -103,27 +98,20 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                 companyId: session?.user.companyId as string,
                 permissions: [],
             });
-    
-            
-            dispatch(handleAdd({
-                isadd: false
-            }));
-            
+
+
+
         } catch (error: any) {
-            toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive",
-            });
+            toast.error(error.message);
         }
     };
-    
-    
+
+
     const handleCancel = () => {
-       
+
         dispatch(handleAdd({
 
-            isadd:false
+            isadd: false
         }))
     };
 
@@ -205,7 +193,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>                    
+                    </div>
                     <div className="space-y-2">
                         <Label>Permissions</Label>
                         <ToggleGroup
@@ -231,7 +219,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles}) => {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                     <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
-                    <Button type ="submit">Add Employee</Button>
+                    <Button type="submit">Add Employee</Button>
                 </CardFooter>
             </form>
         </Card>

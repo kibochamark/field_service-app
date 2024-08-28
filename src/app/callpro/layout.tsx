@@ -2,10 +2,32 @@ import React, { ReactNode } from 'react'
 import NavbarComponent from '@/app/navbar'
 import { SidebarMenu } from '@/app/sidebar'
 import NextAuthProvider from '../NexAuthProvider'
+import { Toaster } from 'react-hot-toast'
 
 function layout({ children }: { children: ReactNode }) {
     return (
         <NextAuthProvider>
+            <Toaster
+                position="top-right"
+                reverseOrder={false}
+                gutter={8}
+                containerClassName=""
+                containerStyle={{}}
+                toastOptions={{
+                    // Define default options
+                    className: '',
+                    duration: 5000,
+                    style: {
+                        background: '#363636',
+                        color: '#fff',
+                    },
+
+                    // Default options for specific types
+                    success: {
+                        duration: 3000,
+                    },
+                }}
+            />
             <div className="h-screen flex flex-col w-full">
                 {/* Navbar at the top */}
                 <NavbarComponent />
