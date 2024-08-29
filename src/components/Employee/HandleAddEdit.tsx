@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from '../../../store/Store';
 import AddEmployee from './AddEmployee';
+import EditEmployee from './EditEmployee';
 import { Button } from "@/shadcn/ui/button";
 import { Badge } from "@/shadcn/ui/badge";
 import {
@@ -40,7 +41,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu";
-import { handleAdd } from '../../../store/EmployeeSlice';
+import { handleAdd, handleEdit, clearEdit } from '../../../store/EmployeeSlice';
 
 interface HandleAddEditProps {
     roles: any[];
@@ -48,13 +49,12 @@ interface HandleAddEditProps {
 }
 
 const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
-    const isadd = useSelector((state: RootState) => state.employee.isadd);
+    const { isAdd, isEdit, currentEmployee } = useSelector((state: RootState) => state.employee);
     const dispatch = useDispatch();
 
     const [selectedFirstName, setSelectedFirstName] = useState<string>('');
     const [selectedRole, setSelectedRole] = useState<string>('');
 
-    // Extract unique first names and roles with safety checks
     const uniqueFirstNames: string[] = employees && employees.length > 0
         ? Array.from(new Set(employees.map((employee: any) => employee.firstName)))
         : [];
@@ -62,7 +62,6 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
         ? Array.from(new Set(employees.map((employee: any) => employee.role?.name)))
         : [];
 
-    // Filter employees based on selected first name and role
     const filteredEmployees = employees && employees.length > 0
         ? employees.filter((employee: any) => {
             return (
@@ -86,45 +85,14 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
 
     return (
         <div className='w-full'>
-            {isadd ? (
+            {isAdd ? (
                 <AddEmployee roles={roles} />
+            ) : isEdit ? (
+                <EditEmployee roles={roles} employee={currentEmployee} />
             ) : (
                 <Tabs defaultValue="all">
                     <div className="flex items-center">
-                        {/* <TabsList>
-                            <TabsTrigger value="all">All</TabsTrigger>
-                            <TabsTrigger value="active">Active</TabsTrigger>
-                            <TabsTrigger value="draft">Draft</TabsTrigger>
-                            <TabsTrigger value="archived" className="hidden sm:flex">
-                                Archived
-                            </TabsTrigger>
-                        </TabsList> */}
                         <div className="ml-auto flex items-center gap-2">
-                            {/* <DropdownMenu> */}
-                                {/* <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                            Filter by First Name
-                                        </span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by First Name</DropdownMenuLabel>
-                                    {uniqueFirstNames.length > 0 ? (
-                                        uniqueFirstNames.map((firstName) => (
-                                            <DropdownMenuItem
-                                                key={firstName}
-                                                onClick={() => handleFilterChange('firstName', firstName)}
-                                            >
-                                                {firstName}
-                                            </DropdownMenuItem>
-                                        ))
-                                    ) : (
-                                        <DropdownMenuItem disabled>No first names available</DropdownMenuItem>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu> */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -150,15 +118,10 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                     )}
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            {/* <Button size="sm" variant="outline" className="h-8 gap-1">
-                                <File className="h-3.5 w-3.5" />
-                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                    Export
-                                </span>
-                            </Button> */}
+                            
                             <Button size="sm" className="h-8 gap-1" onClick={() => {
                                 dispatch(handleAdd({
-                                    isadd: true
+                                    isAdd: true
                                 }));
                             }}>
                                 <PlusCircle className="h-3.5 w-3.5" />
@@ -197,9 +160,9 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                                     {fieldsToDisplay.map((field) => (
                                                         <TableCell key={field}>
                                                             {field === "permissions" ? (
-                                                                <Badge variant="outline">{employee[field].join(", ")}</Badge>
+                                                                <Badge variant="outline">{employee[field]?.join(", ") || "No Permissions"}</Badge>
                                                             ) : field === "role" ? (
-                                                                <Badge variant="outline">{employee[field]?.name}</Badge>
+                                                                <Badge variant="outline">{employee[field]?.name || "No Role"}</Badge>
                                                             ) : (
                                                                 employee[field]
                                                             )}
@@ -219,8 +182,15 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end">
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                <DropdownMenuItem onClick={() => {/* Handle Edit Logic Here */}}>Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => {/* Handle Delete Logic Here */}}>Delete</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => dispatch(handleEdit({
+                                                                    isEdit: true,
+                                                                    employee
+                                                                }))}>
+                                                                    Edit
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {/* Handle Delete Logic Here */}}>
+                                                                    Delete
+                                                                </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </TableCell>
