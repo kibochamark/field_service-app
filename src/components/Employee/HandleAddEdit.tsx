@@ -37,6 +37,10 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu";
 import { handleAdd, handleEdit, clearEdit } from "../../../store/EmployeeSlice";
+import axios from "axios";
+import { AppDispatch } from "../../../store/Store";
+import { removeEmployee } from "../../../store/EmployeeSlice";
+
 
 interface HandleAddEditProps {
   roles: any[];
@@ -83,6 +87,21 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
       ? role.permissions.map((permission: { value: any }) => permission.value)
       : [];
   };
+
+
+
+
+
+
+const handleDeleteEmployee = async (employeeId: string) => {
+  try {
+    await fetch(`/api/employees/${employeeId}`, { method: 'DELETE' });
+    dispatch(removeEmployee(employeeId));
+  } catch (error) {
+    console.error('Failed to delete employee:', error);
+  }
+};
+
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -214,9 +233,10 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
   <Edit className="mr-2 h-4 w-4" />
   Edit
 </DropdownMenuItem>
-                                <DropdownMenuItem
+
+<DropdownMenuItem
   onClick={() => {
-    /* Handle Delete Logic Here */
+    handleDeleteEmployee(employee.id);
   }}
   className="text-red-600"
 >
