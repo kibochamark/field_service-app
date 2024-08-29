@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from "react-redux";
 import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
@@ -7,28 +7,47 @@ import { Label } from "@/shadcn/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shadcn/ui/card";
 import { clearEdit } from '../../../store/EmployeeSlice';
 
+interface Role {
+    id: string;
+    name: string;
+    permissions: { value: string }[];
+}
+
 interface EditEmployeeProps {
-    roles: any[];
+    roles: Role[];
     employee: any;
 }
 
 const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
     const [formData, setFormData] = useState(employee);
+    const [rolePermissions, setRolePermissions] = useState<string[]>([]);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (formData.role) {
+            const selectedRole = roles.find(role => role.name === formData.role.name);
+            if (selectedRole) {
+                setRolePermissions(selectedRole.permissions.map(permission => permission.value));
+            }
+        }
+    }, [formData.role, roles]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData((prev: any) => ({ ...prev, [name]: value }));
     };
 
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { value } = e.target;
         const selectedRole = roles.find(role => role.name === value);
-        setFormData({ ...formData, role: selectedRole });
+        if (selectedRole) {
+            setFormData((prev: any) => ({ ...prev, role: selectedRole }));
+            setRolePermissions(selectedRole.permissions.map(permission => permission.value));
+        }
     };
 
-    const handleSubmit = () => {
-        
+    const handleSubmit = async () => {
+        // Implement the submit logic here
     };
 
     return (
@@ -48,7 +67,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
                 <div className="space-y-2">
                     <Label>Email</Label>
                     <Input name="email" value={formData.email} onChange={handleInputChange} />
-                                </div>
+                </div>
                 <div className="space-y-2">
                     <Label>Role</Label>
                     <select
@@ -69,9 +88,10 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
                     <Label>Permissions</Label>
                     <Input
                         name="permissions"
-                        value={formData.permissions?.join(", ") || ""}
+                        value={formData.permissions?.join(", ") || rolePermissions.join(", ")}
                         onChange={handleInputChange}
                         placeholder="Enter permissions separated by commas"
+                        disabled
                     />
                 </div>
             </CardContent>
@@ -88,5 +108,3 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
 };
 
 export default EditEmployee;
-
-               
