@@ -51,15 +51,14 @@ interface HandleAddEditProps {
 const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const { isAdd, isEdit, currentEmployee } = useSelector((state: RootState) => state.employee);
     const dispatch = useDispatch();
+    console.log(roles, "this role");
 
     const [selectedFirstName, setSelectedFirstName] = useState<string>('');
     const [selectedRole, setSelectedRole] = useState<string>('');
 
-    const uniqueFirstNames: string[] = employees && employees.length > 0
-        ? Array.from(new Set(employees.map((employee: any) => employee.firstName)))
-        : [];
-    const uniqueRoles: string[] = employees && employees.length > 0
-        ? Array.from(new Set(employees.map((employee: any) => employee.role?.name)))
+   
+    const uniqueRoles: string[] = roles && roles.length > 0
+        ? Array.from(new Set(roles.map((role: any) => role.name)))
         : [];
 
     const filteredEmployees = employees && employees.length > 0
@@ -82,6 +81,20 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
             setSelectedRole(value);
         }
     };
+
+    const getPermissionsForRole = (roleName: string) => {
+        // Find the role by its name
+        const role = roles.find(r => r.name === roleName);
+        
+        // If the role is found, extract the permissions array
+        if (role && role.permissions) {
+            return role.permissions.map((permission: { value: any; }) => permission.value); // Extract permission values
+        }
+        
+        // Return an empty array if no role or permissions are found
+        return [];
+    };
+    
 
     return (
         <div className='w-full'>
@@ -160,7 +173,9 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                                     {fieldsToDisplay.map((field) => (
                                                         <TableCell key={field}>
                                                             {field === "permissions" ? (
-                                                                <Badge variant="outline">{employee[field]?.join(", ") || "No Permissions"}</Badge>
+                                                                <Badge variant="outline">
+                                                                    {getPermissionsForRole(employee.role?.name).join(", ") || "No Permissions"}
+                                                                </Badge>
                                                             ) : field === "role" ? (
                                                                 <Badge variant="outline">{employee[field]?.name || "No Role"}</Badge>
                                                             ) : (
