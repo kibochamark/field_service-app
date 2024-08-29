@@ -84,7 +84,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
 
             toast.success("Employee Added");
 
-            dispatch(handleAdd({ isadd: false }));
+            dispatch(handleAdd({ isAdd: false }));
             router.push('/employees');
 
         } catch (error: any) {
@@ -92,7 +92,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
         }
     };
     const handleCancel = () => {
-        dispatch(handleAdd({ isadd: false }));
+        dispatch(handleAdd({ isAdd: false }));
     };
 
     return (
