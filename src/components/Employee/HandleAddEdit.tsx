@@ -156,7 +156,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                     <TableHeader>
                       <TableRow>
                         {fieldsToDisplay.map((field) => (
-                          <TableHead key={field}>
+                          <TableHead key={field} className="font-bold">
                             {field.charAt(0).toUpperCase() + field.slice(1)}
                           </TableHead>
                         ))}
