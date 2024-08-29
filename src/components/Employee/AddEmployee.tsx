@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/shadcn/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shadcn/ui/card";
@@ -28,6 +28,11 @@ interface FormDataState {
     permissions: string[];
 }
 
+const getPermissionsForRole = (roleName: string, roles: any[]) => {
+    const role = roles.find(r => r.name === roleName);
+    return role ? role.permissions.map((permission: { value: any; }) => permission.value) : [];
+};
+
 const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
     const { data: session } = useSession();
     const router = useRouter();
@@ -43,6 +48,17 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
         companyId: session?.user?.companyId as string || '',
         permissions: []
     });
+    
+    const [rolePermissions, setRolePermissions] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (formData.roleId) {
+            const selectedRole = roles.find(role => role.id === formData.roleId);
+            if (selectedRole) {
+                setRolePermissions(selectedRole.permissions.map((permission: { value: any; }) => permission.value));
+            }
+        }
+    }, [formData.roleId, roles]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -233,18 +249,22 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                             onValueChange={handlePermissionsChange}
                             className="justify-start"
                         >
-                            <ToggleGroupItem value="read" aria-label="Toggle read permission">
-                                <LockIcon className="h-4 w-4 mr-2" />
-                                Read
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="write" aria-label="Toggle write permission">
-                                <PenIcon className="h-4 w-4 mr-2" />
-                                Write
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="admin" aria-label="Toggle admin permission">
-                                <ShieldIcon className="h-4 w-4 mr-2" />
-                                Admin
-                            </ToggleGroupItem>
+                            {rolePermissions.map(permission => (
+                                <ToggleGroupItem
+                                    key={permission}
+                                    value={permission}
+                                    aria-label={`Toggle ${permission} permission`}
+                                >
+                                    {permission === 'All permissions' ? (
+                                        <ShieldIcon className="h-4 w-4 mr-2" />
+                                    ) : permission === 'Read' ? (
+                                        <LockIcon className="h-4 w-4 mr-2" />
+                                    ) : (
+                                        <PenIcon className="h-4 w-4 mr-2" />
+                                    )}
+                                    {permission}
+                                </ToggleGroupItem>
+                            ))}
                         </ToggleGroup>
                     </div>
                 </CardContent>
