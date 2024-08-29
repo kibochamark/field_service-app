@@ -6,6 +6,8 @@ import { Input } from "@/shadcn/ui/input";
 import { Label } from "@/shadcn/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shadcn/ui/card";
 import { clearEdit } from '../../../store/EmployeeSlice';
+import toast from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 interface Role {
     id: string;
@@ -45,10 +47,43 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
             setRolePermissions(selectedRole.permissions.map(permission => permission.value));
         }
     };
+    const { data: session } = useSession();
 
-    const handleSubmit = async () => {
-        // Implement the submit logic here
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault(); 
+        
+        try {
+            const response = await fetch(`http://localhost:8000/api/v1/employee/${formData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.user.access_token}`,
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    permissions: formData.permissions.join(', '), 
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to update employee');
+            }
+    
+            const result = await response.json();
+            toast.success("Employee updated successfully");
+    
+            
+            setFormData({
+                ...result,
+            });
+    
+            dispatch(clearEdit()); // Close or reset the form view
+    
+        } catch (error: any) {
+            toast.error(error.message);
+        }
     };
+    
 
     return (
         <Card>
@@ -108,3 +143,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
 };
 
 export default EditEmployee;
+function validateForm() {
+    throw new Error('Function not implemented.');
+}
+

@@ -50,8 +50,7 @@ interface HandleAddEditProps {
 
 const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const { isAdd, isEdit, currentEmployee } = useSelector((state: RootState) => state.employee);
-    const dispatch = useDispatch();
-    console.log(roles, "this role");
+    const dispatch = useDispatch();    
 
     const [selectedFirstName, setSelectedFirstName] = useState<string>('');
     const [selectedRole, setSelectedRole] = useState<string>('');
