@@ -49,7 +49,7 @@ export default function NavbarComponent() {
                         <div className="lg:hidden">
                             <Menu onClick={() => {
                                 dispatch(handleOpen())
-                            }} />
+                            }} className="text-white cursor-pointer" />
                             <Sheet open={isopen} onOpenChange={() => {
                                 isopen && dispatch(handleOpen())
                             }}>

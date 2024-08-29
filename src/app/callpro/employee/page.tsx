@@ -34,7 +34,7 @@ const page = async() => {
 
   return (
     <div className='w-full min-h-screen'>
-      {/* <EmployeeManagement/> */}
+      <EmployeeManagement/>
     </div>
   )
 }

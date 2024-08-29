@@ -35,12 +35,12 @@ function layout({ children }: { children: ReactNode }) {
 
                 <div className="flex flex-1">
                     {/* Sidebar on the left */}
-                    <div className='hidden md:block fixed'>
+                    <div className='hidden md:block w-64 fixed z-10 '>
                         {/* <SidebarMenu /> */}
                         <TestSidebar/>
                     </div>
                     {/* Main content (Dashboard) on the right/center */}
-                    <div className="flex-1 p-4 bg-gray-100">
+                    <div className="flex-1 lg:ml-64 p-4 bg-gray-100">
                         {children}
                     </div>
                 </div>
