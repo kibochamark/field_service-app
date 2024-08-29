@@ -6,7 +6,7 @@ import AddEmployee from "./AddEmployee";
 import EditEmployee from "./EditEmployee";
 import { Button } from "@/shadcn/ui/button";
 import { Badge } from "@/shadcn/ui/badge";
-import { File, ListFilter, MoreHorizontal, PlusCircle } from "lucide-react";
+import { Edit, File, ListFilter, MoreHorizontal, PlusCircle, Trash } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -203,24 +203,28 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    dispatch(
-                                      handleEdit({
-                                        isEdit: true,
-                                        employee,
-                                      })
-                                    )
-                                  }
-                                >
-                                  Edit
-                                </DropdownMenuItem>
+  onClick={() =>
+    dispatch(
+      handleEdit({
+        isEdit: true,
+        employee,
+      })
+    )
+  }
+  className="text-blue-600"
+>
+  <Edit className="mr-2 h-4 w-4" />
+  Edit
+</DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => {
-                                    /* Handle Delete Logic Here */
-                                  }}
-                                >
-                                  Delete
-                                </DropdownMenuItem>
+  onClick={() => {
+    /* Handle Delete Logic Here */
+  }}
+  className="text-red-600"
+>
+  <Trash className="mr-2 h-4 w-4" />
+  Delete
+</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
