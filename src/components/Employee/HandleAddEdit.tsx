@@ -55,7 +55,6 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     const [selectedFirstName, setSelectedFirstName] = useState<string>('');
     const [selectedRole, setSelectedRole] = useState<string>('');
 
-   
     const uniqueRoles: string[] = roles && roles.length > 0
         ? Array.from(new Set(roles.map((role: any) => role.name)))
         : [];
@@ -93,7 +92,11 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
         // Return an empty array if no role or permissions are found
         return [];
     };
-    
+
+    const formatDate = (dateString: string) => {
+        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
 
     return (
         <div className='w-full'>
@@ -177,6 +180,8 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                                                 </Badge>
                                                             ) : field === "role" ? (
                                                                 <Badge variant="outline">{employee[field]?.name || "No Role"}</Badge>
+                                                            ) : field === "createdAt" || field === "updatedAt" ? (
+                                                                formatDate(employee[field])
                                                             ) : (
                                                                 employee[field]
                                                             )}
