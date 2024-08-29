@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { EmployeeReducer } from './EmployeeSlice'
+import { SideBarReducer } from './SidebarSlice'
 
 export const store = configureStore({
     reducer: {
-        employee: EmployeeReducer
+        employee: EmployeeReducer,
+        sidebar:SideBarReducer
     },
 })
 

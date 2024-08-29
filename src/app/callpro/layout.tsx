@@ -3,6 +3,7 @@ import NavbarComponent from '@/app/navbar'
 import { SidebarMenu } from '@/app/sidebar'
 import NextAuthProvider from '../NexAuthProvider'
 import { Toaster } from 'react-hot-toast'
+import TestSidebar from '@/components/layout/TestSidebar'
 
 function layout({ children }: { children: ReactNode }) {
     return (
@@ -34,8 +35,9 @@ function layout({ children }: { children: ReactNode }) {
 
                 <div className="flex flex-1">
                     {/* Sidebar on the left */}
-                    <div className='hidden md:block'>
-                        <SidebarMenu />
+                    <div className='hidden md:block fixed'>
+                        {/* <SidebarMenu /> */}
+                        <TestSidebar/>
                     </div>
                     {/* Main content (Dashboard) on the right/center */}
                     <div className="flex-1 p-4 bg-gray-100">

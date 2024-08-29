@@ -107,7 +107,7 @@ export default {
 
         } else {
           try {
-            const res = await axios.post(process.env.BASEURL! +"auth/google", {
+            const res = await axios.post(process.env.BASEURL! + "auth/google", {
               firstname: profile?.given_name,
               lastname: profile?.family_name,
               email: profile?.email,
@@ -131,6 +131,11 @@ export default {
       return token;
     },
     session: async ({ session, token }) => {
+      console.log("Current Time:", new Date());
+      console.log("Session Expires At:", new Date(session.expires));
+      console.log("Token Expiration:", token.accessTokenExpires);
+      console.log("Current Time (Local):", new Date().toLocaleString());
+      console.log("Session Expires At (Local):", new Date(session.expires).toLocaleString());
 
       return {
         ...session,

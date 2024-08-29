@@ -65,6 +65,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
     };
 
     const handleSubmit = async (values: FormDataState) => {
+        console.log(values)
         try {
             const response = await fetch('http://localhost:8000/api/v1/employee', {
                 method: 'POST',

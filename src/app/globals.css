@@ -55,5 +55,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    box-sizing: border-box;
+    border-radius: 10%;
+    overflow: hidden;
   }
 }

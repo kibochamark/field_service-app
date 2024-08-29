@@ -53,9 +53,9 @@ export default function RootLayout({
             <NextAuthProvider>
               <ReactReduxProvider>
 
-                {/* <AutoLogoutProvider> */}
+                <AutoLogoutProvider>
                 {children}
-                {/* </AutoLogoutProvider> */}
+                </AutoLogoutProvider>
               </ReactReduxProvider>
             </NextAuthProvider>
           </ReactQueryProvider>
