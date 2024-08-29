@@ -74,7 +74,6 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     "email",
     "role",
     "createdAt",
-    "updatedAt",
     "permissions",
   ];
 
@@ -180,8 +179,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                                 <Badge variant="outline">
                                   {employee[field]?.name || "No Role"}
                                 </Badge>
-                              ) : field === "createdAt" ||
-                                field === "updatedAt" ? (
+                              ) : field === "createdAt" ? (
                                 formatDate(employee[field])
                               ) : (
                                 employee[field]
