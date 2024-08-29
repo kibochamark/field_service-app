@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/shadcn/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shadcn/ui/card";
@@ -6,11 +6,13 @@ import { Input } from "@/shadcn/ui/input";
 import { Label } from "@/shadcn/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/shadcn/ui/toggle-group";
-import { LockIcon, PenIcon, ShieldIcon } from 'lucide-react';
+import { LockIcon, PenIcon, ShieldIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { handleAdd } from '../../../store/EmployeeSlice';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
+import { Formik, Field, ErrorMessage, Form } from 'formik';
+import * as Yup from 'yup';
 
 interface AddEmployeeProps {
     roles: any[];
@@ -33,81 +35,36 @@ const getPermissionsForRole = (roleName: string, roles: any[]) => {
     return role ? role.permissions.map((permission: { value: any; }) => permission.value) : [];
 };
 
+const SignupSchema = Yup.object().shape({
+    firstname: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
+    lastname: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
+    phonenumber: Yup.string().matches(/^\d+$/, 'Phone number must be digits only').required('Required'),
+    email: Yup.string().email('Invalid email').required('Required'),
+    password: Yup.string().min(8, 'Password must be at least 8 characters').required('Required'),
+    confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Required'),
+    roleId: Yup.string().required('Required'),
+});
+
 const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
     const { data: session } = useSession();
     const router = useRouter();
     const dispatch = useDispatch();
-    const [formData, setFormData] = useState<FormDataState>({
-        firstname: '',
-        lastname: '',
-        phonenumber: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        roleId: '',
-        companyId: session?.user?.companyId as string || '',
-        permissions: []
-    });
-    
+    const [showPassword, setShowPassword] = useState(false);
     const [rolePermissions, setRolePermissions] = useState<string[]>([]);
 
-    useEffect(() => {
-        if (formData.roleId) {
-            const selectedRole = roles.find(role => role.id === formData.roleId);
-            if (selectedRole) {
-                setRolePermissions(selectedRole.permissions.map((permission: { value: any; }) => permission.value));
-            }
-        }
-    }, [formData.roleId, roles]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleTogglePassword = () => {
+        setShowPassword(prev => !prev);
     };
 
-    const handleSelectChange = (name: string, value: string) => {
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleSelectChange = (name: string, value: string, setFieldValue: any) => {
+        setFieldValue(name, value);
+        const selectedRole = roles.find(role => role.id === value);
+        if (selectedRole) {
+            setRolePermissions(selectedRole.permissions.map((permission: { value: any; }) => permission.value));
+        }
     };
 
-    const handlePermissionsChange = (values: string[]) => {
-        setFormData(prev => ({ ...prev, permissions: values }));
-    };
-
-    const validateForm = () => {
-        const { firstname, lastname, phonenumber, email, password, confirmPassword, roleId } = formData;
-
-        if (!firstname || !lastname || !phonenumber || !email || !password || !confirmPassword || !roleId) {
-            toast.error('All fields are required');
-            return false;
-        }
-
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            toast.error('Please enter a valid email address');
-            return false;
-        }
-
-        // Password length validation
-        if (password.length < 8) {
-            toast.error('Password must be at least 8 characters long');
-            return false;
-        }
-
-        // Confirm password validation
-        if (password !== confirmPassword) {
-            toast.error('Passwords do not match');
-            return false;
-        }
-
-        return true;
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!validateForm()) return;
-
+    const handleSubmit = async (values: FormDataState) => {
         try {
             const response = await fetch('http://localhost:8000/api/v1/employee', {
                 method: 'POST',
@@ -115,7 +72,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session?.user.access_token}`,
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(values),
             });
 
             if (!response.ok) {
@@ -126,25 +83,13 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
 
             toast.success("Employee Added");
 
-            setFormData({
-                firstname: '',
-                lastname: '',
-                phonenumber: '',
-                email: '',
-                password: '',
-                confirmPassword: '',
-                roleId: '',
-                companyId: session?.user?.companyId as string || '',
-                permissions: [],
-            });
-
-            handleCancel();
+            dispatch(handleAdd({ isadd: false }));
+            router.push('/employees');
 
         } catch (error: any) {
             toast.error(error.message);
         }
     };
-
     const handleCancel = () => {
         dispatch(handleAdd({ isadd: false }));
     };
@@ -155,124 +100,126 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                 <CardTitle>Add New Employee</CardTitle>
                 <CardDescription>Enter the details of the new employee to add them to your company.</CardDescription>
             </CardHeader>
-            <form onSubmit={handleSubmit}>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="firstname">First Name</Label>
-                        <Input
-                            id="firstname"
-                            name="firstname"
-                            placeholder="John"
-                            value={formData.firstname}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="lastname">Last Name</Label>
-                        <Input
-                            id="lastname"
-                            name="lastname"
-                            placeholder="Doe"
-                            value={formData.lastname}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="phonenumber">Phone Number</Label>
-                        <Input
-                            id="phonenumber"
-                            name="phonenumber"
-                            placeholder="123-456-7890"
-                            value={formData.phonenumber}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            placeholder="john@example.com"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            name="password"
-                            type="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm Password</Label>
-                        <Input
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            type="password"
-                            value={formData.confirmPassword}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="role">Role</Label>
-                        <Select
-                            onValueChange={value => handleSelectChange('roleId', value)}
-                            value={formData.roleId}
-                            required
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {roles.map((role: any) => (
-                                    <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Permissions</Label>
-                        <ToggleGroup
-                            type="multiple"
-                            value={formData.permissions}
-                            onValueChange={handlePermissionsChange}
-                            className="justify-start"
-                        >
-                            {rolePermissions.map(permission => (
-                                <ToggleGroupItem
-                                    key={permission}
-                                    value={permission}
-                                    aria-label={`Toggle ${permission} permission`}
+            <Formik
+                initialValues={{
+                    firstname: '',
+                    lastname: '',
+                    phonenumber: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    roleId: '',
+                    companyId: session?.user?.companyId as string || '',
+                    permissions: [],
+                }}
+                validationSchema={SignupSchema}
+                onSubmit={handleSubmit}
+            >
+                {({ errors, touched, setFieldValue, values }) => (
+                    <Form>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="firstname">First Name</Label>
+                                <Field name="firstname" as={Input} placeholder="John" />
+                                <ErrorMessage name="firstname" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="lastname">Last Name</Label>
+                                <Field name="lastname" as={Input} placeholder="Doe" />
+                                <ErrorMessage name="lastname" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="phonenumber">Phone Number</Label>
+                                <Field name="phonenumber" as={Input} placeholder="1234567890" />
+                                <ErrorMessage name="phonenumber" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Field name="email" as={Input} type="email" placeholder="john@example.com" />
+                                <ErrorMessage name="email" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <div className="relative">
+                                    <Field
+                                        name="password"
+                                        as={Input}
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                    />
+                                    <button type="button" onClick={handleTogglePassword} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                                        {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                                <ErrorMessage name="password" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <div className="relative">
+                                    <Field
+                                        name="confirmPassword"
+                                        as={Input}
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                    />
+                                    <button type="button" onClick={handleTogglePassword} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                                        {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                                <ErrorMessage name="confirmPassword" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="roleId">Role</Label>
+                                <Select
+                                    onValueChange={value => handleSelectChange('roleId', value, setFieldValue)}
+                                    value={values.roleId}
+                                    required
                                 >
-                                    {permission === 'All permissions' ? (
-                                        <ShieldIcon className="h-4 w-4 mr-2" />
-                                    ) : permission === 'Read' ? (
-                                        <LockIcon className="h-4 w-4 mr-2" />
-                                    ) : (
-                                        <PenIcon className="h-4 w-4 mr-2" />
-                                    )}
-                                    {permission}
-                                </ToggleGroupItem>
-                            ))}
-                        </ToggleGroup>
-                    </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {roles.map((role: any) => (
+                                            <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <ErrorMessage name="roleId" component="div" className="text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Permissions</Label>
+                                <ToggleGroup
+                                    type="multiple"
+                                    value={values.permissions}
+                                    onValueChange={values => setFieldValue('permissions', values)}
+                                    className="justify-start"
+                                >
+                                    {rolePermissions.map(permission => (
+                                        <ToggleGroupItem
+                                            key={permission}
+                                            value={permission}
+                                            aria-label={`Toggle ${permission} permission`}
+                                        >
+                                            {permission === 'All permissions' ? (
+                                                <ShieldIcon className="h-4 w-4 mr-2" />
+                                            ) : permission === 'Read' ? (
+                                                <LockIcon className="h-4 w-4 mr-2" />
+                                            ) : (
+                                                <PenIcon className="h-4 w-4 mr-2" />
+                                            )}
+                                            {permission}
+                                        </ToggleGroupItem>
+                                    ))}
+                                </ToggleGroup>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="flex justify-between">
                     <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
                     <Button type="submit">Add Employee</Button>
                 </CardFooter>
-            </form>
+                    </Form>
+                )}
+            </Formik>
         </Card>
     );
 };
