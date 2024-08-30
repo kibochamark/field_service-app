@@ -60,8 +60,14 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+    
+        // Log the form data before sending it
+        console.log("Form Data to be sent:", {
+            ...formData,
+            permissions: formData.permissions.join(', '),
+        });
+    
         try {
             const response = await fetch(`http://localhost:8000/api/v1/employee/${formData.id}`, {
                 method: 'PUT',
@@ -75,20 +81,33 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
                 }),
             });
     
+           
+            console.log("Response Status:", response.status);
+            console.log("Response Headers:", response.headers);
+    
             if (!response.ok) {
-                throw new Error('Failed to update employee');
+                
+                const errorResponse = await response.json();
+                console.error("Error Response:", errorResponse);
+                throw new Error(errorResponse.message || 'Failed to update employee');
             }
     
             const result = await response.json();
             toast.success("Employee updated successfully");
     
+            
+            console.log("Result from the server:", result);
+    
             setFormData(result);
-            dispatch(clearEdit()); // Close or reset the form view
+            dispatch(clearEdit()); 
     
         } catch (error: any) {
+           
+            console.error("Catch Error:", error);
             toast.error(error.message);
         }
     };
+    
 
     return (
         <Card>
