@@ -87,7 +87,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
             toast.success("Employee Added");
     
             dispatch(handleAdd({ isAdd: false }));
-            router.push('/employees');
+            
     
         } catch (error: any) {
             toast.error(error.message);
