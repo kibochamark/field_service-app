@@ -65,7 +65,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
     };
 
     const handleSubmit = async (values: FormDataState) => {
-        console.log(values)
+        
+        const { confirmPassword, ...dataToSend } = values;
+    
         try {
             const response = await fetch('http://localhost:8000/api/v1/employee', {
                 method: 'POST',
@@ -73,24 +75,26 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session?.user.access_token}`,
                 },
-                body: JSON.stringify(values),
+                body: JSON.stringify(dataToSend),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Failed to add employee');
             }
-
+    
             await response.json();
-
+    
             toast.success("Employee Added");
-
+    
             dispatch(handleAdd({ isAdd: false }));
             router.push('/employees');
-
+    
         } catch (error: any) {
             toast.error(error.message);
         }
     };
+    
+    
     const handleCancel = () => {
         dispatch(handleAdd({ isAdd: false }));
     };
