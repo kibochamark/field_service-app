@@ -40,6 +40,9 @@ import { handleAdd, handleEdit, clearEdit } from "../../../store/EmployeeSlice";
 import axios from "axios";
 import { AppDispatch } from "../../../store/Store";
 import { removeEmployee } from "../../../store/EmployeeSlice";
+import { baseUrl } from "@/utils/constants";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
 
 
 interface HandleAddEditProps {
@@ -52,6 +55,8 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     (state: RootState) => state.employee
   );
   const dispatch = useDispatch();
+
+ const {data:session} = useSession()
 
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -93,14 +98,37 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
 
 
 
-const handleDeleteEmployee = async (employeeId: string) => {
-  try {
-    await fetch(`/api/employees/${employeeId}`, { method: 'DELETE' });
-    dispatch(removeEmployee(employeeId));
-  } catch (error) {
-    console.error('Failed to delete employee:', error);
-  }
-};
+  const handleDeleteEmployee = async (employeeId: string) => {
+    try {
+      const url = baseUrl + `/${employeeId}/employee`;
+      console.log("Deleting employee with ID:", employeeId);
+      console.log("Request URL:", url);
+  
+      const response = await fetch(url, {
+        headers: {
+          Authorization: "Bearer " + session?.user?.access_token,
+        },
+        method: 'DELETE',
+      });
+  
+      console.log("Response Status:", response.status);
+  
+      if (!response.ok) {
+        // Log the response if deletion fails
+        const errorResponse = await response.json();
+        console.error("Error Response:", errorResponse);
+        throw new Error(errorResponse.message || 'Failed to delete employee');
+      }
+  
+      console.log(`Employee with ID ${employeeId} deleted successfully.`);
+      toast.success("Employee deleted successfully");
+  
+    } catch (error: any) {
+      console.error("Failed to delete employee:", error.message);
+      toast.error("Failed to delete employee: " + error.message);
+    }
+  };
+  
 
 
   const formatDate = (dateString: string) => {
