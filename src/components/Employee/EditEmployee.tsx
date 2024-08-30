@@ -24,6 +24,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
     const [formData, setFormData] = useState(employee);
     const [rolePermissions, setRolePermissions] = useState<string[]>([]);
     const dispatch = useDispatch();
+    const { data: session } = useSession();
 
     useEffect(() => {
         if (formData.role) {
@@ -43,11 +44,20 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
         const { value } = e.target;
         const selectedRole = roles.find(role => role.name === value);
         if (selectedRole) {
-            setFormData((prev: any) => ({ ...prev, role: selectedRole }));
+            setFormData((prev: any) => ({ ...prev, role: selectedRole, permissions: selectedRole.permissions.map(permission => permission.value) }));
             setRolePermissions(selectedRole.permissions.map(permission => permission.value));
         }
     };
-    const { data: session } = useSession();
+
+    const handlePermissionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = e.target;
+        setFormData((prev: any) => ({
+            ...prev,
+            permissions: checked
+                ? [...prev.permissions, value]
+                : prev.permissions.filter((permission: string) => permission !== value),
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); 
@@ -72,18 +82,13 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
             const result = await response.json();
             toast.success("Employee updated successfully");
     
-            
-            setFormData({
-                ...result,
-            });
-    
+            setFormData(result);
             dispatch(clearEdit()); // Close or reset the form view
     
         } catch (error: any) {
             toast.error(error.message);
         }
     };
-    
 
     return (
         <Card>
@@ -121,13 +126,21 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
                 </div>
                 <div className="space-y-2">
                     <Label>Permissions</Label>
-                    <Input
-                        name="permissions"
-                        value={formData.permissions?.join(", ") || rolePermissions.join(", ")}
-                        onChange={handleInputChange}
-                        placeholder="Enter permissions separated by commas"
-                        disabled
-                    />
+                    <div className="grid grid-cols-2 gap-2">
+                        {rolePermissions.map((permission) => (
+                            <div key={permission} className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    name="permissions"
+                                    value={permission}
+                                    checked={formData.permissions?.includes(permission)}
+                                    onChange={handlePermissionChange}
+                                    className="form-checkbox"
+                                />
+                                <Label>{permission}</Label>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </CardContent>
             <CardFooter className="flex justify-end space-x-2">
@@ -143,7 +156,3 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
 };
 
 export default EditEmployee;
-function validateForm() {
-    throw new Error('Function not implemented.');
-}
-
