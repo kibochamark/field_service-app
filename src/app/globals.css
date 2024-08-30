@@ -53,10 +53,12 @@
   * {
     @apply border-border;
   }
+
   body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+
     @apply bg-background text-foreground;
     box-sizing: border-box;
     border-radius: 10%;
-    overflow: hidden;
   }
 }

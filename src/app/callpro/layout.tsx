@@ -40,7 +40,7 @@ function layout({ children }: { children: ReactNode }) {
                         <TestSidebar/>
                     </div>
                     {/* Main content (Dashboard) on the right/center */}
-                    <div className="flex-1 lg:ml-64 p-4 bg-gray-100">
+                    <div className="flex-1 overflow-y-auto lg:ml-64 p-4 bg-gray-100">
                         {children}
                     </div>
                 </div>
