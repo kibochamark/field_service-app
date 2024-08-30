@@ -62,31 +62,33 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
     
-        // Log the form data before sending it
-        console.log("Form Data to be sent:", {
-            ...formData,
-            permissions: formData.permissions.join(', '),
-        });
+        // Prepare the data to match the expected schema
+        const updatedEmployeeData = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            profile: {
+                phone: formData.phone, // Add any additional profile fields here
+            },
+            roleId: formData.role?.id, // Send the roleId instead of the entire role object
+            permissions: formData.permissions, // This is already in the correct format
+        };
+    
+        
     
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/employee/${formData.id}`, {
-                method: 'PUT',
+            const response = await fetch(`http://localhost:8000/api/v1/${formData.id}/employee/`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session?.user.access_token}`,
                 },
-                body: JSON.stringify({
-                    ...formData,
-                    permissions: formData.permissions.join(', '), 
-                }),
+                body: JSON.stringify(updatedEmployeeData),
             });
     
-           
-            console.log("Response Status:", response.status);
-            console.log("Response Headers:", response.headers);
+            
     
             if (!response.ok) {
-                
                 const errorResponse = await response.json();
                 console.error("Error Response:", errorResponse);
                 throw new Error(errorResponse.message || 'Failed to update employee');
@@ -95,19 +97,17 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
             const result = await response.json();
             toast.success("Employee updated successfully");
     
-            
-            console.log("Result from the server:", result);
+           
     
             setFormData(result);
-            dispatch(clearEdit()); 
+            dispatch(clearEdit());
     
         } catch (error: any) {
-           
             console.error("Catch Error:", error);
             toast.error(error.message);
         }
     };
-    
+       
 
     return (
         <Card>

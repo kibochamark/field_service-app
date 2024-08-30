@@ -29,16 +29,16 @@ export function SidebarMenu() {
         },
         {
             label: "Employee management",
-            name: "employees",
+            name: "Employees",
             icon: <Users size={15} className="mr-2" />,
             href: "/callpro/employee",
         },
-        // {
-        //     label: "Discover",
-        //     name: "Radio",
-        //     icon: <RadioIcon size={15} className="mr-2" />,
-        //     href: "/home/",
-        // },
+        {
+            label: "Discover",
+            name: "Radio",
+            icon: <RadioIcon size={15} className="mr-2" />,
+            href: "/home/",
+        },
         // {
         //     label: "Library",
         //     name: "Playlist",

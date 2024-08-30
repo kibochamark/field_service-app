@@ -1,6 +1,6 @@
 
 
-import DemoPage from '@/components/Test/page'
+import DemoPage from '@/components/Customer/page'
 import React from 'react'
 
 const page = () => {
