@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/Store'; // Adjust the path as necessary
 import { closeForm } from '../../../store/CustomerSlice';
@@ -9,10 +10,7 @@ import { Input } from "@/shadcn/ui/input"; // Assuming you have a customized Inp
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast'; // Import toast
-
-interface AddCustomerProps {
-    roles: any[];
-}
+import { getRoles } from '@/app/callpro/employee/page';
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -20,6 +18,7 @@ const validationSchema = Yup.object({
   firstName: Yup.string().required('Required'),
   lastName: Yup.string().required('Required'),
   notes: Yup.string(),
+  roleId: Yup.string().required('Role is required'),
   profile: Yup.object({
     address: Yup.object({
       street: Yup.string().required('Required'),
@@ -35,6 +34,18 @@ const CustomerForm = () => {
   const dispatch = useDispatch();
   const isOpen = useSelector((state: RootState) => state.customerForm.isOpen);
   const { data: session } = useSession();
+  const [roles, setRoles] = useState<any[]>([]); // State for roles
+
+  // Fetch roles after component mounts
+  useEffect(() => {
+    const fetchRoles = async () => {
+      if (session?.user?.access_token) {
+        const fetchedRoles = await getRoles(session?.user?.access_token);
+        setRoles(fetchedRoles ?? []);
+      }
+    };
+    fetchRoles();
+  }, [session]);
 
   if (!isOpen) return null;
 
@@ -48,6 +59,7 @@ const CustomerForm = () => {
             firstName: '',
             lastName: '',
             notes: '',
+            roleId: '',
             profile: {
               address: {
                 street: '',
@@ -61,19 +73,19 @@ const CustomerForm = () => {
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              await axios.post(
+              const response = await axios.post(
                 'http://localhost:8000/api/v1/customers',
                 {
                   email: values.email,
                   firstName: values.firstName,
                   lastName: values.lastName,
                   notes: values.notes,
+                  roleId: values.roleId,
                   profile: {
                     address: values.profile?.address,
                     phone: values.profile?.phone,
                   },
-                  companyId: session?.user.companyId, // Assuming companyId is available in session
-                  roleId: session?.user.id, 
+                  companyId: session?.user.companyId,
                 },
                 {
                   headers: {
@@ -83,9 +95,20 @@ const CustomerForm = () => {
               );
               toast.success('Customer created successfully!'); // Use toast for success message
               dispatch(closeForm());
-            } catch (error) {
-              console.error('Error creating customer:', error);
-              toast.error('Failed to create customer.'); // Use toast for error message
+            } catch (error: any) {
+              if (error.response) {
+                console.error('Error response data:', error.response.data);
+                console.error('Error response status:', error.response.status);
+                console.error('Error response headers:', error.response.headers);
+                toast.error(`Failed to create customer. Server responded with status ${error.response.status}.`);
+              } else if (error.request) {
+                console.error('Error request:', error.request);
+                toast.error('Failed to create customer. No response received from server.');
+              } else {
+                console.error('Error message:', error.message);
+                toast.error(`Failed to create customer. Error: ${error.message}`);
+              }
+              console.error('Error config:', error.config);
             } finally {
               setSubmitting(false);
             }
@@ -138,15 +161,6 @@ const CustomerForm = () => {
               <div className="mt-4">
                 <h3 className="text-xl font-semibold mb-2">Personal Profile</h3>
                 <div className="grid grid-cols-2 gap-4">
-                <div className="mt-4">
-                  <label>Phone</label>
-                  <Field name="profile.phone">
-                    {({ field }: { field: any }) => (
-                      <Input {...field} type="text" placeholder="Phone" />
-                    )}
-                  </Field>
-                  <ErrorMessage name="profile.phone" component="div" className="text-red-600" />
-                </div>
                   <div>
                     <label>Street</label>
                     <Field name="profile.address.street">
@@ -186,9 +200,30 @@ const CustomerForm = () => {
                     </Field>
                     <ErrorMessage name="profile.address.state" component="div" className="text-red-600" />
                   </div>
-                </div>
 
-                
+                  <div className="mt-4">
+                    <label>Phone</label>
+                    <Field name="profile.phone">
+                      {({ field }: { field: any }) => (
+                        <Input {...field} type="text" placeholder="Phone" />
+                      )}
+                    </Field>
+                    <ErrorMessage name="profile.phone" component="div" className="text-red-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label>Role</label>
+                <Field as="select" name="roleId" className="form-select">
+                  <option value="">Select Role</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage name="roleId" component="div" className="text-red-600" />
               </div>
 
               <div className="mt-6 flex justify-end gap-4">
