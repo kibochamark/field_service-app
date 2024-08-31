@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
+import { Revalidate } from '@/utils/Revalidate';
 
 interface AddEmployeeProps {
     roles: any[];
@@ -87,6 +88,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
             toast.success("Employee Added");
     
             dispatch(handleAdd({ isAdd: false }));
+            Revalidate("getemployees")
             
     
         } catch (error: any) {

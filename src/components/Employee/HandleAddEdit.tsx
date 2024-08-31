@@ -43,6 +43,7 @@ import { removeEmployee } from "../../../store/EmployeeSlice";
 import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
+import { Revalidate } from "@/utils/Revalidate";
 
 
 interface HandleAddEditProps {
@@ -122,7 +123,8 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
   
       console.log(`Employee with ID ${employeeId} deleted successfully.`);
       toast.success("Employee deleted successfully");
-  
+      
+        Revalidate("getemployees")
     } catch (error: any) {
       console.error("Failed to delete employee:", error.message);
       toast.error("Failed to delete employee: " + error.message);
