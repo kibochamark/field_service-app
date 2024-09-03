@@ -10,12 +10,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export type Customer = {
+  id: string; 
   firstName: string;
   lastName: string;
   email: string;
-  notes: string;  
+  notes: string;
   createdAt: string;
 };
 
@@ -43,7 +45,7 @@ export const columns: ColumnDef<Customer>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-  }, 
+  },
   {
     accessorKey: "email",
     header: "Email",
@@ -68,49 +70,41 @@ export const columns: ColumnDef<Customer>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-
-      return (
-        <Action row={row}/>
-      );
+      return <Action row={row} />;
     },
   },
 ];
 
+import React from "react";
 
-import React from 'react'
-import { useDispatch } from "react-redux";
-import { handleEdit } from "../../../store/CustomerSlice";
+const Action = ({ row }: { row: any }) => {
+  const router = useRouter();
 
-const Action = ({row}:{row:any}) => {
-  const dispatch = useDispatch()
+  function handleDelete(id: any): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div>
       <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>{
-dispatch(handleEdit({
-  edit:true,data:row.original
-}))
-              }}
-            >
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => router.push(`/callpro/editcustomer/${row.original.id}`)}>
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleDelete(row.id)}>
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
-  )
-}
+  );
+};
 
-export default columns
+export default columns;
