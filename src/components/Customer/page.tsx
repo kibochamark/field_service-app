@@ -10,6 +10,7 @@ import CustomerForm from "./AddCustomer";
 import { RootState } from '../../../store/Store';
 import { openForm } from '../../../store/CustomerSlice';
 import Topcard from './Topcard';
+import EditCustomer from './EditCustomer';
 
 // Function to fetch data asynchronously
 async function getData(): Promise<Customer[]> {
@@ -100,6 +101,7 @@ export default function DemoPage() {
       </div>
       <div className="bg-slate-100">
         <DataTable columns={columns} data={data} />
+        
       </div>
       {isOpen && <CustomerForm />} {/* Render the form only if isOpen is true */}
     </div>

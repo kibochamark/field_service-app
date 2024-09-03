@@ -15,7 +15,7 @@ export type Customer = {
   firstName: string;
   lastName: string;
   email: string;
-  notes: string;
+  notes: string;  
   createdAt: string;
 };
 
@@ -43,7 +43,7 @@ export const columns: ColumnDef<Customer>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-  },
+  }, 
   {
     accessorKey: "email",
     header: "Email",
@@ -68,10 +68,24 @@ export const columns: ColumnDef<Customer>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const customer = row.original;
 
       return (
-        <DropdownMenu>
+        <Action row={row}/>
+      );
+    },
+  },
+];
+
+
+import React from 'react'
+import { useDispatch } from "react-redux";
+import { handleEdit } from "../../../store/CustomerSlice";
+
+const Action = ({row}:{row:any}) => {
+  const dispatch = useDispatch()
+  return (
+    <div>
+      <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
@@ -81,20 +95,22 @@ export const columns: ColumnDef<Customer>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() =>
-                console.log(`Editing customer ${customer.firstName} ${customer.lastName}`)
-              }
+              onClick={() =>{
+dispatch(handleEdit({
+  edit:true,data:row.original
+}))
+              }}
             >
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => console.log(`Deleting customer ${customer.email}`)}
             >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      );
-    },
-  },
-];
+    </div>
+  )
+}
+
+export default columns

@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store/Store'; // Adjust the path as necessary
-import { closeForm } from '../../../store/CustomerSlice';
+import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { Input } from "@/shadcn/ui/input"; // Assuming you have a customized Input component
-import axios from 'axios';
+import { Input } from "@/shadcn/ui/input"; // Customize as needed
+import toast from 'react-hot-toast'; // For notifications
+import { closeForm } from '../../../store/CustomerSlice';
 import { useSession } from 'next-auth/react';
-import toast from 'react-hot-toast'; // Import toast
-import { getRoles } from '@/app/callpro/employee/page';
+import { RootState } from '../../../store/Store';
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -18,7 +17,6 @@ const validationSchema = Yup.object({
   firstName: Yup.string().required('Required'),
   lastName: Yup.string().required('Required'),
   notes: Yup.string(),
-  roleId: Yup.string().required('Role is required'),
   profile: Yup.object({
     address: Yup.object({
       street: Yup.string().required('Required'),
@@ -28,91 +26,77 @@ const validationSchema = Yup.object({
     }).nullable(),
     phone: Yup.string().nullable(),
   }).nullable(),
+  roleId: Yup.string().required('Required') // Ensure roleId is required
 });
 
-const CustomerForm = () => {
-  const dispatch = useDispatch();
-  const isOpen = useSelector((state: RootState) => state.customerForm.isOpen);
-  const { data: session } = useSession();
-  const [roles, setRoles] = useState<any[]>([]); // State for roles
+interface EditCustomerProps {
+  onClose: () => void;
+}
 
-  // Fetch roles after component mounts
+const EditCustomer: React.FC<EditCustomerProps> = ({  onClose }) => {
+  const [initialValues, setInitialValues] = useState<any>(null);
+  const { data: session } = useSession();
+  const dispatch = useDispatch();
+
+  const customer= useSelector((state:RootState)=>state.customerForm.data)
+  const edit= useSelector((state:RootState)=>state.customerForm.isedit)
+
+
+  // if(!edit) return null
+  console.log(customer);
+  
+
+
+
   useEffect(() => {
-    const fetchRoles = async () => {
-      if (session?.user?.access_token) {
-        const fetchedRoles = await getRoles(session?.user?.access_token);
-        setRoles(fetchedRoles ?? []);
+    const fetchCustomerDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/v1/customer/${customer?.id}`, {
+          headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+          },
+        });
+        setInitialValues(response.data);
+      } catch (error) {
+        console.error('Failed to fetch customer details:', error);
+        toast.error('Failed to fetch customer details.');
       }
     };
-    fetchRoles();
-  }, [session]);
 
-  if (!isOpen) return null;
+    fetchCustomerDetails();
+  }, [customer?.id, edit]);
+
+  const handleSubmit = async (values: any, { setSubmitting }: any) => {
+    try {
+      await axios.put(
+        `http://localhost:8000/api/v1/customer/${customer}`,
+        values,
+        {
+          headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+          },
+        }
+      );
+      toast.success('Customer details updated successfully!');
+      dispatch(closeForm());
+    } catch (error) {
+      console.error('Failed to update customer details:', error);
+      toast.error('Failed to update customer details.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!initialValues) return null; // Show nothing until the data is fetched
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-4xl">
-        <h2 className="text-2xl font-semibold mb-4">Add New Customer</h2>
+        <h2 className="text-2xl font-semibold mb-4">Edit Customer</h2>
         <Formik
-          initialValues={{
-            email: '',
-            firstName: '',
-            lastName: '',
-            notes: '',
-            roleId: '',
-            profile: {
-              address: {
-                street: '',
-                city: '',
-                zip: '',
-                state: '',
-              },
-              phone: '',
-            },
-          }}
+          initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting }) => {
-            try {
-              const response = await axios.post(
-                'http://localhost:8000/api/v1/customers',
-                {
-                  email: values.email,
-                  firstName: values.firstName,
-                  lastName: values.lastName,
-                  notes: values.notes,
-                  roleId: roles.find((role)=>role.name  === "client").id,
-                  profile: {
-                    address: values.profile?.address,
-                    phone: values.profile?.phone,
-                  },
-                  companyId: session?.user.companyId,
-                },
-                {
-                  headers: {
-                    Authorization: `Bearer ${session?.user?.access_token}`,
-                  },
-                }
-              );
-              toast.success('Customer created successfully!'); // Use toast for success message
-              dispatch(closeForm());
-            } catch (error: any) {
-              if (error.response) {
-                console.error('Error response data:', error.response.data);
-                console.error('Error response status:', error.response.status);
-                console.error('Error response headers:', error.response.headers);
-                toast.error(`Failed to create customer. Server responded with status ${error.response.status}.`);
-              } else if (error.request) {
-                console.error('Error request:', error.request);
-                toast.error('Failed to create customer. No response received from server.');
-              } else {
-                console.error('Error message:', error.message);
-                toast.error(`Failed to create customer. Error: ${error.message}`);
-              }
-              console.error('Error config:', error.config);
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
           {({ isSubmitting }) => (
             <Form>
@@ -213,22 +197,9 @@ const CustomerForm = () => {
                 </div>
               </div>
 
-              {/* <div className="mt-4">
-                <label>Role</label>
-                <Field as="select" name="roleId" className="form-select">
-                  <option value="">Select Role</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage name="roleId" component="div" className="text-red-600" />
-              </div> */}
-
               <div className="mt-6 flex justify-end gap-4">
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded" disabled={isSubmitting}>
-                  Submit
+                  Save
                 </button>
                 <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => dispatch(closeForm())}>
                   Cancel
@@ -242,4 +213,4 @@ const CustomerForm = () => {
   );
 };
 
-export default CustomerForm;
+export default EditCustomer;
