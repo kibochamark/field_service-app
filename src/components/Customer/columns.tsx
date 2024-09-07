@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Trash, Edit } from "lucide-react";
 import { Button } from "@/shadcn/ui/button";
 import {
   DropdownMenu,
@@ -95,10 +95,10 @@ const Action = ({ row }: { row: any }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => router.push(`/callpro/editcustomer/${row.original.id}`)}>
+          <DropdownMenuItem onClick={() => router.push(`/callpro/editcustomer/${row.original.id}`)}><Edit className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleDelete(row.id)}>
+          <DropdownMenuItem onClick={() => handleDelete(row.id)}> <Trash className="mr-2 h-4 w-4"/>
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
