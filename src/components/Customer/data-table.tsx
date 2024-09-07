@@ -51,7 +51,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div >
+    <div className="bg-white">
     <div className="flex items-center py-4">
     <Input
       placeholder="Filter name..."
@@ -63,14 +63,14 @@ export function DataTable<TData, TValue>({
     />
   </div>
 
-    <div className="rounded-md border">
+    <div className="rounded-md border-4">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="font-bold text-black">
                     {header.isPlaceholder
                       ? null
                       : flexRender(

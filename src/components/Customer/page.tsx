@@ -12,6 +12,14 @@ import { openForm } from '../../../store/CustomerSlice';
 import Topcard from './Topcard';
 import EditCustomer from './EditCustomer';
 
+interface DemoPageProps {
+  customersinfo: {
+    number_of_active_customers: number;
+    number_of_customers: number;
+    number_of_inactive_customers: number;
+  };
+}
+
 // Function to fetch data asynchronously
 async function getData(): Promise<Customer[]> {
   try {
@@ -23,7 +31,7 @@ async function getData(): Promise<Customer[]> {
   }
 }
 
-export default function DemoPage() {
+export default function DemoPage({ customersinfo }: DemoPageProps) { // Accept customersinfo as prop
   const dispatch = useDispatch();
   const isOpen = useSelector((state: RootState) => state.customerForm.isOpen); // Accessing the form state
   const [data, setData] = React.useState<Customer[]>([]);
@@ -37,60 +45,7 @@ export default function DemoPage() {
   }, []);
 
   return (
-    <div className="w-full">
-      <div className="flex flex-wrap justify-between">
-        <Topcard
-          title="Total Customers"
-          description="Total number of customers"
-          value={data.length.toString()}
-          unit="customers"
-          data={[
-            { date: "2024-01-01", count: 1000 },
-            { date: "2024-01-02", count: 1200 },
-            { date: "2024-01-03", count: 1500 },
-            { date: "2024-01-04", count: 2000 },
-            { date: "2024-01-05", count: 2500 },
-            { date: "2024-01-06", count: 3000 },
-            { date: "2024-01-07", count: 3500 },
-          ]}
-          dataKey="count"
-          colorVar="--chart-1"
-        />
-        <Topcard
-          title="Total Active Customers"
-          description="Number of active customers"
-          value="2,500" // Replace this with actual data if available
-          unit="active"
-          data={[
-            { date: "2024-01-01", count: 500 },
-            { date: "2024-01-02", count: 700 },
-            { date: "2024-01-03", count: 900 },
-            { date: "2024-01-04", count: 1200 },
-            { date: "2024-01-05", count: 1500 },
-            { date: "2024-01-06", count: 2000 },
-            { date: "2024-01-07", count: 2500 },
-          ]}
-          dataKey="count"
-          colorVar="--chart-2"
-        />
-        <Topcard
-          title="Total Inactive Customers"
-          description="Number of inactive customers"
-          value="1,000" // Replace this with actual data if available
-          unit="inactive"
-          data={[
-            { date: "2024-01-01", count: 300 },
-            { date: "2024-01-02", count: 400 },
-            { date: "2024-01-03", count: 500 },
-            { date: "2024-01-04", count: 600 },
-            { date: "2024-01-05", count: 700 },
-            { date: "2024-01-06", count: 800 },
-            { date: "2024-01-07", count: 1000 },
-          ]}
-          dataKey="count"
-          colorVar="--chart-3"
-        />
-      </div>
+    <div className="w-full bg-white p-4">
       <div className="w-full flex justify-end">
         <Button className="mt-2" onClick={() => dispatch(openForm())}>
           <PlusCircle className="h-5.5 w-5.5" />
@@ -99,10 +54,16 @@ export default function DemoPage() {
           </span>
         </Button>
       </div>
+
+      {/* Pass customersinfo to Topcard */}
+      <div className=''>
+        <Topcard customersinfo={customersinfo} />
+      </div>
+
       <div className="bg-slate-100">
         <DataTable columns={columns} data={data} />
-        
       </div>
+
       {isOpen && <CustomerForm />} {/* Render the form only if isOpen is true */}
     </div>
   );
