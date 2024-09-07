@@ -227,10 +227,10 @@ const CustomerForm = () => {
               </div> */}
 
               <div className="mt-6 flex justify-end gap-4">
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded" disabled={isSubmitting}>
+                <button type="submit" className="bg-primary700 hover:bg-primary500 text-white px-4 py-2 rounded" disabled={isSubmitting}>
                   Submit
                 </button>
-                <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => dispatch(closeForm())}>
+                <button type="button" className="bg-gray-500 text-white px-4 py-2 hover:bg-red-600  rounded" onClick={() => dispatch(closeForm())}>
                   Cancel
                 </button>
               </div>

@@ -47,7 +47,7 @@ export default function DemoPage({ customersinfo }: DemoPageProps) { // Accept c
   return (
     <div className="w-full bg-white p-4">
       <div className="w-full flex justify-end">
-        <Button className="mt-2" onClick={() => dispatch(openForm())}>
+        <Button className="mt-2 bg-primary700 flex justify-items-center gap-2" onClick={() => dispatch(openForm())}>
           <PlusCircle className="h-5.5 w-5.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
             Add New Customer
