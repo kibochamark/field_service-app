@@ -18,7 +18,7 @@ const validationSchema = Yup.object({
   firstName: Yup.string().required('Required'),
   lastName: Yup.string().required('Required'),
   notes: Yup.string(),
-  roleId: Yup.string().required('Role is required'),
+  roleId: Yup.string(),
   profile: Yup.object({
     address: Yup.object({
       street: Yup.string().required('Required'),
@@ -34,7 +34,8 @@ const CustomerForm = () => {
   const dispatch = useDispatch();
   const isOpen = useSelector((state: RootState) => state.customerForm.isOpen);
   const { data: session } = useSession();
-  const [roles, setRoles] = useState<any[]>([]); // State for roles
+  const [roles, setRoles] = useState<any[]>([]); 
+  console.log(roles,"roles here")// State for roles
 
   // Fetch roles after component mounts
   useEffect(() => {
