@@ -1,5 +1,4 @@
 import { getCustomers, getCustomersInfo } from '@/components/Customer/CustomerActions'
-import { DataTable } from '@/components/Customer/data-table'
 import DemoPage from '@/components/Customer/page'
 import React from 'react'
 
@@ -9,10 +8,11 @@ export default async function page() {
 
   const customersinfo = await getCustomersInfo() ?? []
   console.log(customersinfo, "info")
+
   return (
     <div className='w-full min-h-screen'> 
-         
-      <DemoPage/>
+      {/* Pass customersinfo as props to DemoPage */}
+      <DemoPage customersinfo={customersinfo} />
     </div>
   )
 }
