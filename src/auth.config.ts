@@ -49,9 +49,7 @@ export default {
         password: { label: "password", type: "password", required: true },
       },
       authorize: async (credentials) => {
-        console.log(credentials, "cred");
         let user = null;
-
 
         const res = await axios.post(
           "http://localhost:8000/api/v1/auth/login",
@@ -61,7 +59,6 @@ export default {
           }
         );
 
-        console.log(res)
 
         if (res.status === 200) {
           return user = res.data;
@@ -114,12 +111,15 @@ export default {
               googleId: account?.providerAccountId,
             });
 
+            console.log(res.data?.data, "data")
+
 
             if (res.status === 200 || res.status === 201) {
               token.access_token = res.data?.data?.token?.accessToken;
               token.refresh_token = res.data?.data?.token?.refreshToken;
               token.hascompany = res.data?.data?.token?.hascompany;
               token.companyId = res.data?.data?.token?.companyId;
+              token.role = res.data?.data?.token?.role;
             }
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
@@ -131,12 +131,6 @@ export default {
       return token;
     },
     session: async ({ session, token }) => {
-      console.log("Current Time:", new Date());
-      console.log("Session Expires At:", new Date(session.expires));
-      console.log("Token Expiration:", token.accessTokenExpires);
-      console.log("Current Time (Local):", new Date().toLocaleString());
-      console.log("Session Expires At (Local):", new Date(session.expires).toLocaleString());
-
       return {
         ...session,
         user: {
@@ -145,6 +139,7 @@ export default {
           refresh_token: token?.refresh_token!,
           hascompany: token?.hascompany!,
           companyId: token?.companyId!,
+          role:token?.role
         }
       }
     },
