@@ -11,6 +11,7 @@ declare module "next-auth" {
       refresh_token: string;
       hascompany: boolean;
       companyId: string;
+      role:string;
     } & DefaultSession["user"];
   }
 
