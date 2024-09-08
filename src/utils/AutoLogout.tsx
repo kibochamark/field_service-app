@@ -72,7 +72,7 @@ export function AutoLogoutProvider({
     if (status === 'authenticated') {
       const sessionExpiry = new Date(session?.expires).getTime();
       const localNow = new Date().getTime(); // Current time in the local timezone
-      console.log("user authenticated", sessionExpiry, localNow);
+      // console.log("user authenticated", sessionExpiry, localNow);
 
       if (localNow > sessionExpiry) {
         console.log("session expired");

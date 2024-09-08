@@ -7,10 +7,11 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Input } from "@/shadcn/ui/input";
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation'; // For navigation
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { RootState } from '../../../store/Store';
 import { handleEdit } from '../../../store/CustomerSlice';
+import { baseUrl } from '@/utils/constants';
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -24,48 +25,62 @@ const validationSchema = Yup.object({
       city: Yup.string().required('Required'),
       zip: Yup.string().required('Required'),
       state: Yup.string().required('Required'),
-    }).nullable(),
-    phone: Yup.string().nullable(),
-  }).nullable(),
-  roleId: Yup.string().required('Required'),
+    }),
+    phone: Yup.string().required('Required'),
+  }),
+  roleId: Yup.string(),
+  companyId: Yup.string().required(),
 });
 
-const EditCustomer = ({customerId}:{customerId:string}) => {
+const EditCustomer = ({ customerId }: { customerId: string }) => {
   const [initialValues, setInitialValues] = useState<any>(null);
   const { data: session } = useSession();
   const dispatch = useDispatch();
-  const router = useRouter(); // For navigation
+  const router = useRouter();
 
-  const customer = useSelector((state: RootState) => state.customerForm.data);
   const edit = useSelector((state: RootState) => state.customerForm.isedit);
- 
 
   useEffect(() => {
-    if (edit && customerId) {
-      const fetchCustomerDetails = async () => {
-        try {
-          const response = await axios.get(`http://localhost:8000/api/v1/customer/${customerId}`, {
-            headers: {
-              Authorization: `Bearer ${session?.user?.access_token}`,
-            },
-          });
-          console.log('Customer Data:', response.data); 
-          setInitialValues(response.data);
-        } catch (error) {
-          console.error('Failed to fetch customer details:', error);
-          toast.error('Failed to fetch customer details.');
-        }
-      };
-  
-      fetchCustomerDetails();
-    } 
-  }, [customerId, edit]);
-  
+    const fetchCustomerDetails = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}customer/${customerId}`, {
+          headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+          },
+        });
+        setInitialValues(response.data);
+      } catch (error) {
+        console.error('Failed to fetch customer details:', error);
+        toast.error('Failed to fetch customer details.');
+      }
+    };
+    fetchCustomerDetails();
+  }, [customerId, edit, session]);
+
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
+      // Build the correct payload structure
+      const payload = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        notes: values.notes,
+        profile: {
+          phone: values.profile.phone,
+          address: {
+            street: values.profile.address.street,
+            city: values.profile.address.city,
+            zip: values.profile.address.zip,
+            state: values.profile.address.state,
+          },
+        },
+        roleId: values.roleId,
+        companyId: values.companyId,
+      };
+
       await axios.put(
-        `http://localhost:8000/api/v1/customer/${customer.id}`,
-        values,
+        `${baseUrl}customer/${customerId}`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${session?.user?.access_token}`,
@@ -73,8 +88,8 @@ const EditCustomer = ({customerId}:{customerId:string}) => {
         }
       );
       toast.success('Customer details updated successfully!');
-      dispatch(handleEdit({ edit: false, data: null })); 
-      router.push('/customers'); 
+      dispatch(handleEdit({ edit: false, data: null })); // Clear edit state
+      router.push('/callpro/customer'); // Navigate to customer list
     } catch (error) {
       console.error('Failed to update customer details:', error);
       toast.error('Failed to update customer details.');
@@ -83,15 +98,16 @@ const EditCustomer = ({customerId}:{customerId:string}) => {
     }
   };
 
-  if (!initialValues) return <p>Loading...</p>; 
+  if (!initialValues) return <p>Loading...</p>;
 
   return (
-    <div className="container mx-auto p-8">
+    <div className="p-8 bg-white">
       <h2 className="text-2xl font-semibold mb-4">Edit Customer</h2>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
+        enableReinitialize
       >
         {({ isSubmitting }) => (
           <Form>
@@ -193,13 +209,17 @@ const EditCustomer = ({customerId}:{customerId:string}) => {
             </div>
 
             <div className="mt-6 flex justify-end gap-4">
-              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="bg-primary700 hover:bg-primary400 text-white px-4 py-2 rounded"
+                disabled={isSubmitting}
+              >
                 Save
               </button>
               <button
                 type="button"
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-                onClick={() => router.push('/customers')}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-red-500"
+                onClick={() => router.push('/callpro/customer')}
               >
                 Cancel
               </button>
