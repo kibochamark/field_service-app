@@ -17,17 +17,17 @@ const Topcard: React.FC<TopcardProps> = ({ customersinfo }) => {
     {
       activity: "Active Customers",
       value: (customersinfo.number_of_active_customers / totalCustomers) * 100,
-      fill: "var(--color-active-customers)",
+      fill: "#1E90FF", // DodgerBlue for Active Customers
     },
     {
       activity: "Total Customers",
       value: (totalCustomers / totalCustomers) * 100,
-      fill: "var(--color-total-customers)",
+      fill: "#4682B4", // SteelBlue for Total Customers
     },
     {
       activity: "Inactive Customers",
       value: (customersinfo.number_of_inactive_customers / totalCustomers) * 100,
-      fill: "var(--color-inactive-customers)",
+      fill: "#87CEFA", // LightSkyBlue for Inactive Customers
     },
   ];
 
@@ -58,15 +58,15 @@ const Topcard: React.FC<TopcardProps> = ({ customersinfo }) => {
           config={{
             activeCustomers: {
               label: "Active Customers",
-              color: "hsl(var(--chart-1))",
+              color: "#1E90FF", // DodgerBlue
             },
             totalCustomers: {
               label: "Total Customers",
-              color: "hsl(var(--chart-2))",
+              color: "#4682B4", // SteelBlue
             },
             inactiveCustomers: {
               label: "Inactive Customers",
-              color: "hsl(var(--chart-3))",
+              color: "#87CEFA", // LightSkyBlue
             },
           }}
           className="mx-auto aspect-square w-full max-w-[80%]"
