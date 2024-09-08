@@ -13,13 +13,23 @@ import {
 import { useRouter } from "next/navigation";
 
 export type Customer = {
-  id: string; 
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
   notes: string;
+  profile: {
+    phone: string;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zip: string;
+    };
+  };
   createdAt: string;
 };
+
 
 export const columns: ColumnDef<Customer>[] = [
   {
@@ -53,6 +63,26 @@ export const columns: ColumnDef<Customer>[] = [
   {
     accessorKey: "notes",
     header: "Notes",
+  },
+  {
+    accessorKey: "profile.phone",
+    header: "Phone",
+  },
+  {
+    accessorKey: "profile.address.street",
+    header: "Street",
+  },
+  {
+    accessorKey: "profile.address.city",
+    header: "City",
+  },
+  {
+    accessorKey: "profile.address.state",
+    header: "State",
+  },
+  {
+    accessorKey: "profile.address.zip",
+    header: "Zip",
   },
   {
     accessorKey: "createdAt",
