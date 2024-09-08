@@ -15,7 +15,7 @@ export async function getCustomers() {
     });
 
     const data = await res.json();
-    console.log(data, "CDATA")
+    
     return data;
 
   } catch (e: any) {
