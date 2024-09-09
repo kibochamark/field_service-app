@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shadcn/u
 import { clearEdit } from '../../../store/EmployeeSlice';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
+import { baseUrl } from '@/utils/constants';
 
 interface Role {
     id: string;
@@ -77,7 +78,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
         
     
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/${formData.id}/employee/`, {
+            const response = await fetch(baseUrl + `${formData.id}/employee/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

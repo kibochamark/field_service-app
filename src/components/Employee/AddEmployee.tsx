@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import { Formik, Field, ErrorMessage, Form } from 'formik';
 import * as Yup from 'yup';
 import { Revalidate } from '@/utils/Revalidate';
+import { baseUrl } from '@/utils/constants';
 
 interface AddEmployeeProps {
     roles: any[];
@@ -70,7 +71,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
         const { confirmPassword, ...dataToSend } = values;
     
         try {
-            const response = await fetch('http://localhost:8000/api/v1/employee', {
+            const response = await fetch(baseUrl + `employee`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

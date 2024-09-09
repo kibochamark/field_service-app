@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast'; // Import toast
 import { getRoles } from '@/app/callpro/employee/page';
+import { baseUrl } from '@/utils/constants';
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -75,7 +76,7 @@ const CustomerForm = () => {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const response = await axios.post(
-                'http://localhost:8000/api/v1/customers',
+                baseUrl + 'customers',
                 {
                   email: values.email,
                   firstName: values.firstName,

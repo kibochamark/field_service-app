@@ -4,6 +4,7 @@ import axios from "axios";
 // Your own logic for dealing with plaintext password strings; be careful!
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { baseUrl } from "./utils/constants";
 
 
 async function refreshAccessToken(token: any) {
@@ -52,7 +53,7 @@ export default {
         let user = null;
 
         const res = await axios.post(
-          "http://localhost:8000/api/v1/auth/login",
+          baseUrl + `auth/login`,
           {
             email: credentials.email,
             password: credentials.password,

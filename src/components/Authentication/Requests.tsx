@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 
 export const roles = async () => {
   try {
-    const role = await axios.get("http://localhost:8000/api/v1/roles");
+    const role = await axios.get("baseUrl + `roles`");
     return role.data;
   } catch (error) {
     console.error("Error fetching roles", error);
@@ -14,7 +14,7 @@ export const roles = async () => {
 
 export const googlsingUp = async (role: string) => {
   try {
-    const res = await axios.get("http://localhost:8000/auth/google", {
+    const res = await axios.get("https://field-service-management.vercel.app/auth/google", {
       params: { role: role },
     });
     return res.data;
