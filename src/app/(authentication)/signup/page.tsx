@@ -6,7 +6,7 @@ import axios from "axios";
 import { getSession } from "next-auth/react";
 import React from "react";
 
-export const signup = async (values: any) => {
+const signup = async (values: any) => {
   try {
     const result = await axios.post(
       baseUrl + "auth/signup",
