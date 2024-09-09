@@ -9,7 +9,7 @@ import React from "react";
 export const signup = async (values: any) => {
   try {
     const result = await axios.post(
-      baseUrl + `auth/signup`,
+      baseUrl + "auth/signup",
       { 
         firstname:values.firstname,
         lastname:values.lastname,

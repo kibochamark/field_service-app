@@ -53,7 +53,7 @@ export default {
         let user = null;
 
         const res = await axios.post(
-          baseUrl + `auth/login`,
+          baseUrl + "api/v1/auth/login",
           {
             email: credentials.email,
             password: credentials.password,

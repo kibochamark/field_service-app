@@ -76,7 +76,7 @@ const CustomerForm = () => {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const response = await axios.post(
-                baseUrl + 'customers',
+                baseUrl + "customers",
                 {
                   email: values.email,
                   firstName: values.firstName,

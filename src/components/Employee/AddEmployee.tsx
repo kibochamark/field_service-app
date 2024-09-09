@@ -71,7 +71,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
         const { confirmPassword, ...dataToSend } = values;
     
         try {
-            const response = await fetch(baseUrl + `employee`, {
+            const response = await fetch(baseUrl + "employee", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
