@@ -23,3 +23,23 @@ export const googlsingUp = async (role: string) => {
     console.error("Error fetching google", error);
   }
 };
+
+
+export const signup = async (values: any) => {
+  try {
+    const result = await axios.post(
+      baseUrl + "auth/signup",
+      { 
+        firstname:values.firstname,
+        lastname:values.lastname,
+        email:values.email,
+        password:values.password,
+        phonenumber:values.phonenumber
+      }
+    );
+    return result.data;
+  } catch (error:any) {
+    console.error("Error creating user account", error);
+    return error.message
+  }
+};

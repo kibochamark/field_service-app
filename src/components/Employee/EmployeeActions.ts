@@ -25,3 +25,25 @@ export async function getEmployees(){
         return e?.message
     }
 }
+
+
+
+export async function getRoles(token:string){
+    try{
+        const res= await fetch(baseUrl + "roles", {
+            method:"GET",
+            headers:{
+                Authorization:"Bearer " + token
+            },
+            next:{tags:["getroles"]}
+        })
+
+        const data= await res.json()
+
+        return data
+
+    }catch(e:any){
+        return e?.message
+    }
+}
+
