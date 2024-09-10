@@ -66,7 +66,7 @@ const CompanySetup = () => {
                 });
                 companyFormik.resetForm();
                 setTimeout(()=>{
-                    router.push("/dashboard");
+                    router.push("/callpro/dashboard");
                 }, 4000)
                
             }
