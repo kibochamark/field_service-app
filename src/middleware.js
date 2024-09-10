@@ -57,5 +57,5 @@ export default auth(async(req) => {
 });
 
 export const config = {
-  matcher: ["/(api|trpc)(.*)", "/company", "/callpro/:path*", "/login", "/signup", "/"],
+  matcher: ["/(api|trpc)(.*)", "/", "/company", "/callpro/:path*", "/login", "/signup"],
 };
