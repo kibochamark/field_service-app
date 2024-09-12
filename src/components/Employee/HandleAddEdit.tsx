@@ -51,18 +51,18 @@ interface HandleAddEditProps {
   employees: any[];
 }
 
-const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
+const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [] }) => {
   const { isAdd, isEdit, currentEmployee } = useSelector(
     (state: RootState) => state.employee
   );
   const dispatch = useDispatch();
-
- const {data:session} = useSession()
+  const { data: session } = useSession();
 
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
 
-  const filteredEmployees = employees
+  // Ensure employees is an array before filtering
+  const filteredEmployees = Array.isArray(employees)
     ? employees.filter((employee: any) => {
         const searchValue = globalFilter.toLowerCase();
         const matchesGlobalFilter =
@@ -87,51 +87,46 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
     "permissions",
   ];
 
+  // Ensure roles is an array before mapping
   const getPermissionsForRole = (roleName: string) => {
-    const role = roles.find((r) => r.name === roleName);
+    const role = Array.isArray(roles)
+      ? roles.find((r) => r.name === roleName)
+      : null;
     return role && role.permissions
       ? role.permissions.map((permission: { value: any }) => permission.value)
       : [];
   };
-
-
-
-
-
 
   const handleDeleteEmployee = async (employeeId: string) => {
     try {
       const url = baseUrl + `/${employeeId}/employee`;
       console.log("Deleting employee with ID:", employeeId);
       console.log("Request URL:", url);
-  
+
       const response = await fetch(url, {
         headers: {
           Authorization: "Bearer " + session?.user?.access_token,
         },
         method: 'DELETE',
       });
-  
+
       console.log("Response Status:", response.status);
-  
+
       if (!response.ok) {
-        // Log the response if deletion fails
         const errorResponse = await response.json();
         console.error("Error Response:", errorResponse);
         throw new Error(errorResponse.message || 'Failed to delete employee');
       }
-  
+
       console.log(`Employee with ID ${employeeId} deleted successfully.`);
       toast.success("Employee deleted successfully");
-      
-        Revalidate("getemployees")
+
+      Revalidate("getemployees");
     } catch (error: any) {
       console.error("Failed to delete employee:", error.message);
       toast.error("Failed to delete employee: " + error.message);
     }
   };
-  
-
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -166,7 +161,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                 className="px-4 py-2 border rounded-md"
               >
                 <option value="">All Roles</option>
-                {roles.map((role) => (
+                {Array.isArray(roles) && roles.map((role) => (
                   <option key={role.name} value={role.name}>
                     {role.name}
                   </option>
@@ -184,7 +179,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                 );
               }}
             >
-              <PlusCircle className="h-3.5 w-3.5"/>
+              <PlusCircle className="h-3.5 w-3.5" />
               <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Add Employee
               </span>
@@ -250,29 +245,29 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuItem
-  onClick={() =>
-    dispatch(
-      handleEdit({
-        isEdit: true,
-        employee,
-      })
-    )
-  }
-  className="text-blue-600"
->
-  <Edit className="mr-2 h-4 w-4" />
-  Edit
-</DropdownMenuItem>
+                                  onClick={() =>
+                                    dispatch(
+                                      handleEdit({
+                                        isEdit: true,
+                                        employee,
+                                      })
+                                    )
+                                  }
+                                  className="text-blue-600"
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
 
-<DropdownMenuItem
-  onClick={() => {
-    handleDeleteEmployee(employee.id);
-  }}
-  className="text-red-600"
->
-  <Trash className="mr-2 h-4 w-4" />
-  Delete
-</DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    handleDeleteEmployee(employee.id);
+                                  }}
+                                  className="text-red-600"
+                                >
+                                  <Trash className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -302,3 +297,4 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles, employees }) => {
 };
 
 export default HandleAddEdit;
+
