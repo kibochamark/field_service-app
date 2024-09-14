@@ -38,7 +38,7 @@ export default function BulkImportButton() {
 
   const handleDownloadTemplate = () => {
     // Directly referencing the template stored in the public folder
-    const url = "/employeetemplate.xlsx" // Path to the CSV template in the public folder
+    const url = "/employeetemplate2.xlsx" // Path to the CSV template in the public folder
     const a = document.createElement("a")
     a.href = url
     a.download = "employee_template.xlsx"
@@ -86,7 +86,7 @@ export default function BulkImportButton() {
         <DialogHeader>
           <DialogTitle>Bulk Import</DialogTitle>
           <DialogDescription>
-            Download the template, fill it with your data, and upload the CSV file.
+            Download the template, fill it with your data, and upload the excel file.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -99,17 +99,17 @@ export default function BulkImportButton() {
             Download Template
           </Button>
           <div className="grid w-full items-center gap-1.5">
-            <Label htmlFor="csv-upload">Upload CSV</Label>
+            <Label htmlFor="csv-upload">Upload Excel file</Label>
             <Input
               id="csv-upload"
               type="file"
-              accept=".csv"
+              accept=".xlsx"
               onChange={handleFileChange}
             />
           </div>
           <Button onClick={handleUpload} className="w-full">
             <UploadIcon className="mr-2 h-4 w-4" />
-            Upload CSV
+            Upload
           </Button>
         </div>
       </DialogContent>
