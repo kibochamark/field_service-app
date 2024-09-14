@@ -17,7 +17,7 @@ const Signup = ({ role }: { role: any }) => {
   const [step, setStep] = useState(1);
   const router = useRouter();
 
-  const roles = role.map(
+  const roles = role?.map(
     (type: { id: string; name: string }, index: number) => (
       <option value={type.id} key={index}>
         {type.name}
