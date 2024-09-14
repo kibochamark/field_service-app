@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { CircleUser, CircleUserRound, ClipboardList, Loader, Menu, User, User2Icon } from 'lucide-react';
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { Suspense, useContext } from "react";
+import { Suspense, useContext, useEffect, useState } from "react";
 import * as Icon from 'react-feather';
 import { DarkModeSwitch } from "react-toggle-dark-mode";
 import { ThemeContext } from "./Provider";
@@ -21,7 +21,7 @@ import { signOut, useSession } from "next-auth/react";
 
 export default function NavbarComponent() {
     // retrieve user session
-    const{data:session} = useSession()
+    const { data: session } = useSession()
 
     const router = useRouter();
     const theme = useContext(ThemeContext);
@@ -33,7 +33,7 @@ export default function NavbarComponent() {
     }
 
 
-    const logout =async () => {
+    const logout = async () => {
         await signOut()
     }
 
@@ -41,11 +41,33 @@ export default function NavbarComponent() {
     const isopen = useSelector((state: RootState) => state.sidebar.isopen)
     const dispatch = useDispatch()
 
+    const [isScrolled, setIsScrolled] = useState(false)
 
-    // retrieve user session
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 50) {
+                setIsScrolled(true)
+            } else {
+                setIsScrolled(false)
+            }
+        }
+
+        window.addEventListener('scroll', handleScroll)
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [])
+
+
 
     return (
-        <header className="sticky top-0  z-50 flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-primary600 dark:bg-background dark:text-white text-sm py-4 dark:border-gray-600 border-b border-gray-600">
+
+        // <header className="sticky top-0  z-50 flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-primary600 dark:bg-background dark:text-white text-sm py-4 dark:border-gray-600 border-b border-gray-600">
+        <header className={`fixed top-0 left-0 h-16 bg-primary800 flex flex-wrap sm:flex-nowrap w-full dark:bg-background dark:text-white text-sm  right-0 z-50 transition-all duration-300 ${isScrolled
+                ? 'bg-background/80 backdrop-blur-sm'
+                : 'bg-background'
+            }`}>
             <nav className="max-w-full container w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center">
@@ -78,9 +100,9 @@ export default function NavbarComponent() {
                             <DropdownMenuTrigger asChild>
 
                                 <p className="font-medium rounded-full px-3  cursor-pointer py-2 text-md bg-white text-gray-900">
-                                <Suspense fallback={<Loader className="animate animate-spin text-primary600"/>}>
+                                    <Suspense fallback={<Loader className="animate animate-spin text-primary600" />}>
 
-                                    {session ? session?.user?.name?.charAt(0).toUpperCase() :"U"}
+                                        {session ? session?.user?.name?.charAt(0).toUpperCase() : "U"}
                                     </Suspense>
 
                                 </p>
