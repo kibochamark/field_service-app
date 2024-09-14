@@ -5,6 +5,7 @@ import axios from "axios";
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { baseUrl } from "./utils/constants";
+import { signOut } from "./auth";
 
 
 async function refreshAccessToken(token: any) {
@@ -118,7 +119,6 @@ export default {
               googleId: account?.providerAccountId,
             });
 
-            console.log(res.data?.data, "data")
 
 
             if (res.status === 200 || res.status === 201) {
@@ -127,7 +127,10 @@ export default {
               token.hascompany = res.data?.data?.token?.hascompany;
               token.companyId = res.data?.data?.token?.companyId;
               token.role = res.data?.data?.token?.role;
+            }else{
+              return null
             }
+            
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
           }

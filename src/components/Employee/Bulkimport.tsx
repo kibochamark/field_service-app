@@ -13,13 +13,22 @@ import {
 import { Input } from "@/shadcn/ui/input"
 import { Label } from "@/shadcn/ui/label"
 import { DownloadIcon, UploadIcon } from "lucide-react"
+import { useMutation } from "@tanstack/react-query"
+import { BulkEmployeeCreation } from "./EmployeeActions"
+import toast from "react-hot-toast"
+import { Revalidate } from "@/utils/Revalidate"
+import { useSession } from "next-auth/react"
 
 export default function BulkImportButton() {
   const [file, setFile] = useState<File | null>(null)
 
+
+  const {data:session}= useSession()
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
-    if (selectedFile && selectedFile.type === "text/csv") {
+    console.log(selectedFile?.type)
+    if (selectedFile && selectedFile.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
       setFile(selectedFile)
     } else {
       alert("Please select a valid CSV file.")
@@ -29,10 +38,10 @@ export default function BulkImportButton() {
 
   const handleDownloadTemplate = () => {
     // Directly referencing the template stored in the public folder
-    const url = "/import_template.csv" // Path to the CSV template in the public folder
+    const url = "/employeetemplate.xlsx" // Path to the CSV template in the public folder
     const a = document.createElement("a")
     a.href = url
-    a.download = "import_template.csv"
+    a.download = "employee_template.xlsx"
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -40,15 +49,33 @@ export default function BulkImportButton() {
 
   const handleUpload = () => {
     if (file) {
-      // Simulating file upload
-      console.log(`Uploading file: ${file.name}`)
-      // Here you would typically send the file to your server
-      alert("File uploaded successfully!")
-      setFile(null)
+      const uploadeddata = new FormData(); // No need to specify FormData type explicitly
+      uploadeddata.append("companyid", session?.user?.companyId ?? "");
+      uploadeddata.append("file", file);
+  
+      // Pass the FormData directly to mutate
+      uploadmutation.mutate(uploadeddata);
+      setFile(null);
     } else {
-      alert("Please select a file to upload.")
+      toast.error("Please select a file to upload.");
     }
-  }
+  };
+  
+
+  // upload mutation
+  const uploadmutation = useMutation({
+    mutationFn:async(values:FormData)=>{
+
+      return await BulkEmployeeCreation(values)
+    },
+    onSuccess(data, variables, context) {
+      toast.success("Employees created successful")
+      Revalidate("getemployees")
+    },
+    onError(error, variables, context) {
+      toast.error("error in creating employees")
+    }
+  })
 
   return (
     <Dialog>
