@@ -142,7 +142,7 @@ const TestSidebar = () => {
                                                 onClick={()=>{
                                                     isopen && dispatch(handleOpen())
                                                 }}
-                                                className={`rounded-lg flex items-center gap-4 justify-center hover:bg-gray-100 transition-all duration-500  px-4 py-2 text-sm font-medium ${pathname.includes(menu.href) ? "bg-primary500 hover:bg-primary400 text-white" : ""}`}
+                                                className={`rounded-lg flex items-center gap-4 justify-start hover:bg-gray-100 transition-all duration-500  px-4 py-2 text-sm font-medium ${pathname.includes(menu.href) ? "bg-primary500 hover:bg-primary400 text-white" : ""}`}
                                             >
                                                 {menu.icon} {menu.name}
                                             </Link>
