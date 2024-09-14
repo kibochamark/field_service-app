@@ -40,7 +40,7 @@ export async function getRoles(token:string){
 
         const data= await res.json()
 
-        return data
+        return data?.data ?? []
 
     }catch(e:any){
         return e?.message

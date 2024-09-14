@@ -68,22 +68,34 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
 
     const handleSubmit = async (values: FormDataState) => {
         const { confirmPassword, ...dataToSend } = values;
+        console.log(dataToSend, "Data to send");
     
         try {
+            // Log before making the request
+            console.log("Sending request to:", baseUrl + "employee");
+            
             const response = await fetch(baseUrl + "employee", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user.access_token}`,
+                    'Authorization': `Bearer ${session?.user.access_token}`, // Log token for debugging if undefined
                 },
                 body: JSON.stringify(dataToSend),
             });
     
+            // Log the response status and headers
+            console.log("Response status:", response.status);
+            console.log("Response headers:", response.headers);
+    
+            // Check if response is OK
             if (!response.ok) {
+                const errorResponse = await response.json();
+                console.log("Error response body:", errorResponse);
                 throw new Error('Failed to add employee');
             }
     
-            await response.json();
+            const result = await response.json();
+            console.log("Response body:", result);
     
             toast.success("Employee Added");
     
@@ -91,9 +103,12 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
             Revalidate("getemployees");
     
         } catch (error: any) {
+            // Log the error for better debugging
+            console.error("Error adding employee:", error);
             toast.error(error.message);
         }
     };
+    
     
     const handleCancel = () => {
         dispatch(handleAdd({ isAdd: false }));
@@ -176,19 +191,22 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
                             <div className="space-y-2">
                                 <Label htmlFor="roleId">Role</Label>
                                 <Select
-                                    onValueChange={value => handleSelectChange('roleId', value, setFieldValue)}
-                                    value={values.roleId}
-                                    required
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.isArray(roles) && roles.map((role: any) => (
-                                            <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+    onValueChange={value => handleSelectChange('roleId', value, setFieldValue)}
+    value={values.roleId}
+    required
+>
+    <SelectTrigger>
+        <SelectValue placeholder="Select a role" />
+    </SelectTrigger>
+    <SelectContent>
+        {Array.isArray(roles) && roles
+            .filter((role: any) => role.name !== 'business owner' && role.name !== 'client') // Filter out "business owner" and "client"
+            .map((role: any) => (
+                <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+            ))}
+    </SelectContent>
+</Select>
+
                                 <ErrorMessage name="roleId" component="div" className="text-red-500" />
                             </div>
                             <div className="space-y-2">
