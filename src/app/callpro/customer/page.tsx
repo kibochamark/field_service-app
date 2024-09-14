@@ -2,12 +2,13 @@ import { getCustomers, getCustomersInfo } from '@/components/Customer/CustomerAc
 import DemoPage from '@/components/Customer/page'
 import React from 'react'
 
+export const dynamic = "force-dynamic"
+
+
 export default async function page() {
   const customers = await getCustomers() ?? []
-  console.log(customers, "kastomaa")
 
   const customersinfo = await getCustomersInfo() ?? []
-  console.log(customersinfo, "info")
 
   return (
     <div className='w-full min-h-screen'> 
