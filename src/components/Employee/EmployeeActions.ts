@@ -53,21 +53,27 @@ export async function getRoles(token:string){
 
 // handle bulk upload for employees
 export async function BulkEmployeeCreation(employeedata:FormData){
+    console.log(employeedata)
     try{
         // retrieve user session
         const session = await auth();
+        if(session){
 
-        const res= await axios.post(baseUrl + "employee/bulk", {
-            headers:{
-                Authorization:"Bearer " + session?.user?.access_token
-            },
-            data:{
-                companyid:employeedata.get("companyid"),
-                file:employeedata.get("file")
+            const res= await fetch("http://localhost:8000/api/v1/employee/bulk", {
+                method:"POST",
+                headers:{
+                    Authorization: "Bearer " + session?.user?.access_token,
+                },
+                body:employeedata
+            })
+            if(res.status !== 200){
+                throw new Error("Failed to create employees , something went wrong")
             }
-        })
-
-        return res.data
+    
+    
+            return await res.json()
+    
+        }
 
     }catch(e:any){
         return e?.message

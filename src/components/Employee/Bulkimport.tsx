@@ -12,7 +12,7 @@ import {
 } from "@/shadcn/ui/dialog"
 import { Input } from "@/shadcn/ui/input"
 import { Label } from "@/shadcn/ui/label"
-import { DownloadIcon, UploadIcon } from "lucide-react"
+import { DownloadIcon, Loader, UploadIcon } from "lucide-react"
 import { useMutation } from "@tanstack/react-query"
 import { BulkEmployeeCreation } from "./EmployeeActions"
 import toast from "react-hot-toast"
@@ -23,7 +23,7 @@ export default function BulkImportButton() {
   const [file, setFile] = useState<File | null>(null)
 
 
-  const {data:session}= useSession()
+  const { data: session } = useSession()
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -52,7 +52,7 @@ export default function BulkImportButton() {
       const uploadeddata = new FormData(); // No need to specify FormData type explicitly
       uploadeddata.append("companyid", session?.user?.companyId ?? "");
       uploadeddata.append("file", file);
-  
+
       // Pass the FormData directly to mutate
       uploadmutation.mutate(uploadeddata);
       setFile(null);
@@ -60,12 +60,12 @@ export default function BulkImportButton() {
       toast.error("Please select a file to upload.");
     }
   };
-  
+
 
   // upload mutation
   const uploadmutation = useMutation({
-    mutationFn:async(values:FormData)=>{
-
+    mutationFn: async (values: FormData) => {
+      console.log("reacged")
       return await BulkEmployeeCreation(values)
     },
     onSuccess(data, variables, context) {
@@ -107,9 +107,10 @@ export default function BulkImportButton() {
               onChange={handleFileChange}
             />
           </div>
-          <Button onClick={handleUpload} className="w-full">
+          <Button onClick={handleUpload} className="w-full" disabled={uploadmutation.isPending}>
             <UploadIcon className="mr-2 h-4 w-4" />
-            Upload
+            {uploadmutation.isPending ? <Loader className="animate animate-spin bg-white" /> : "Upload"}
+
           </Button>
         </div>
       </DialogContent>
