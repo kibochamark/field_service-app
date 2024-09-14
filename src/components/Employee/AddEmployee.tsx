@@ -191,19 +191,22 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
                             <div className="space-y-2">
                                 <Label htmlFor="roleId">Role</Label>
                                 <Select
-                                    onValueChange={value => handleSelectChange('roleId', value, setFieldValue)}
-                                    value={values.roleId}
-                                    required
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.isArray(roles) && roles.map((role: any) => (
-                                            <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+    onValueChange={value => handleSelectChange('roleId', value, setFieldValue)}
+    value={values.roleId}
+    required
+>
+    <SelectTrigger>
+        <SelectValue placeholder="Select a role" />
+    </SelectTrigger>
+    <SelectContent>
+        {Array.isArray(roles) && roles
+            .filter((role: any) => role.name !== 'business owner' && role.name !== 'client') // Filter out "business owner" and "client"
+            .map((role: any) => (
+                <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+            ))}
+    </SelectContent>
+</Select>
+
                                 <ErrorMessage name="roleId" component="div" className="text-red-500" />
                             </div>
                             <div className="space-y-2">
