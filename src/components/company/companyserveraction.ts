@@ -5,7 +5,6 @@ import axios from "axios";
 
 export const company = async (values: any) => {
     const session = await auth()
-    console.log(session, "dserver")
     try {
         const result = await axios.post(process.env.BASEURL! + "company", {
             ...values,

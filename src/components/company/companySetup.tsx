@@ -21,9 +21,8 @@ const CompanySetup = () => {
     const router = useRouter()
 
     // get client session
-    const {data:session, status, update} = useSession()
+    const { data: session, status, update } = useSession()
 
-    console.log(session, "use session hook")
 
 
     const CompanySchema: any = Yup.object().shape({});
@@ -40,6 +39,7 @@ const CompanySetup = () => {
                 city: "",
                 street: "",
                 zip: "",
+                state: ""
             },
         },
         onSubmit: (values) => {
@@ -54,23 +54,24 @@ const CompanySetup = () => {
             return await company(values);
         },
         onSuccess(data) {
-            console.log(data)
-            update({hascompany:true})
-            if(data.message){
+
+            if (data.status !== "success") {
                 toast.error("Something went wrong", {
                     position: "top-center",
                 });
-            }else{
+            } else {
+                update({ hascompany: true })
+
                 toast.success("Company Details Added Successfully", {
                     position: "top-center",
                 });
                 companyFormik.resetForm();
-                setTimeout(()=>{
+                setTimeout(() => {
                     router.push("/callpro/dashboard");
                 }, 4000)
-               
+
             }
-            
+
         },
         onError(error) {
 
@@ -259,6 +260,25 @@ const CompanySetup = () => {
                             />
                         </div>
                     </div>
+                    <div className="mb-2 md:mb-0">
+                        <div className="flex md:flex-row gap-2 content-center">
+                            <label
+                                htmlFor=""
+                                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                                Country
+                            </label>
+                        </div>
+                        <input
+                            type="text"
+                            id=""
+                            name="address.state"
+                            value={companyFormik.values.address.state}
+                            onBlur={companyFormik.handleBlur}
+                            onChange={companyFormik.handleChange}
+                            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
+                        />
+                    </div>
                     <div className="md:grid md:grid-cols-2 gap-6">
                         <div className="mb-2 md:mb-0">
                             <div className="flex md:flex-row gap-2 content-center">
@@ -279,6 +299,7 @@ const CompanySetup = () => {
                                 className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                             />
                         </div>
+
                         <div className="mb-2 md:mb-0">
                             <div className="flex md:flex-row gap-2 content-center">
                                 <label
