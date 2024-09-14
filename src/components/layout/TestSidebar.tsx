@@ -86,7 +86,7 @@ const TestSidebar = () => {
     return (
         <div>
             <div className="flex h-screen flex-col w-full justify-between md:border-e bg-white">
-                <div className="md:px-4 py-6">
+                <div className="md:px-4 lg:py-20">
 
 
                     <ul className="mt-6 space-y-4">
