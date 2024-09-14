@@ -44,6 +44,7 @@ import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { Revalidate } from "@/utils/Revalidate";
+import BulkImportButton from "./Bulkimport";
 
 
 interface HandleAddEditProps {
@@ -184,6 +185,9 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
                 Add Employee
               </span>
             </Button>
+            <div>
+              <BulkImportButton/>
+            </div>
           </div>
           <TabsContent value="all">
             <Card>
