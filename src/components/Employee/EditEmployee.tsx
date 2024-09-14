@@ -9,6 +9,7 @@ import { clearEdit } from '../../../store/EmployeeSlice';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { baseUrl } from '@/utils/constants';
+import { Revalidate } from '@/utils/Revalidate';
 
 interface Role {
     id: string;
@@ -96,6 +97,7 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
             }
     
             const result = await response.json();
+            Revalidate("getemployees")
             toast.success("Employee updated successfully");
     
            
@@ -131,18 +133,21 @@ const EditEmployee: React.FC<EditEmployeeProps> = ({ roles, employee }) => {
                 <div className="space-y-2">
                     <Label>Role</Label>
                     <select
-                        name="role"
-                        value={formData.role?.name || ""}
-                        onChange={handleRoleChange}
-                        className="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                    >
-                        <option value="">Select a role</option>
-                        {roles.map((role) => (
-                            <option key={role.id} value={role.name}>
-                                {role.name}
-                            </option>
-                        ))}
-                    </select>
+    name="role"
+    value={formData.role?.name || ""}
+    onChange={handleRoleChange}
+    className="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+>
+    <option value="">Select a role</option>
+    {roles
+        .filter(role => role.name !== 'client')
+        .map((role) => (
+            <option key={role.id} value={role.name}>
+                {role.name}
+            </option>
+        ))}
+</select>
+
                 </div>
                 <div className="space-y-2">
                     <Label>Permissions</Label>
