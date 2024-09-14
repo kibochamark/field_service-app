@@ -64,9 +64,9 @@ export default function BulkImportButton() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <Button
-            variant="secondary"
+            // variant="secondary"
             onClick={handleDownloadTemplate}
-            className="w-full"
+            className="w-full bg-green-800 hover:bg-green-600"
           >
             <DownloadIcon className="mr-2 h-4 w-4" />
             Download Template
