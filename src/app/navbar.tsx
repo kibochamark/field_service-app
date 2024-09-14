@@ -58,7 +58,7 @@ export default function NavbarComponent() {
                             }}>
                                 <SheetContent side={"left"} className="w-[300px] sm:w-[340px]">
                                     <SheetHeader>
-                                        <SheetTitle className='text-left text-xl font-bold ml-3 inline-flex text-primary gap-2 justify-start items-center'><ClipboardList /> HouseCall</SheetTitle>
+                                        <SheetTitle className='text-left text-xl font-bold ml-3 inline-flex text-primary gap-2 justify-start items-center'><ClipboardList /> DispatchRhino</SheetTitle>
                                         <SheetDescription>
                                             <TestSidebar />
                                         </SheetDescription>
@@ -66,7 +66,7 @@ export default function NavbarComponent() {
                                 </SheetContent>
                             </Sheet>
                         </div>
-                        <Link className="inline-flex items-center gap-2  flex-row-reverse text-xl ml-4 font-semibold text-white" href="/dashboard"><ClipboardList /> HouseCall</Link>
+                        <Link className="inline-flex items-center gap-2  flex-row-reverse text-xl ml-4 font-semibold text-white" href="/dashboard"><ClipboardList /> DispatchRhino</Link>
                     </div>
                     <div className="flex items-center flex-row gap-4 pr-4">
                         <DarkModeSwitch
