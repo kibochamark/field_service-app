@@ -1,6 +1,6 @@
 "use client"
 import React, { Suspense } from 'react'
-import { ChevronDownIcon, Home, ListVideo, Loader, Menu, Mic2, Music, Play, RadioIcon, SquareStack, User, UserPen, Users } from "lucide-react";
+import { ChevronDownIcon, Clipboard, Home, ListVideo, Loader, Menu, Mic2, Music, Play, RadioIcon, SquareStack, User, UserPen, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -43,6 +43,12 @@ const TestSidebar = () => {
             name: "Customers",
             icon: <UserPen size={24} className="" />,
             href: "/callpro/customer",
+        },
+        {
+            label: "Job",
+            name: "Job Management",
+            icon: <Clipboard size={24} className="" />,
+            href: "/callpro/jobs",
         },
 
 

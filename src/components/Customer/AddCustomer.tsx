@@ -10,8 +10,8 @@ import { Input } from "@/shadcn/ui/input"; // Assuming you have a customized Inp
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast'; // Import toast
-import { getRoles } from '@/app/callpro/employee/page';
 import { baseUrl } from '@/utils/constants';
+import { getRoles } from '../Employee/EmployeeActions';
 
 // Validation schema
 const validationSchema = Yup.object({

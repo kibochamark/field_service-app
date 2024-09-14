@@ -1,9 +1,8 @@
 import HandleAddEdit from "./HandleAddEdit"
 import { auth } from "@/auth"
-import { getRoles } from "@/app/callpro/employee/page"
 import { Suspense } from "react"
 import { Loader } from "lucide-react"
-import { getEmployees } from "./EmployeeActions"
+import { getEmployees, getRoles } from "./EmployeeActions"
 
 
 export async function EmployeeManagement() {

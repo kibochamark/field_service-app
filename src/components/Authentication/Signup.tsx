@@ -1,5 +1,4 @@
 "use client";
-import { signup } from "@/app/(authentication)/signup/page";
 import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import { BuildingIcon, UserIcon } from "lucide-react";
@@ -7,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
-import { googlsingUp } from "./Requests";
+import { googlsingUp, signup } from "./Requests";
 import { signIn, useSession } from "next-auth/react";
 import { company } from "../company/companyserveraction";
 import toast from "react-hot-toast";

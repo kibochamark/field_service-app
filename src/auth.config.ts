@@ -53,12 +53,14 @@ export default {
         let user = null;
 
         const res = await axios.post(
-          baseUrl + "api/v1/auth/login",
+          baseUrl + "auth/login",
           {
             email: credentials.email,
             password: credentials.password,
           }
         );
+
+
 
 
         if (res.status === 200) {
@@ -101,6 +103,8 @@ export default {
             token.refresh_token = (user as any)?.refreshToken;
             token.hascompany = (user as any)?.hascompany;
             token.companyId = (user as any)?.companyId;
+            token.role = (user as any)?.role;
+
           }
 
         } else {

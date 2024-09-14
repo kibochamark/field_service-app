@@ -47,7 +47,7 @@ const SignupSchema = Yup.object().shape({
     roleId: Yup.string().required('Required'),
 });
 
-const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
+const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
     const { data: session } = useSession();
     const router = useRouter();
     const dispatch = useDispatch();
@@ -60,14 +60,13 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
 
     const handleSelectChange = (name: string, value: string, setFieldValue: any) => {
         setFieldValue(name, value);
-        const selectedRole = roles.find(role => role.id === value);
+        const selectedRole = Array.isArray(roles) ? roles.find(role => role.id === value) : null;
         if (selectedRole) {
             setRolePermissions(selectedRole.permissions.map((permission: { value: any; }) => permission.value));
         }
     };
 
     const handleSubmit = async (values: FormDataState) => {
-        
         const { confirmPassword, ...dataToSend } = values;
     
         try {
@@ -89,14 +88,12 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
             toast.success("Employee Added");
     
             dispatch(handleAdd({ isAdd: false }));
-            Revalidate("getemployees")
-            
+            Revalidate("getemployees");
     
         } catch (error: any) {
             toast.error(error.message);
         }
     };
-    
     
     const handleCancel = () => {
         dispatch(handleAdd({ isAdd: false }));
@@ -126,7 +123,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                 {({ errors, touched, setFieldValue, values }) => (
                     <Form>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
+                        <div className="space-y-2">
                                 <Label htmlFor="firstname">First Name</Label>
                                 <Field name="firstname" as={Input} placeholder="John" />
                                 <ErrorMessage name="firstname" component="div" className="text-red-500" />
@@ -187,7 +184,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {roles.map((role: any) => (
+                                        {Array.isArray(roles) && roles.map((role: any) => (
                                             <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -222,9 +219,9 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
                             </div>
                         </CardContent>
                         <CardFooter className="flex justify-between">
-                    <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
-                    <Button type="submit">Add Employee</Button>
-                </CardFooter>
+                            <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
+                            <Button type="submit">Add Employee</Button>
+                        </CardFooter>
                     </Form>
                 )}
             </Formik>
@@ -233,3 +230,4 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles }) => {
 };
 
 export default AddEmployee;
+

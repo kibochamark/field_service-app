@@ -39,11 +39,12 @@ export function SidebarMenu() {
             icon: <RadioIcon size={15} className="mr-2" />,
             href: "/home/",
         },
-        // {
-        //     label: "Library",
-        //     name: "Playlist",
-        //     icon: <Play size={15} className="mr-2" />,
-        //     href: "/home/playlist",
+        {
+            label: "Library",
+            name: "Playlist",
+            icon: <Play size={15} className="mr-2" />,
+            href: "/home/playlist",
+        }
         //     submenu: [
         //         {
         //             name: "Playlist 1",
