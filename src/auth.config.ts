@@ -95,6 +95,8 @@ export default {
     jwt: async ({ token, user, profile, session, account, trigger }) => {
       if (trigger === "update") {
         token.hascompany = session?.hascompany
+        token.companyId = session?.company;
+
       } else {
         if (!profile) {
           if (user) {

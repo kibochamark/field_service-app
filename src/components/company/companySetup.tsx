@@ -60,7 +60,7 @@ const CompanySetup = () => {
                     position: "top-center",
                 });
             } else {
-                update({ hascompany: true, companyId:data?.data?.id })
+                update({ hascompany: true, company:data?.data?.id })
 
                 toast.success("Company Details Added Successfully", {
                     position: "top-center",
