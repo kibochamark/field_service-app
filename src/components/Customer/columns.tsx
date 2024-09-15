@@ -21,7 +21,6 @@ export type Customer = {
   profile: {
     phone: string;
     address: {
-      street: string;
       city: string;
       state: string;
       zip: string;
@@ -34,67 +33,59 @@ export type Customer = {
 export const columns: ColumnDef<Customer>[] = [
   {
     accessorKey: "firstName",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        First Name
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"First Name"} />
+    },
   },
   {
     accessorKey: "lastName",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Last Name
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Last Name"} />
+    },
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Email"} />
+    },
   },
   {
     accessorKey: "notes",
-    header: "Notes",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Notes"} />
+    },
   },
   {
     accessorKey: "profile.phone",
-    header: "Phone",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Contact"} />
+    },
   },
-  {
-    accessorKey: "profile.address.street",
-    header: "Street",
-  },
+ 
   {
     accessorKey: "profile.address.city",
-    header: "City",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"City"} />
+    },
   },
   {
     accessorKey: "profile.address.state",
-    header: "State",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Country"} />
+    },
   },
   {
     accessorKey: "profile.address.zip",
-    header: "Zip",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Zip Code"} />
+    },
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Created At
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title={"Creation date"} />
+    },
     cell: ({ cell }) => new Date(cell.getValue<string>()).toLocaleDateString(),
   },
   {
@@ -106,6 +97,7 @@ export const columns: ColumnDef<Customer>[] = [
 ];
 
 import React from "react";
+import { DataTableColumnHeader } from "../GlobalComponents/ColumnHeader";
 
 const Action = ({ row }: { row: any }) => {
   const router = useRouter();
@@ -128,7 +120,7 @@ const Action = ({ row }: { row: any }) => {
           <DropdownMenuItem onClick={() => router.push(`/callpro/editcustomer/${row.original.id}`)}><Edit className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleDelete(row.id)}> <Trash className="mr-2 h-4 w-4"/>
+          <DropdownMenuItem onClick={() => handleDelete(row.id)}> <Trash className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>

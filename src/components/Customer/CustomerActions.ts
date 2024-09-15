@@ -15,8 +15,12 @@ export async function getCustomers() {
     });
 
     const data = await res.json();
+
+    if(res.status == 200){
+      return data?.data
+    }
     
-    return data;
+    return [];
 
   } catch (e: any) {
     return e?.message;
@@ -39,5 +43,41 @@ export async function getCustomersInfo() {
 
   } catch (e: any) {
     return e?.message;
+  }
+}
+
+
+
+// handle bulk upload for employees
+export async function BulkCustomerCreation(customerData:FormData){
+  try{
+      // retrieve user session
+      const session = await auth();
+      if(session){
+
+          const res= await fetch( baseUrl + "customers/bulk", {
+              method:"POST",
+              headers:{
+                  Authorization: "Bearer " + session?.user?.access_token,
+              },
+              body:customerData
+          })
+
+        
+
+          if(res.status !== 200){
+              return [res.status, "Failed to create customers , something went wrong"]
+          }
+
+          const data= await res.json()
+
+  
+  
+          return [200, data]
+  
+      }
+
+  }catch(e:any){
+      return [500, e?.message]
   }
 }

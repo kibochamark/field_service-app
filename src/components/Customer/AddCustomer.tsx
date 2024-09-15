@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast'; // Import toast
 import { baseUrl } from '@/utils/constants';
 import { getRoles } from '../Employee/EmployeeActions';
+import { Revalidate } from '@/utils/Revalidate';
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -96,6 +97,7 @@ const CustomerForm = () => {
                 }
               );
               toast.success('Customer created successfully!'); // Use toast for success message
+              Revalidate("getcustomers")
               dispatch(closeForm());
             } catch (error: any) {
               if (error.response) {

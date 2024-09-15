@@ -59,7 +59,7 @@ export async function BulkEmployeeCreation(employeedata:FormData){
         const session = await auth();
         if(session){
 
-            const res= await fetch("http://localhost:8000/api/v1/employee/bulk", {
+            const res= await fetch( baseUrl + "employee/bulk", {
                 method:"POST",
                 headers:{
                     Authorization: "Bearer " + session?.user?.access_token,
@@ -67,16 +67,18 @@ export async function BulkEmployeeCreation(employeedata:FormData){
                 body:employeedata
             })
             if(res.status !== 200){
-                throw new Error("Failed to create employees , something went wrong")
+                return [400, "Failed to create employees , something went wrong"]
             }
+  
+            const data= await res.json()
     
     
-            return await res.json()
+            return [200, data]
     
         }
 
     }catch(e:any){
-        return e?.message
+        return [500, e?.message]
     }
 }
 
