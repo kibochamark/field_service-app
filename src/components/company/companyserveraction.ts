@@ -1,6 +1,7 @@
 "use server"
 
 import { auth } from "@/auth";
+import { baseUrl } from "@/utils/constants";
 import axios from "axios";
 
 export const company = async (values: any) => {
@@ -23,3 +24,27 @@ export const company = async (values: any) => {
         return JSON.stringify(error)
     }
 };
+
+
+export async function getCompanySize(){
+    try{
+        const session = await auth()
+        const res= await fetch(baseUrl + `companysize`, {
+            method:"GET",
+            headers:{
+                Authorization:"Bearer " + session?.user?.access_token
+            },
+            next:{tags:["getcompanysize"]}
+        })
+
+        const data= await res.json()
+
+    
+
+
+        return data
+
+    }catch(e:any){
+        return e?.message
+    }
+}

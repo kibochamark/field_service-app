@@ -38,7 +38,6 @@ export default function DemoPage({ customersinfo, customers }: DemoPageProps) { 
   const isOpen = useSelector((state: RootState) => state.customerForm.isOpen); // Accessing the form state
 
 
-  console.log(customers)
 
 
   return (
