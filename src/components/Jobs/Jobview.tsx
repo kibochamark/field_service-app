@@ -77,6 +77,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shadcn/ui/tooltip"
+import Createjob from "./Createjob"
 
 export const description =
   "An orders dashboard with a sidebar navigation. The sidebar has icon navigation. The content area has a breadcrumb and search in the header. The main area has a list of recent orders with a filter and export button. The main area also has a detailed view of a single order with order details, shipping information, billing information, customer information, and payment information."
@@ -207,7 +208,7 @@ export function Jobview() {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button>Create New Job</Button>
+                  <Createjob/>
                 </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
@@ -482,7 +483,7 @@ export function Jobview() {
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
                   <CardTitle className="group flex items-center gap-2 text-lg">
-                    Order Oe31b70H
+                    Latest Order: Oe31b70H
                     <Button
                       size="icon"
                       variant="outline"
