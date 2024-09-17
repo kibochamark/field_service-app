@@ -86,7 +86,7 @@ export default function Component() {
     <CardFooter>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button>Create New Job</Button>
+          <Button className='bg-primary700'>Create New Job</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -181,7 +181,7 @@ export default function Component() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full">Create Job</Button>
+              <Button type="submit" className="w-full bg-primary700">Create Job</Button>
             </form>
           </div>
         </DialogContent>
