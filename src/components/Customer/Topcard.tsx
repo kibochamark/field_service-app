@@ -1,5 +1,5 @@
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
-import { Card, CardContent } from "@/shadcn/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shadcn/ui/card";
 import { ChartContainer } from "@/shadcn/ui/chart";
 
 interface TopcardProps {
@@ -32,69 +32,55 @@ const Topcard: React.FC<TopcardProps> = ({ customersinfo }) => {
   ];
 
   return (
-    <Card className="max-w-xs">
-      <CardContent className="flex gap-4 p-4">
-        <div className="grid items-center gap-2">
-          <div className="grid flex-1 auto-rows-min gap-0.5">
-            <div className="text-sm text-muted-foreground">Active Customers</div>
-            <div className="flex items-baseline gap-1 text-xl font-bold tabular-nums leading-none">
-              {customersinfo.number_of_active_customers}
+    <div className="md:grid grid-cols-3 gap-4 space-y-4 md:space-y-0 my-4">
+      <Card x-chunk="dashboard-01-chunk-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Customers Available
+            </CardTitle>
+            {/* <DollarSign className="h-4 text-primary600 w-4 text-muted-foreground" /> */}
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl text-primary600 font-bold">{customersinfo.number_of_customers}
             </div>
-          </div>
-          <div className="grid flex-1 auto-rows-min gap-0.5">
-            <div className="text-sm text-muted-foreground">Total Customers</div>
-            <div className="flex items-baseline gap-1 text-xl font-bold tabular-nums leading-none">
-              {customersinfo.number_of_customers}
+            <p className="text-xs text-muted-foreground">
+              in the last 1 minute
+            </p>
+          </CardContent>
+        </Card>
+       <Card x-chunk="dashboard-01-chunk-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Active Customers
+            </CardTitle>
+            {/* <DollarSign className="h-4 text-primary600 w-4 text-muted-foreground" /> */}
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl text-green-600 font-bold">{customersinfo.number_of_active_customers}
             </div>
-          </div>
-          <div className="grid flex-1 auto-rows-min gap-0.5">
-            <div className="text-sm text-muted-foreground">Inactive Customers</div>
-            <div className="flex items-baseline gap-1 text-xl font-bold tabular-nums leading-none">
-              {customersinfo.number_of_inactive_customers}
+            <p className="text-xs text-muted-foreground">
+              in the last minute
+            </p>
+          </CardContent>
+        </Card>
+       <Card x-chunk="dashboard-01-chunk-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              InActive Customers
+            </CardTitle>
+            {/* <DollarSign className="h-4 text-primary600 w-4 text-muted-foreground" /> */}
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl text-orange-200 font-bold">{customersinfo.number_of_inactive_customers}
+
             </div>
-          </div>
-        </div>
-        <ChartContainer
-          config={{
-            activeCustomers: {
-              label: "Active Customers",
-              color: "#1E90FF", // DodgerBlue
-            },
-            totalCustomers: {
-              label: "Total Customers",
-              color: "#4682B4", // SteelBlue
-            },
-            inactiveCustomers: {
-              label: "Inactive Customers",
-              color: "#87CEFA", // LightSkyBlue
-            },
-          }}
-          className="mx-auto aspect-square w-full max-w-[80%]"
-        >
-          <RadialBarChart
-            margin={{
-              left: -10,
-              right: -10,
-              top: -10,
-              bottom: -10,
-            }}
-            data={data}
-            innerRadius="20%"
-            barSize={24}
-            startAngle={90}
-            endAngle={450}
-          >
-            <PolarAngleAxis
-              type="number"
-              domain={[0, 100]}
-              dataKey="value"
-              tick={false}
-            />
-            <RadialBar dataKey="value" background cornerRadius={5} />
-          </RadialBarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+            <p className="text-xs text-muted-foreground">
+              in the last 1 minute
+            </p>
+          </CardContent>
+        </Card>
+       
+    </div>
   );
 }
 

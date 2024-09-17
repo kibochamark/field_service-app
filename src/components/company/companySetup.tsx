@@ -1,6 +1,6 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import { useFormik } from "formik";
+import { Formik, useFormik } from "formik";
 import { BuildingIcon, Loader, LogOut, MoveLeftIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -17,13 +17,19 @@ import { company } from "./companyserveraction";
 import toast from "react-hot-toast";
 
 
-const CompanySetup = () => {
+const CompanySetup = ({ size }: { size: any }) => {
     const router = useRouter()
 
     // get client session
     const { data: session, status, update } = useSession()
 
 
+    console.log(size)
+
+
+    const sizeoptions = Object.keys(size)?.map((key: string, idx: number) => {
+        return <option key={idx} value={size[key] as string}>{key}</option>
+    })
 
     const CompanySchema: any = Yup.object().shape({});
 
@@ -35,9 +41,9 @@ const CompanySetup = () => {
             email: "",
             poBox: "",
             addressline1: "",
-            address: {
+            address:"",
+            stateinfo: {
                 city: "",
-                street: "",
                 zip: "",
                 state: ""
             },
@@ -60,7 +66,7 @@ const CompanySetup = () => {
                     position: "top-center",
                 });
             } else {
-                update({ hascompany: true, company:data?.data?.id })
+                update({ hascompany: true, company: data?.data?.id })
 
                 toast.success("Company Details Added Successfully", {
                     position: "top-center",
@@ -115,6 +121,9 @@ const CompanySetup = () => {
                                     Company Name
                                 </label>
                             </div>
+                            {companyFormik.touched.name && companyFormik.errors.name && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.name}</p>
+                            )}
                             <input
                                 type="text"
                                 id=""
@@ -134,6 +143,7 @@ const CompanySetup = () => {
                                     Company Website (optional)
                                 </label>
                             </div>
+                            
                             <input
                                 type="text"
                                 id=""
@@ -148,9 +158,12 @@ const CompanySetup = () => {
                                 htmlFor=""
                                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                                Email Address
+                                Company Email Address
                             </label>
                         </div>
+                        {companyFormik.touched.email && companyFormik.errors.email && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.email}</p>
+                            )}
                         <input
                             type="email"
                             id=""
@@ -171,6 +184,9 @@ const CompanySetup = () => {
                                     Industry
                                 </label>
                             </div>
+                            {companyFormik.touched.description && companyFormik.errors.description && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.description}</p>
+                            )}
                             <input
                                 type="text"
                                 id=""
@@ -190,15 +206,18 @@ const CompanySetup = () => {
                                     Company Size
                                 </label>
                             </div>
-                            <input
-                                type="text"
-                                id=""
-                                name="companySize"
-                                value={companyFormik.values.companySize}
-                                onBlur={companyFormik.handleBlur}
-                                onChange={companyFormik.handleChange}
-                                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
-                            />
+                            {companyFormik.touched.companySize && companyFormik.errors.companySize && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.companySize}</p>
+                            )}
+                            <select
+                            name="companySize"
+                            value={companyFormik.values.companySize}
+                            onBlur={companyFormik.handleBlur}
+                            onChange={companyFormik.handleChange}
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary">
+                                <option>Choose company size</option>
+                                {sizeoptions}
+                            </select>
                         </div>
                     </div>
                     <div className="mb-2 md:mb-0">
@@ -207,9 +226,56 @@ const CompanySetup = () => {
                                 htmlFor=""
                                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                                Address
+                                Country
                             </label>
                         </div>
+                        {companyFormik.touched?.stateinfo?.state && companyFormik.errors.stateinfo?.state && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.stateinfo?.state}</p>
+                            )}
+                        <input
+                            type="text"
+                            id=""
+                            name="stateinfo.state"
+                            value={companyFormik.values.stateinfo.state}
+                            onBlur={companyFormik.handleBlur}
+                            onChange={companyFormik.handleChange}
+                            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
+                        />
+                    </div>
+                    <div className="mb-2 md:mb-0">
+                        <div className="flex md:flex-row gap-2 content-center">
+                            <label
+                                htmlFor=""
+                                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                               Address
+                            </label>
+                        </div>
+                        {companyFormik.touched.address && companyFormik.errors.address && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.address}</p>
+                            )}
+                        <input
+                            type="text"
+                            id=""
+                            name="address"
+                            value={companyFormik.values.address}
+                            onBlur={companyFormik.handleBlur}
+                            onChange={companyFormik.handleChange}
+                            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
+                        />
+                    </div>
+                    <div className="mb-2 md:mb-0">
+                        <div className="flex md:flex-row gap-2 content-center">
+                            <label
+                                htmlFor=""
+                                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                                Company telephone
+                            </label>
+                        </div>
+                        {companyFormik.touched.addressline1 && companyFormik.errors.addressline1 && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.addressline1}</p>
+                            )}
                         <input
                             type="text"
                             id=""
@@ -230,6 +296,9 @@ const CompanySetup = () => {
                                     P.O BOX
                                 </label>
                             </div>
+                            {companyFormik.touched.poBox && companyFormik.errors.poBox && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.poBox}</p>
+                            )}
                             <input
                                 type="text"
                                 id=""
@@ -249,77 +318,44 @@ const CompanySetup = () => {
                                     City
                                 </label>
                             </div>
+                            {companyFormik.touched?.stateinfo?.city && companyFormik.errors.stateinfo?.city && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.stateinfo?.city}</p>
+                            )}
                             <input
                                 type="text"
                                 id=""
-                                name="address.city"
-                                value={companyFormik.values.address.city}
+                                name="stateinfo.city"
+                                value={companyFormik.values.stateinfo.city}
                                 onBlur={companyFormik.handleBlur}
                                 onChange={companyFormik.handleChange}
                                 className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                             />
                         </div>
                     </div>
+
                     <div className="mb-2 md:mb-0">
                         <div className="flex md:flex-row gap-2 content-center">
                             <label
                                 htmlFor=""
                                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                                Country
+                            Zip code
                             </label>
                         </div>
+                        {companyFormik.touched?.stateinfo?.zip && companyFormik.errors.stateinfo?.zip && (
+                                <p className="text-sm text-red-600">{companyFormik.errors.stateinfo?.zip}</p>
+                            )}
                         <input
                             type="text"
                             id=""
-                            name="address.state"
-                            value={companyFormik.values.address.state}
+                            name="stateinfo.zip"
+                            value={companyFormik.values?.stateinfo?.zip}
                             onBlur={companyFormik.handleBlur}
                             onChange={companyFormik.handleChange}
                             className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                         />
                     </div>
-                    <div className="md:grid md:grid-cols-2 gap-6">
-                        <div className="mb-2 md:mb-0">
-                            <div className="flex md:flex-row gap-2 content-center">
-                                <label
-                                    htmlFor=""
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                >
-                                    Street
-                                </label>
-                            </div>
-                            <input
-                                type="text"
-                                id=""
-                                name="address.street"
-                                value={companyFormik.values.address.street}
-                                onBlur={companyFormik.handleBlur}
-                                onChange={companyFormik.handleChange}
-                                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
-                            />
-                        </div>
-
-                        <div className="mb-2 md:mb-0">
-                            <div className="flex md:flex-row gap-2 content-center">
-                                <label
-                                    htmlFor=""
-                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                >
-                                    Zip Code
-                                </label>
-                            </div>
-                            <input
-                                type="text"
-                                id=""
-                                name="address.zip"
-                                value={companyFormik.values.address.zip}
-                                onBlur={companyFormik.handleBlur}
-                                onChange={companyFormik.handleChange}
-                                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
-                            />
-                        </div>
-                    </div>
+                   
                     <div>
                         <button
                             type="submit"

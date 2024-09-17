@@ -14,12 +14,12 @@ import { Input } from "@/shadcn/ui/input"
 import { Label } from "@/shadcn/ui/label"
 import { DownloadIcon, Loader, UploadIcon } from "lucide-react"
 import { useMutation } from "@tanstack/react-query"
-import { BulkEmployeeCreation } from "./EmployeeActions"
 import toast from "react-hot-toast"
 import { Revalidate } from "@/utils/Revalidate"
 import { useSession } from "next-auth/react"
+import { BulkCustomerCreation } from "./CustomerActions"
 
-export default function BulkImportButton() {
+export default function BulkCustomerImport() {
   const [file, setFile] = useState<File | null>(null)
 
 
@@ -38,10 +38,10 @@ export default function BulkImportButton() {
 
   const handleDownloadTemplate = () => {
     // Directly referencing the template stored in the public folder
-    const url = "/employeetemplate2.xlsx" // Path to the CSV template in the public folder
+    const url = "/customertemplate.xlsx" // Path to the CSV template in the public folder
     const a = document.createElement("a")
     a.href = url
-    a.download = "employee_template.xlsx"
+    a.download = "customers_template.xlsx"
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -50,7 +50,7 @@ export default function BulkImportButton() {
   const handleUpload = () => {
     if (file) {
       const uploadeddata = new FormData(); // No need to specify FormData type explicitly
-      uploadeddata.append("companyid", session?.user?.companyId ?? "");
+      uploadeddata.append("companyId", session?.user?.companyId ?? "");
       uploadeddata.append("file", file);
 
       // Pass the FormData directly to mutate
@@ -65,27 +65,26 @@ export default function BulkImportButton() {
   // upload mutation
   const uploadmutation = useMutation({
     mutationFn: async (values: FormData) => {
-      console.log("reacged")
-      return await BulkEmployeeCreation(values)
+      return await BulkCustomerCreation(values)
     },
     onSuccess(data, variables, context) {
-      if(data && data[0] === 200){
-        toast.success("Employees created successful")
-        Revalidate("getemployees")
-      }else{
-        toast.error((data && data[1]) ?? "")
-      }
-      
+        if(data && data[0] === 200){
+            toast.success("customers created successful")
+            Revalidate("getcustomers")
+            Revalidate("getcustomersinfo")
+          }else{
+            toast.error((data && data[1]) ?? "")
+          }
     },
     onError(error, variables, context) {
-      toast.error("error in creating employees")
+      toast.error("error in creating customers")
     }
   })
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Bulk Import</Button>
+        <Button variant="outline" className="mt-2 border border-primary800 text-primary600 hover:bg-primary400 hover:text-white transition-all duration-300">Bulk Import</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
