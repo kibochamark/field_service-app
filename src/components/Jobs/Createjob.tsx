@@ -92,7 +92,7 @@ export default function Component() {
           <DialogHeader>
             <DialogTitle>Create New Job</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto p-4">
+          <div className="max-h-[75vh] overflow-y-auto p-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
