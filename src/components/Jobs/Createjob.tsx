@@ -16,7 +16,7 @@ export default function Createjob() {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
-    firstName: '',
+    name: '',
     description: '',
     jobType: '',
     location: {
@@ -64,8 +64,8 @@ export default function Createjob() {
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} />
+              <Label htmlFor="firstName">Job Title</Label>
+              <Input id="firstName" name="name" value={formData.name} onChange={handleInputChange} />
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
