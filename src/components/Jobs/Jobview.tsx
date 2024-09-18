@@ -20,7 +20,6 @@ import {
   Truck,
   Users2,
 } from "lucide-react"
-
 import { Badge } from "@/shadcn/ui/badge"
 import {
   Breadcrumb,
@@ -207,9 +206,14 @@ export function Jobview() {
                     Management and Insightful Analysis.
                   </CardDescription>
                 </CardHeader>
-                <CardFooter>
-                  <Createjob/>
-                </CardFooter>
+               
+
+<CardFooter>
+  <Link href="/callpro/createjob">
+    <Button variant="outline">Create Job</Button>
+  </Link>
+</CardFooter>
+
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
                 <CardHeader className="pb-2">

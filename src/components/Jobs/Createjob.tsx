@@ -5,15 +5,15 @@ import { Button } from "@/shadcn/ui/button"
 import { Input } from "@/shadcn/ui/input"
 import { Textarea } from "@/shadcn/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
 import { Label } from "@/shadcn/ui/label"
 import { Calendar } from "@/shadcn/ui/calendar"
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/ui/popover'
+import { baseUrl } from '@/utils/constants'
+import { useSession } from 'next-auth/react'
 
 export default function Createjob() {
-  const [open, setOpen] = useState(false)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     name: '',
@@ -166,7 +166,7 @@ export default function Createjob() {
                 <PopoverContent align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.jobSchedule.startDate || undefined} // Ensure type compatibility
+                    selected={formData.jobSchedule.startDate || undefined}
                     onSelect={(date) => handleScheduleChange('startDate', date)}
                     className="rounded-md border"
                   />
@@ -185,7 +185,7 @@ export default function Createjob() {
                 <PopoverContent align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.jobSchedule.endDate || undefined} // Ensure type compatibility
+                    selected={formData.jobSchedule.endDate || undefined}
                     onSelect={(date) => handleScheduleChange('endDate', date)}
                     className="rounded-md border"
                   />
@@ -210,34 +210,58 @@ export default function Createjob() {
     }
   }
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData)
-    setOpen(false)
-    setStep(1)
-    // Typically, you'd send the data to your backend here.
-  }
+  const { data: session } = useSession();
+  const handleSubmit = async () => {
+    try {
+      const dataToSend = {
+        name: formData.name,
+        description: formData.description,
+        jobType: formData.jobType,
+        location: {
+          city: formData.location.city,
+          state: formData.location.state,
+          zip: formData.location.zip,
+          otherInfo: formData.location.otherInfo,
+        },
+        client: formData.client,
+        dispatcher: formData.dispatcher,
+        technician: formData.technician,
+        jobSchedule: {
+          startDate: formData.jobSchedule.startDate,
+          endDate: formData.jobSchedule.endDate,
+          recurrence: formData.jobSchedule.recurrence,
+        },
+      };
+
+      const response = await fetch(baseUrl + "job", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.user?.access_token}`, // Make sure session is available
+        },
+        body: JSON.stringify(dataToSend),
+      });
+  
+
+      if (!response.ok) {
+        throw new Error("Failed to create job");
+      }
+
+      const result = await response.json();
+      console.log("Job created:", result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Job</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create New Job - Step {step} of 4</DialogTitle>
-        </DialogHeader>
-        <div className="py-4">
-          {renderStep()}
-        </div>
-        <div className="flex justify-between">
-          {step > 1 && <Button onClick={prevStep}>Previous</Button>}
-          {step < 4 ? (
-            <Button onClick={nextStep}>Next</Button>
-          ) : (
-            <Button onClick={handleSubmit}>Submit</Button>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <div className="container mx-auto py-8">
+      <h1 className="text-2xl font-bold mb-4">Create Job</h1>
+      <div>{renderStep()}</div>
+      <div className="flex justify-between mt-4">
+        {step > 1 && <Button onClick={prevStep}>Back</Button>}
+        {step < 4 ? <Button onClick={nextStep}>Next</Button> : <Button onClick={handleSubmit}>Submit</Button>}
+      </div>
+    </div>
   )
 }
