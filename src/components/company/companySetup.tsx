@@ -15,16 +15,59 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { company } from "./companyserveraction";
 import toast from "react-hot-toast";
+import Select from "react-select";
+import { countries } from "countries-list"; // Can use a list with country codes and flags
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
+
+
+const countryOptions = Object.entries(countries).map(([code, country]: any) => ({
+    label: (
+        <div className="flex items-center">
+            <img src={`https://flagcdn.com/16x12/${code.toLowerCase()}.png`} alt={country.name} className="mr-2" />
+            {country.name}
+        </div>
+    ),
+    value: code,
+    countryCode: country.phone,
+}));
+
+const industryOptions = [
+    { value: 'hvac', label: 'HVAC (Heating, Ventilation, and Air Conditioning)' },
+    { value: 'plumbing', label: 'Plumbing' },
+    { value: 'electrical', label: 'Electrical Services' },
+    { value: 'landscaping', label: 'Landscaping' },
+    { value: 'pest-control', label: 'Pest Control' },
+    { value: 'cleaning', label: 'Cleaning Services' },
+    { value: 'appliance-repair', label: 'Appliance Repair' },
+    { value: 'it-networking', label: 'IT and Networking' },
+    { value: 'telecommunications', label: 'Telecommunications' },
+    { value: 'security-systems', label: 'Security Systems' },
+    { value: 'automotive-repair', label: 'Automotive Repair' },
+    { value: 'construction', label: 'Construction' },
+    { value: 'facilities-management', label: 'Facilities Management' },
+    { value: 'solar-energy', label: 'Solar Energy Services' },
+    { value: 'roofing', label: 'Roofing' },
+    { value: 'locksmith', label: 'Locksmith Services' },
+    { value: 'painting', label: 'Painting Services' },
+    { value: 'pool-maintenance', label: 'Pool Maintenance' },
+    { value: 'property-management', label: 'Property Management' },
+    { value: 'general-contracting', label: 'General Contracting' },
+];
+
 
 
 const CompanySetup = ({ size }: { size: any }) => {
     const router = useRouter()
 
+    const [selectedCountry, setSelectedCountry] = useState<any>(null);
+
+
+
     // get client session
     const { data: session, status, update } = useSession()
 
 
-    console.log(size)
 
 
     const sizeoptions = Object.keys(size)?.map((key: string, idx: number) => {
@@ -41,7 +84,7 @@ const CompanySetup = ({ size }: { size: any }) => {
             email: "",
             poBox: "",
             addressline1: "",
-            address:"",
+            address: "",
             stateinfo: {
                 city: "",
                 zip: "",
@@ -55,6 +98,33 @@ const CompanySetup = ({ size }: { size: any }) => {
     });
 
 
+
+    const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const phoneNumber = e.target.value;
+        if (selectedCountry) {
+            // Validate phone number with country code
+            const parsedNumber = parsePhoneNumberFromString(phoneNumber, selectedCountry.value);
+            if (parsedNumber && parsedNumber.isValid()) {
+                companyFormik.setFieldValue("addressline1", `${selectedCountry.countryCode}${phoneNumber}`);
+            } else {
+                companyFormik.setFieldError("addressline1", "Invalid phone number");
+            }
+        }
+
+
+    };
+
+    // Function to extract and clean up the error message
+    const getReadableErrorMessage = (error:any) => {
+        // Extract the error message, which may vary in format
+        const rawMessage = error?.error[0] || "An unexpected error occurred";
+
+        // Clean up the error message (e.g., remove quotes, structure it better)
+        const readableMessage = rawMessage.replace(/\"/g, '').replace(/\./g, ' ');
+
+        return readableMessage;
+    };
+
     const companyMutation = useMutation({
         mutationFn: async (values: any) => {
             return await company(values);
@@ -62,13 +132,16 @@ const CompanySetup = ({ size }: { size: any }) => {
         onSuccess(data) {
 
             if (data.status !== "success") {
-                toast.error("Something went wrong", {
+                toast.error(getReadableErrorMessage(data.message), {
                     position: "top-center",
                 });
             } else {
                 update({ hascompany: true, company: data?.data?.id })
 
-                toast.success("Company Details Added Successfully", {
+                toast.success("Company created  Successfully", {
+                    position: "top-center",
+                });
+                toast.success("you will be redirected shortly", {
                     position: "top-center",
                 });
                 companyFormik.resetForm();
@@ -143,7 +216,7 @@ const CompanySetup = ({ size }: { size: any }) => {
                                     Company Website (optional)
                                 </label>
                             </div>
-                            
+
                             <input
                                 type="text"
                                 id=""
@@ -162,8 +235,8 @@ const CompanySetup = ({ size }: { size: any }) => {
                             </label>
                         </div>
                         {companyFormik.touched.email && companyFormik.errors.email && (
-                                <p className="text-sm text-red-600">{companyFormik.errors.email}</p>
-                            )}
+                            <p className="text-sm text-red-600">{companyFormik.errors.email}</p>
+                        )}
                         <input
                             type="email"
                             id=""
@@ -185,17 +258,19 @@ const CompanySetup = ({ size }: { size: any }) => {
                                 </label>
                             </div>
                             {companyFormik.touched.description && companyFormik.errors.description && (
-                                <p className="text-sm text-red-600">{companyFormik.errors.description}</p>
-                            )}
-                            <input
-                                type="text"
-                                id=""
-                                name="description"
-                                value={companyFormik.values.description}
-                                onBlur={companyFormik.handleBlur}
-                                onChange={companyFormik.handleChange}
-                                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
+                                <p className="text-sm text-red-600">{companyFormik.errors.description}</p>)}
+
+                            <Select
+                                options={industryOptions}
+                                onChange={(option) => companyFormik.setFieldValue("description", option?.value)}
+                                placeholder="Select industry"
+                                isSearchable
+                                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full"
+
                             />
+
+
+
                         </div>
                         <div className="mb-2 md:mb-0">
                             <div className="flex md:flex-row gap-2 content-center">
@@ -210,37 +285,68 @@ const CompanySetup = ({ size }: { size: any }) => {
                                 <p className="text-sm text-red-600">{companyFormik.errors.companySize}</p>
                             )}
                             <select
-                            name="companySize"
-                            value={companyFormik.values.companySize}
-                            onBlur={companyFormik.handleBlur}
-                            onChange={companyFormik.handleChange}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary">
+                                name="companySize"
+                                value={companyFormik.values.companySize}
+                                onBlur={companyFormik.handleBlur}
+                                onChange={companyFormik.handleChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary">
                                 <option>Choose company size</option>
                                 {sizeoptions}
                             </select>
                         </div>
                     </div>
                     <div className="mb-2 md:mb-0">
+                        {/* Phone Number */}
                         <div className="flex md:flex-row gap-2 content-center">
                             <label
                                 htmlFor=""
                                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                                Country
+                                Company Contact
                             </label>
                         </div>
-                        {companyFormik.touched?.stateinfo?.state && companyFormik.errors.stateinfo?.state && (
+                        <div className="flex gap-4 mb-4">
+                            <div className="w-1/3">
+                                <Select
+                                    className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full"
+                                    options={countryOptions}
+                                    onChange={(option) => setSelectedCountry(option)}
+                                    placeholder="Select country"
+                                />
+                            </div>
+                            <div className="w-2/3">
+                                <input
+                                    type="text"
+                                    placeholder="769347882"
+                                    onChange={handlePhoneNumberChange}
+                                    className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
+
+                                />
+                            </div>
+                        </div>
+                        {companyFormik.errors.addressline1 && <p className="text-red-400">{companyFormik.errors.addressline1}</p>}
+
+                        {/* Country */}
+                        <div>
+                            <div className="flex md:flex-row gap-2 content-center">
+                                <label
+                                    htmlFor=""
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                >
+                                    Country
+                                </label>
+                            </div>
+                            {companyFormik.touched.stateinfo?.state && companyFormik.errors.stateinfo?.state && (
                                 <p className="text-sm text-red-600">{companyFormik.errors.stateinfo?.state}</p>
                             )}
-                        <input
-                            type="text"
-                            id=""
-                            name="stateinfo.state"
-                            value={companyFormik.values.stateinfo.state}
-                            onBlur={companyFormik.handleBlur}
-                            onChange={companyFormik.handleChange}
-                            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
-                        />
+                            <Select
+                                options={countryOptions}
+                                onChange={(option) => companyFormik.setFieldValue("stateinfo.state", option?.label.toLocaleString())}
+                                placeholder="Select country"
+                                isSearchable
+                            />
+                        </div>
+
                     </div>
                     <div className="mb-2 md:mb-0">
                         <div className="flex md:flex-row gap-2 content-center">
@@ -248,12 +354,12 @@ const CompanySetup = ({ size }: { size: any }) => {
                                 htmlFor=""
                                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                               Address
+                                Address
                             </label>
                         </div>
                         {companyFormik.touched.address && companyFormik.errors.address && (
-                                <p className="text-sm text-red-600">{companyFormik.errors.address}</p>
-                            )}
+                            <p className="text-sm text-red-600">{companyFormik.errors.address}</p>
+                        )}
                         <input
                             type="text"
                             id=""
@@ -264,28 +370,7 @@ const CompanySetup = ({ size }: { size: any }) => {
                             className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                         />
                     </div>
-                    <div className="mb-2 md:mb-0">
-                        <div className="flex md:flex-row gap-2 content-center">
-                            <label
-                                htmlFor=""
-                                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                                Company telephone
-                            </label>
-                        </div>
-                        {companyFormik.touched.addressline1 && companyFormik.errors.addressline1 && (
-                                <p className="text-sm text-red-600">{companyFormik.errors.addressline1}</p>
-                            )}
-                        <input
-                            type="text"
-                            id=""
-                            name="addressline1"
-                            value={companyFormik.values.addressline1}
-                            onBlur={companyFormik.handleBlur}
-                            onChange={companyFormik.handleChange}
-                            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
-                        />
-                    </div>
+             
                     <div className="md:grid md:grid-cols-2 gap-6">
                         <div className="mb-2 md:mb-0">
                             <div className="flex md:flex-row gap-2 content-center">
@@ -339,12 +424,12 @@ const CompanySetup = ({ size }: { size: any }) => {
                                 htmlFor=""
                                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                             >
-                            Zip code
+                                Zip code
                             </label>
                         </div>
                         {companyFormik.touched?.stateinfo?.zip && companyFormik.errors.stateinfo?.zip && (
-                                <p className="text-sm text-red-600">{companyFormik.errors.stateinfo?.zip}</p>
-                            )}
+                            <p className="text-sm text-red-600">{companyFormik.errors.stateinfo?.zip}</p>
+                        )}
                         <input
                             type="text"
                             id=""
@@ -355,7 +440,7 @@ const CompanySetup = ({ size }: { size: any }) => {
                             className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                         />
                     </div>
-                   
+
                     <div>
                         <button
                             type="submit"
