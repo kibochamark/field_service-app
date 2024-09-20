@@ -54,8 +54,8 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
     description: '',
     type: '',
     client: '',
-    startDate: null,
-    endDate: null,
+    startDate: new Date(),  // Default value for start date
+    endDate: new Date(),
     recurrence: 'None',
     technician: '',
     status: 'Draft'
@@ -63,9 +63,13 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
 
   console.log(customers, "customer")
   console.log(jobtype, "jobss")
+  console.log(employee, "joniwakas")
 
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
+
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
 
 
   const [openClientSearch, setOpenClientSearch] = React.useState(false)
@@ -87,6 +91,20 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
     setSelectedClients((prev) => prev.filter((c) => c.id !== clientId))
   }
 
+  const [openTechnicianSearch, setOpenTechnicianSearch] = React.useState(false)
+  const [technicianSearch, setTechnicianSearch] = React.useState("")
+  const [selectedTechnicians, setSelectedTechnicians] = React.useState<{id: string, name: string}[]>([])
+
+const handleSelectTechnician = (technician: { id: string; name: string }) => {
+  setSelectedTechnicians((prev) => {
+    const isSelected = prev.some((t) => t.id === technician.id)
+    if (isSelected) {
+      return prev.filter((t) => t.id !== technician.id)
+    } else {
+      return [...prev, technician]
+    }
+  })
+}
 
   useEffect(() => {
     // Simulating fetching jobs from an API
@@ -138,16 +156,17 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
     setCurrentJob({ ...currentJob, [field]: value })
   }
 
-  const handleDateChange = (date: Date | null, field: 'startDate' | 'endDate') => {
-    setCurrentJob({ ...currentJob, [field]: date })
-  }
-
+  const handleDateChange = (date: Date, field: 'startDate' | 'endDate') => {
+    setCurrentJob({ ...currentJob, [field]: date });
+    if (field === 'startDate') setShowStartCalendar(false);
+    else setShowEndCalendar(false);
+  };
   const validateStep = () => {
     switch (step) {
       case 'create':
-        return currentJob.name && currentJob.description && currentJob.type && currentJob.client
+        return currentJob.name
       case 'schedule':
-        return currentJob.startDate && currentJob.endDate && currentJob.recurrence
+        return currentJob.recurrence
       case 'assign':
         return currentJob.technician
       default:
@@ -371,25 +390,52 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Start Date</Label>
-                {/* <Calendar
-                  mode="single"
-                  selected={currentJob.startDate}
-                  onSelect={(date) => handleDateChange(date, 'startDate')}
-                  className="rounded-md border"
-                /> */}
-              </div>
-              <div>
-                <Label>End Date</Label>
-                {/* <Calendar
-                  mode="single"
-                  selected={currentJob.endDate}
-                  onSelect={(date) => handleDateChange(date, 'endDate')}
-                  className="rounded-md border"
-                /> */}
-              </div>
-            </div>
+      {/* Start Date */}
+      <div>
+        <Label>Start Date</Label>
+        {/* <input
+          type="text"
+          value={currentJob.startDate.toLocaleDateString()}
+          readOnly
+          onClick={() => setShowStartCalendar(!showStartCalendar)}
+          className="rounded-md border cursor-pointer"
+          placeholder="Select start date"
+        />
+        {showStartCalendar && (
+          <div className="absolute z-10">
+            <Calendar
+              mode="single"
+              selected={currentJob.startDate}
+              onSelect={(date) => handleDateChange(date, 'startDate')}
+              className="rounded-md border mt-2"
+            />
+          </div>
+        )} */}
+      </div>
+
+      {/* End Date */}
+      <div>
+        <Label>End Date</Label>
+        <input
+          // type="text"
+          // value={currentJob.endDate.toLocaleDateString()}
+          // readOnly
+          // onClick={() => setShowEndCalendar(!showEndCalendar)}
+          // className="rounded-md border cursor-pointer"
+          // placeholder="Select end date"
+        />
+        {/* {showEndCalendar && (
+          <div className="absolute z-10">
+            <Calendar
+              mode="single"
+              selected={currentJob.endDate}
+              onSelect={(date) => handleDateChange(date, 'endDate')}
+              className="rounded-md border mt-2"
+            />
+          </div>
+        )} */}
+      </div>
+    </div>
             <div>
               <Label htmlFor="recurrence">Recurrence</Label>
               <Select value={currentJob.recurrence} onValueChange={(value) => handleSelectChange(value, 'recurrence')}>
@@ -408,20 +454,63 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
       case 'assign':
         return (
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="technician">Assign Technician</Label>
-              <Select value={currentJob.technician} onValueChange={(value) => handleSelectChange(value, 'technician')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select technician" />
-                </SelectTrigger>
-                <SelectContent>
-                  {technicians.map((tech) => (
-                    <SelectItem key={tech} value={tech}>{tech}</SelectItem>
+    <div>
+      <Label htmlFor="technicians">Assign Technician</Label>
+      <Popover open={openTechnicianSearch} onOpenChange={setOpenTechnicianSearch}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openTechnicianSearch}
+            className="w-full justify-between"
+          >
+            {selectedTechnicians.length > 0 ? `${selectedTechnicians.length} selected` : "Select technicians..."}
+            <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput placeholder="Search technicians..." onValueChange={setTechnicianSearch} />
+            <CommandList>
+              <CommandEmpty>No technician found.</CommandEmpty>
+              <CommandGroup>
+                {employee
+                  .filter((tech:{id: string; name: string}) =>
+                    tech.name.toLowerCase().includes(technicianSearch.toLowerCase())
+                  )
+                  .map((tech: { id: string; name: string }) => (
+                    <CommandItem
+                      key={tech.id}
+                      onSelect={() => handleSelectTechnician(tech)}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{tech.name}</span>
+                      {selectedTechnicians.some((t) => t.id === tech.id) && <Check className="h-4 w-4" />}
+                    </CommandItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {selectedTechnicians.map((tech) => (
+          <Badge key={tech.id} variant="secondary" className="flex items-center gap-1">
+            {tech.name}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => handleSelectTechnician(tech)}
+            >
+              <X className="h-3 w-3" />
+              <span className="sr-only">Remove {tech.name}</span>
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
+  </div>
         )
       case 'review':
         return (

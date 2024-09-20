@@ -16,13 +16,16 @@ async function page() {
     name: `${customer.firstName} ${customer.lastName}`,
   }));
 
-  console.log(customerData, "Customer data for Job Management");
+  const techdata = technician.map((technician: any) => ({
+    id: technician.id,
+    name: `${technician.firstName} ${technician.lastName}`,
+  }));
 
    
 
   return (
     <div>
-      <JobManagement customers={customerData} employee={technician} jobtype={jobTypes} />
+      <JobManagement customers={customerData} employee={techdata} jobtype={jobTypes} />
     </div>
   );
 }
