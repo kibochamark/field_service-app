@@ -13,7 +13,7 @@ import { Badge } from "@/shadcn/ui/badge"
 import { toast } from "@/shadcn/ui/use-toast"
 import { format } from 'date-fns'
 import { AlertCircle, CheckCircle2, Clock, MapPin, User, Calendar as CalendarIcon, ArrowLeft, ArrowRight, Save, Edit, X } from "lucide-react"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shadcn/ui/command"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/shadcn/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
 
@@ -34,23 +34,14 @@ interface Job {
   status: JobStatus
 }
 
+
+
 const jobTypes = ['Maintenance', 'Repair', 'Installation', 'Inspection']
 const recurrenceOptions = ['None', 'Daily', 'Weekly', 'Monthly']
 const technicians = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams']
-const clients = [
-  'Acme Corp',
-  'Globex Corporation',
-  'Soylent Corp',
-  'Initech',
-  'Umbrella Corporation',
-  'Hooli',
-  'Dunder Mifflin',
-  'Stark Industries',
-  'Wayne Enterprises',
-  'Cyberdyne Systems'
-]
 
-export default function JobManagement() {
+
+export default function JobManagement({ customers, employee, jobtype }: { customers: any; employee: any; jobtype: any }) {
   const [step, setStep] = useState<Step>('create')
   const [jobs, setJobs] = useState<Job[]>([])
   const [currentJob, setCurrentJob] = useState<Job>({
@@ -65,6 +56,10 @@ export default function JobManagement() {
     technician: '',
     status: 'Draft'
   })
+
+  console.log(customers, "customer")
+  console.log(jobtype, "jobss")
+
   const [clientSearch, setClientSearch] = useState('')
   const [openClientSearch, setOpenClientSearch] = useState(false)
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
@@ -182,7 +177,7 @@ export default function JobManagement() {
         description: "The job has been successfully updated.",
       })
     } else {
-        const newJob = { ...currentJob, id: Date.now().toString(), status: 'Assigned' as JobStatus }
+      const newJob = { ...currentJob, id: Date.now().toString(), status: 'Assigned' as JobStatus }
       setJobs([...jobs, newJob])
       toast({
         title: "Job Created",
@@ -219,9 +214,11 @@ export default function JobManagement() {
     setStep('create')
   }
 
-  const filteredClients = clients.filter((client) =>
-    client.toLowerCase().includes(clientSearch.toLowerCase())
+  const filteredClients = customers.filter((client: { id: string; name: string }) =>
+    client.name.toLowerCase().includes(clientSearch.toLowerCase())
   )
+
+  console.log(filteredClients, "filtered")
 
   const renderStep = () => {
     switch (step) {
@@ -243,8 +240,8 @@ export default function JobManagement() {
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {jobTypes.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  {jobtype.map((type:any) => (
+                    <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -267,23 +264,32 @@ export default function JobManagement() {
                   <Command>
                     <CommandInput placeholder="Search clients..." onValueChange={setClientSearch} />
                     <CommandEmpty>No client found.</CommandEmpty>
-                    <CommandGroup>
-                      {filteredClients.map((client) => (
-                        <CommandItem
-                          key={client}
-                          onSelect={() => {
-                            handleSelectChange(client, 'client')
-                            setOpenClientSearch(false)
-                          }}
-                        >
-                          {client}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
+                    <CommandList>
+                      <CommandGroup>                      
+
+                        {filteredClients.length > 0 ? (
+                          filteredClients?.map((client: { id: string; name: string }) => (
+                            <CommandItem
+                              key={client.id}
+                              onSelect={() => {
+                                handleSelectChange(client.name, 'client')
+                                setOpenClientSearch(false)
+                              }}
+                            >
+                              {client.name}
+                            </CommandItem>
+                          ))
+                        ) : (
+                          <CommandEmpty>No clients found.</CommandEmpty>
+                        )}
+
+                      </CommandGroup>
+                    </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
             </div>
+
           </div>
         )
       case 'schedule':
@@ -395,10 +401,9 @@ export default function JobManagement() {
       <div className="flex justify-between mb-8">
         {steps.map((s, index) => (
           <div key={s} className="flex flex-col items-center">
-            <div 
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                steps.indexOf(step) >= index ? 'bg-primary text-primary-foreground' : 'bg-muted'
-              }`}
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${steps.indexOf(step) >= index ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                }`}
             >
               {index + 1}
             </div>

@@ -45,22 +45,6 @@ export default function CreateJob() {
 
   const { data: session } = useSession();
 
-  const fetchJobTypes = async () => {
-    try {
-      const response = await fetch(baseUrl + "jobtype", {
-        method: "GET",
-        headers: {
-          'Authorization': `Bearer ${session?.user?.access_token}`
-        },
-      })
-      const data = await response.json()
-      setJobTypes(data.data)
-
-      console.log(data, "jobtype")
-    } catch (error) {
-      console.error("Failed to fetch job types:", error)
-    }
-  };
  
 
   // Fetch Customers on Component Load
@@ -99,7 +83,7 @@ export default function CreateJob() {
   // Call fetch functions on component mount
   useEffect(() => {
     if (session?.user) {
-      fetchJobTypes();
+     
       fetchCustomers();
       fetchEmployees();
     }
