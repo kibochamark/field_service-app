@@ -12,10 +12,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/ui/tabs"
 import { Badge } from "@/shadcn/ui/badge"
 import { toast } from "@/shadcn/ui/use-toast"
 import { format } from 'date-fns'
-import { AlertCircle, CheckCircle2, Clock, MapPin, User, Calendar as CalendarIcon, ArrowLeft, ArrowRight, Save, Edit, X } from "lucide-react"
+import { AlertCircle, CheckCircle2, Clock, MapPin, User, Calendar as CalendarIcon, ArrowLeft, ArrowRight, Save, Edit, X, Check } from "lucide-react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/shadcn/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
+import React from 'react'
 
 type Step = 'create' | 'schedule' | 'assign' | 'review'
 type JobStatus = 'Draft' | 'Not Assigned' | 'Assigned' | 'In Progress' | 'Completed'
@@ -33,7 +34,10 @@ interface Job {
   technician: string
   status: JobStatus
 }
-
+interface Client {
+  id: string
+  name: string
+}
 
 
 const jobTypes = ['Maintenance', 'Repair', 'Installation', 'Inspection']
@@ -60,9 +64,29 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
   console.log(customers, "customer")
   console.log(jobtype, "jobss")
 
-  const [clientSearch, setClientSearch] = useState('')
-  const [openClientSearch, setOpenClientSearch] = useState(false)
+
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
+
+
+  const [openClientSearch, setOpenClientSearch] = React.useState(false)
+  const [clientSearch, setClientSearch] = React.useState("")
+  const [selectedClients, setSelectedClients] = React.useState<Client[]>([])
+
+  const handleSelectClient = (client: { id: string; name: string }) => {
+    setSelectedClients((prev) => {
+      const isSelected = prev.some((c) => c.id === client.id)
+      if (isSelected) {
+        return prev.filter((c) => c.id !== client.id)
+      } else {
+        return [...prev, client]
+      }
+    })
+  }
+
+  const removeClient = (clientId: string) => {
+    setSelectedClients((prev) => prev.filter((c) => c.id !== clientId))
+  }
+
 
   useEffect(() => {
     // Simulating fetching jobs from an API
@@ -246,7 +270,7 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            {/* <div>
               <Label htmlFor="client">Client</Label>
               <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
                 <PopoverTrigger asChild>
@@ -288,8 +312,59 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
                   </Command>
                 </PopoverContent>
               </Popover>
-            </div>
-
+            </div> */}
+<div>
+      <Label htmlFor="clients">Clients</Label>
+      <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openClientSearch}
+            className="w-full justify-between"
+          >
+            {selectedClients.length > 0 ? `${selectedClients.length} selected` : "Select clients..."}
+            <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput placeholder="Search clients..." onValueChange={setClientSearch} />
+            <CommandList>
+              <CommandEmpty>No client found.</CommandEmpty>
+              <CommandGroup>
+                {filteredClients.map((client: { id: string; name: string }) => (
+                  <CommandItem
+                    key={client.id}
+                    onSelect={() => handleSelectClient(client)}
+                    className="flex items-center justify-between"
+                  >
+                    <span>{client.name}</span>
+                    {selectedClients.some((c) => c.id === client.id) && <Check className="h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {selectedClients.map((client) => (
+          <Badge key={client.id} variant="secondary" className="flex items-center gap-1">
+            {client.name}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => removeClient(client.id)}
+            >
+              <X className="h-3 w-3" />
+              <span className="sr-only">Remove {client.name}</span>
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
           </div>
         )
       case 'schedule':
