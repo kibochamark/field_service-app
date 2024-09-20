@@ -39,10 +39,8 @@ interface Client {
   name: string
 }
 
-
-const jobTypes = ['Maintenance', 'Repair', 'Installation', 'Inspection']
 const recurrenceOptions = ['None', 'Daily', 'Weekly', 'Monthly']
-const technicians = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams']
+
 
 
 export default function JobManagement({ customers, employee, jobtype }: { customers: any; employee: any; jobtype: any }) {
@@ -291,49 +289,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                 </SelectContent>
               </Select>
             </div>
-            {/* <div>
-              <Label htmlFor="client">Client</Label>
-              <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openClientSearch}
-                    className="w-full justify-between"
-                  >
-                    {currentJob.client || "Select client..."}
-                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search clients..." onValueChange={setClientSearch} />
-                    <CommandEmpty>No client found.</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup>                      
-
-                        {filteredClients.length > 0 ? (
-                          filteredClients?.map((client: { id: string; name: string }) => (
-                            <CommandItem
-                              key={client.id}
-                              onSelect={() => {
-                                handleSelectChange(client.name, 'client')
-                                setOpenClientSearch(false)
-                              }}
-                            >
-                              {client.name}
-                            </CommandItem>
-                          ))
-                        ) : (
-                          <CommandEmpty>No clients found.</CommandEmpty>
-                        )}
-
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div> */}
+            
 <div>
       <Label htmlFor="clients">Clients</Label>
       <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
@@ -390,54 +346,28 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
         )
       case 'schedule':
         return (
+         
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-      {/* Start Date */}
-      <div>
-        <Label>Start Date</Label>
-        {/* <input
-          type="text"
-          value={currentJob.startDate.toLocaleDateString()}
-          readOnly
-          onClick={() => setShowStartCalendar(!showStartCalendar)}
-          className="rounded-md border cursor-pointer"
-          placeholder="Select start date"
-        />
-        {showStartCalendar && (
-          <div className="absolute z-10">
-            <Calendar
-              mode="single"
-              selected={currentJob.startDate}
-              onSelect={(date) => handleDateChange(date, 'startDate')}
-              className="rounded-md border mt-2"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Start Date</Label>
+              {/* <Calendar
+                mode="single"
+                selected={currentJob.startDate}
+                onSelect={(date) => handleDateChange(date, 'startDate')}
+                className="rounded-md border"
+              /> */}
+            </div>
+            <div>
+              <Label>End Date</Label>
+              {/* <Calendar
+                mode="single"
+                selected={currentJob.endDate}
+                onSelect={(date) => handleDateChange(date, 'endDate')}
+                className="rounded-md border"
+              /> */}
+            </div>
           </div>
-        )} */}
-      </div>
-
-      {/* End Date */}
-      <div>
-        <Label>End Date</Label>
-        <input
-          // type="text"
-          // value={currentJob.endDate.toLocaleDateString()}
-          // readOnly
-          // onClick={() => setShowEndCalendar(!showEndCalendar)}
-          // className="rounded-md border cursor-pointer"
-          // placeholder="Select end date"
-        />
-        {/* {showEndCalendar && (
-          <div className="absolute z-10">
-            <Calendar
-              mode="single"
-              selected={currentJob.endDate}
-              onSelect={(date) => handleDateChange(date, 'endDate')}
-              className="rounded-md border mt-2"
-            />
-          </div>
-        )} */}
-      </div>
-    </div>
             <div>
               <Label htmlFor="recurrence">Recurrence</Label>
               <Select value={currentJob.recurrence} onValueChange={(value) => handleSelectChange(value, 'recurrence')}>
