@@ -65,11 +65,9 @@ export default {
 
 
         if (res.status === 200) {
-          return user = res.data;
-        } else {
-          return user;
-
+          user = res.data;
         }
+        return user;
       },
     }),
     GoogleProvider({
@@ -133,6 +131,7 @@ export default {
             
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
+            return null
           }
         }
       }
@@ -157,5 +156,6 @@ export default {
   secret: process.env.AUTH_SECRET!,
   pages: {
     // signIn: "/login",
+    error: '/auth/error',
   },
 } satisfies NextAuthConfig;
