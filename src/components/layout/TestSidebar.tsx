@@ -9,6 +9,7 @@ import {
   Menu,
   Mic2,
   Music,
+  NotebookPen,
   Play,
   RadioIcon,
   SquareStack,
@@ -65,10 +66,11 @@ const TestSidebar = () => {
       href: "/callpro/jobs",
     },
     {
-        label: "JobScheduler",
-        name: "JobScheduler",
-        icon: <Clipboard size={24} className=""  />,
-        href: "/callpro/jobschedule",
+        label: "invoice",
+        name: "Invoices",
+        icon: <NotebookPen className=""  />,
+
+        href: "/callpro/invoice",
     },
 
     // {
