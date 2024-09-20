@@ -1,6 +1,6 @@
-"use client"
-import Image from "next/image"
-import Link from "next/link"
+"use client";
+import Image from "next/image";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,8 +28,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/shadcn/ui/breadcrumb"
-import { Button } from "@/shadcn/ui/button"
+} from "@/shadcn/ui/breadcrumb";
+import { Button } from "@/shadcn/ui/button";
 import {
   Card,
   CardContent,
@@ -37,7 +37,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/shadcn/ui/card"
+} from "@/shadcn/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -46,16 +46,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shadcn/ui/dropdown-menu"
-import { Input } from "@/shadcn/ui/input"
+} from "@/shadcn/ui/dropdown-menu";
+import { Input } from "@/shadcn/ui/input";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/shadcn/ui/pagination"
-import { Progress } from "@/shadcn/ui/progress"
-import { Separator } from "@/shadcn/ui/separator"
-import { Sheet, SheetContent, SheetTrigger } from "@/shadcn/ui/sheet"
+} from "@/shadcn/ui/pagination";
+import { Progress } from "@/shadcn/ui/progress";
+import { Separator } from "@/shadcn/ui/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@/shadcn/ui/sheet";
 import {
   Table,
   TableBody,
@@ -63,27 +63,93 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/shadcn/ui/table"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shadcn/ui/tabs"
+} from "@/shadcn/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/shadcn/ui/tooltip"
-import Createjob from "./Createjob"
+} from "@/shadcn/ui/tooltip";
+import Createjob from "./Createjob";
+import jobScheduleColumn from "./jobScheduleColumn";
+import { DataTable } from "./DataTable";
 
 export const description =
-  "An orders dashboard with a sidebar navigation. The sidebar has icon navigation. The content area has a breadcrumb and search in the header. The main area has a list of recent orders with a filter and export button. The main area also has a detailed view of a single order with order details, shipping information, billing information, customer information, and payment information."
+  "An orders dashboard with a sidebar navigation. The sidebar has icon navigation. The content area has a breadcrumb and search in the header. The main area has a list of recent orders with a filter and export button. The main area also has a detailed view of a single order with order details, shipping information, billing information, customer information, and payment information.";
 
 export function Jobview() {
+  const dummyData = [
+    {
+      id: "1",
+      customer: "John Doe",
+      type: "Maintenance",
+      status: "Completed",
+      startDate: "2024-08-15",
+      endDate: "2024-08-17",
+      amount: 500,
+      scheduleJob: "Monthly",
+      when: "2024-09-01",
+    },
+    {
+      id: "2",
+      customer: "Jane Smith",
+      type: "Repair",
+      status: "Pending",
+      startDate: "2024-09-01",
+      endDate: "2024-09-02",
+      amount: 1500,
+      scheduleJob: "One-Time",
+      when: "2024-09-05",
+    },
+    {
+      id: "3",
+      customer: "ACME Corp",
+      type: "Installation",
+      status: "In Progress",
+      startDate: "2024-08-30",
+      endDate: "2024-09-03",
+      amount: 3000,
+      scheduleJob: "Quarterly",
+      when: "2024-10-01",
+    },
+    {
+      id: "4",
+      customer: "XYZ Inc",
+      type: "Upgrade",
+      status: "Pending",
+      startDate: "2024-09-10",
+      endDate: "2024-09-12",
+      amount: 2500,
+      scheduleJob: "Annual",
+      when: "2025-01-01",
+    },
+    {
+      id: "5",
+      customer: "John Watson",
+      type: "Support",
+      status: "Completed",
+      startDate: "2024-07-20",
+      endDate: "2024-07-20",
+      amount: 200,
+      scheduleJob: "One-Time",
+      when: "2024-07-22",
+    },
+    {
+      id: "6",
+      customer: "Mary Jane",
+      type: "Consultation",
+      status: "In Progress",
+      startDate: "2024-09-05",
+      endDate: "2024-09-06",
+      amount: 800,
+      scheduleJob: "Weekly",
+      when: "2024-09-07",
+    },
+  ];
+
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">      
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
@@ -196,9 +262,7 @@ export function Jobview() {
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
           <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-              <Card
-                className="sm:col-span-2" x-chunk="dashboard-05-chunk-0"
-              >
+              <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
                 <CardHeader className="pb-3">
                   <CardTitle>Your Jobs</CardTitle>
                   <CardDescription className="max-w-lg text-balance leading-relaxed">
@@ -291,13 +355,12 @@ export function Jobview() {
                 <Card x-chunk="dashboard-05-chunk-3">
                   <CardHeader className="px-7">
                     <CardTitle>Jobs</CardTitle>
-                    <CardDescription>
-                      Recent Jobs
-                    </CardDescription>
+                    <CardDescription>Recent Jobs</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="max-w-2xl w-full">
+                    <DataTable columns={jobScheduleColumn} data={dummyData} />
                     <Table>
-                      <TableHeader>
+                      {/* <TableHeader>
                         <TableRow>
                           <TableHead>Customer</TableHead>
                           <TableHead className="hidden sm:table-cell">
@@ -473,17 +536,16 @@ export function Jobview() {
                           </TableCell>
                           <TableCell className="text-right">$450.00</TableCell>
                         </TableRow>
-                      </TableBody>
+                      </TableBody> */}
                     </Table>
                   </CardContent>
                 </Card>
               </TabsContent>
+              <div className="w-1/2"></div>
             </Tabs>
           </div>
           <div>
-            <Card
-              className="overflow-hidden" x-chunk="dashboard-05-chunk-4"
-            >
+            <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
                   <CardTitle className="group flex items-center gap-2 text-lg">
@@ -638,5 +700,5 @@ export function Jobview() {
         </main>
       </div>
     </div>
-  )
+  );
 }

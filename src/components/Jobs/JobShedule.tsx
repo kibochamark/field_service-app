@@ -159,7 +159,7 @@ export default function JobSchedule() {
         </Dialog>
       </div>
 
-      <Table className='bg-white rounded-md'>
+      {/* <Table className='bg-white rounded-md'>
         <TableHeader>
           <TableRow>
             <TableHead>Schedule ID</TableHead>
@@ -218,7 +218,7 @@ export default function JobSchedule() {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </Table> */}
     </div>
   )
 }
