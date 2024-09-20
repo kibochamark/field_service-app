@@ -164,15 +164,17 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   const validateStep = () => {
     switch (step) {
       case 'create':
-        return currentJob.name
+        return currentJob.name && currentJob.description && currentJob.type && currentJob.client
       case 'schedule':
-        return currentJob.recurrence
+        return currentJob.startDate && currentJob.endDate && currentJob.recurrence
       case 'assign':
         return currentJob.technician
       default:
         return true
     }
   }
+
+  
 
   const handleNext = () => {
     if (!validateStep()) {
