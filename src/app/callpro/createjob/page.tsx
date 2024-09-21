@@ -8,7 +8,9 @@ async function page() {
   const customers = await getCustomers() ?? [];
   const technician = await getTechnicians() ?? [];
   const jobTypes = await getJobTypes() ?? [];
-  
+  console.log(jobTypes, "jobs")
+  console.log(technician, "tech")
+  console.log(customers, "cus")
 
   // Extracting names and ids from customers
   const customerData = customers.map((customer: any) => ({

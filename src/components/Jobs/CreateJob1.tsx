@@ -18,6 +18,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { baseUrl } from '@/utils/constants'
+import { useSession } from 'next-auth/react'
 
 type Step = 'create' | 'schedule' | 'assign' | 'review'
 type JobStatus = 'Draft' | 'Not Assigned' | 'Assigned' | 'In Progress' | 'Completed'
@@ -28,13 +30,14 @@ interface Job {
   name: string
   description: string
   type: string
-  client: string
+  client: string[] 
   startDate: Date | null
   endDate: Date | null
   recurrence: string
-  technician: string
+  technician: string[] 
   status: JobStatus
 }
+
 interface Client {
   id: string
   name: string
@@ -50,13 +53,13 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
   const [currentJob, setCurrentJob] = useState<Job>({
     id: '',
     name: '',
-    description: '',
+    description: '',    
     type: '',
-    client: '',
+    client: [],
     startDate: new Date(),  
     endDate: new Date(),
     recurrence: 'None',
-    technician: '',
+    technician: [],
     status: 'Draft'
   })
 
@@ -82,7 +85,7 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
       }
     })
   }
-
+  const { data: session } = useSession();
   const removeClient = (clientId: string) => {
     setSelectedClients((prev) => prev.filter((c) => c.id !== clientId))
   }
@@ -102,47 +105,6 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   })
 }
 
-  useEffect(() => {
-    // Simulating fetching jobs from an API
-    const fetchedJobs: Job[] = [
-      {
-        id: '1',
-        name: 'Annual HVAC Maintenance',
-        description: 'Perform annual maintenance on HVAC system',
-        type: 'Maintenance',
-        client: 'Acme Corp',
-        startDate: new Date(2023, 5, 15),
-        endDate: new Date(2023, 5, 15),
-        recurrence: 'Yearly',
-        technician: 'John Doe',
-        status: 'Assigned'
-      },
-      {
-        id: '2',
-        name: 'Elevator Repair',
-        description: 'Fix malfunctioning elevator in Building B',
-        type: 'Repair',
-        client: 'Skyline Properties',
-        startDate: new Date(2023, 5, 20),
-        endDate: new Date(2023, 5, 21),
-        recurrence: 'None',
-        technician: 'Jane Smith',
-        status: 'In Progress'
-      }
-    ]
-    setJobs(fetchedJobs)
-
-    // Load draft from localStorage if it exists
-    const savedDraft = localStorage.getItem('jobDraft')
-    if (savedDraft) {
-      const parsedDraft = JSON.parse(savedDraft)
-      setCurrentJob({
-        ...parsedDraft,
-        startDate: parsedDraft.startDate ? new Date(parsedDraft.startDate) : null,
-        endDate: parsedDraft.endDate ? new Date(parsedDraft.endDate) : null,
-      })
-    }
-  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCurrentJob({ ...currentJob, [e.target.name]: e.target.value })
@@ -160,7 +122,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   const validateStep = () => {
     switch (step) {
       case 'create':
-        return currentJob.name 
+        return currentJob.name && currentJob.description && currentJob.type && currentJob.client      
       case 'schedule':
         return currentJob.startDate && currentJob.endDate && currentJob.recurrence
       case 'assign':
@@ -209,37 +171,80 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (editingJobId) {
-      setJobs(jobs.map(job => job.id === editingJobId ? currentJob : job))
-      setEditingJobId(null)
-      toast({
-        title: "Job Updated",
-        description: "The job has been successfully updated.",
-      })
-    } else {
-      const newJob = { ...currentJob, id: Date.now().toString(), status: 'Assigned' as JobStatus }
-      setJobs([...jobs, newJob])
-      toast({
-        title: "Job Created",
-        description: "The new job has been successfully created and assigned.",
-      })
+ const handleSubmit = async () => {
+  if (!validateStep()) return;
+
+  const updatedJob = {
+    ...currentJob,
+    client: selectedClients.map((client) => client.id), // Extract client IDs
+    technician: selectedTechnicians.map((tech) => tech.id), // Extract technician IDs
+    jobTypeId: currentJob.type, 
+  };
+
+  console.log(updatedJob, "updated job");
+
+  try {
+    const method = editingJobId ? 'PUT' : 'POST'; // Change method based on if editing
+    const endpoint = baseUrl + 'job'; // Base URL for job API
+
+    // Log before making the request
+    console.log("Sending request to:", endpoint);
+    
+    const response = await fetch(endpoint, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.user.access_token}`, // Use the access token
+      },
+      body: JSON.stringify(updatedJob),
+    });
+
+    // Log the response status and headers
+    console.log("Response status:", response.status);
+    console.log("Response headers:", response.headers);
+    
+    // Check if response is OK
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.log("Error response body:", errorResponse);
+      throw new Error('Failed to submit job data');
     }
+
+    const result = await response.json();
+    console.log("Response body:", result);
+
+    toast({
+      title: editingJobId ? "Job Updated" : "Job Created",
+      description: editingJobId ? "The job has been successfully updated." : "The new job has been successfully created and assigned.",
+    });
+
+    // Update state based on whether it's an edit or a new job
+    setJobs(editingJobId ? jobs.map(job => job.id === editingJobId ? result : job) : [...jobs, result]);
+    setEditingJobId(null);
     setCurrentJob({
       id: '',
       name: '',
       description: '',
-      type: '',
-      client: '',
+      type: '', // Reset job type after submission
+      client: [], // Clear client selections
       startDate: new Date(),
       endDate: new Date(),
       recurrence: 'None',
-      technician: '',
+      technician: [], // Clear technician selections
       status: 'Draft'
-    })
-    setStep('create')
-    localStorage.removeItem('jobDraft')
+    });
+    setStep('create');
+  } catch (error) {
+    console.error("Error submitting job:", error);
+    toast({
+      title: "Submission Error",
+      variant: "destructive"
+    });
   }
+};
+
+  
+  
 
   const handleSaveDraft = () => {
     localStorage.setItem('jobDraft', JSON.stringify(currentJob))
