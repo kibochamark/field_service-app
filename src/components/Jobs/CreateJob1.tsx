@@ -17,6 +17,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
 import React from 'react'
+import { cn } from '@/lib/utils'
 
 type Step = 'create' | 'schedule' | 'assign' | 'review'
 type JobStatus = 'Draft' | 'Not Assigned' | 'Assigned' | 'In Progress' | 'Completed'
@@ -52,16 +53,13 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
     description: '',
     type: '',
     client: '',
-    startDate: new Date(),  // Default value for start date
+    startDate: new Date(),  
     endDate: new Date(),
     recurrence: 'None',
     technician: '',
     status: 'Draft'
   })
 
-  console.log(customers, "customer")
-  console.log(jobtype, "jobss")
-  console.log(employee, "joniwakas")
 
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
@@ -154,7 +152,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
     setCurrentJob({ ...currentJob, [field]: value })
   }
 
-  const handleDateChange = (date: Date, field: 'startDate' | 'endDate') => {
+  const handleDateChange = (date: any, field: 'startDate' | 'endDate') => {
     setCurrentJob({ ...currentJob, [field]: date });
     if (field === 'startDate') setShowStartCalendar(false);
     else setShowEndCalendar(false);
@@ -162,7 +160,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   const validateStep = () => {
     switch (step) {
       case 'create':
-        return currentJob.name && currentJob.description && currentJob.type && currentJob.client
+        return currentJob.name 
       case 'schedule':
         return currentJob.startDate && currentJob.endDate && currentJob.recurrence
       case 'assign':
@@ -233,8 +231,8 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       description: '',
       type: '',
       client: '',
-      startDate: null,
-      endDate: null,
+      startDate: new Date(),
+      endDate: new Date(),
       recurrence: 'None',
       technician: '',
       status: 'Draft'
@@ -260,8 +258,6 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   const filteredClients = customers.filter((client: { id: string; name: string }) =>
     client.name.toLowerCase().includes(clientSearch.toLowerCase())
   )
-
-  console.log(filteredClients, "filtered")
 
   const renderStep = () => {
     switch (step) {
@@ -348,26 +344,61 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
         return (
          
           <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Start Date</Label>
-              {/* <Calendar
-                mode="single"
-                selected={currentJob.startDate}
-                onSelect={(date) => handleDateChange(date, 'startDate')}
-                className="rounded-md border"
-              /> */}
-            </div>
-            <div>
-              <Label>End Date</Label>
-              {/* <Calendar
-                mode="single"
-                selected={currentJob.endDate}
-                onSelect={(date) => handleDateChange(date, 'endDate')}
-                className="rounded-md border"
-              /> */}
-            </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+    {/* Start Date */}
+    <div>
+      <Label>Start Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-[280px] justify-start text-left font-normal",
+              !currentJob.startDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {currentJob.startDate ? format(currentJob.startDate, "PPP") : <span>Pick a start date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={currentJob.startDate as Date}
+            onSelect={(date) => handleDateChange(date, 'startDate')}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+
+    {/* End Date */}
+    <div>
+      <Label>End Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-[280px] justify-start text-left font-normal",
+              !currentJob.endDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {currentJob.endDate ? format(currentJob.endDate, "PPP") : <span>Pick an end date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={currentJob.endDate as Date}
+            onSelect={(date) => handleDateChange(date, 'endDate')}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  </div>
             <div>
               <Label htmlFor="recurrence">Recurrence</Label>
               <Select value={currentJob.recurrence} onValueChange={(value) => handleSelectChange(value, 'recurrence')}>
