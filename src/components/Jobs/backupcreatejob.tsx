@@ -142,19 +142,10 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   }
 
   const handleDateChange = (date: any, field: 'startDate' | 'endDate') => {
-    setCurrentJob({
-      ...currentJob,
-      jobSchedule: {
-        ...currentJob.jobSchedule,
-        [field]: date,
-      },
-    });
-  
-    // Optional: Hide the calendar after selecting a date
+    setCurrentJob({ ...currentJob, [field]: date });
     if (field === 'startDate') setShowStartCalendar(false);
     else setShowEndCalendar(false);
   };
-  
   const validateStep = () => {
     switch (step) {
       case 'create':
@@ -220,7 +211,6 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
        
       
     };
-    console.log(updatedJob, "updates")
    
 
     let dataToSend = {  
@@ -470,31 +460,19 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       </Popover>
     </div>
   </div>
-  <div>
-  <Label htmlFor="recurrence">Recurrence</Label>
-  <Select 
-    value={currentJob.jobSchedule?.recurrence} 
-    onValueChange={(value) => 
-      setCurrentJob({
-        ...currentJob,
-        jobSchedule: {
-          ...currentJob.jobSchedule,
-          recurrence: value, 
-        },
-      })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select recurrence" />
-    </SelectTrigger>
-    <SelectContent>
-      {recurrenceOptions.map((option) => (
-        <SelectItem key={option} value={option}>{option}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-
+            <div>
+              <Label htmlFor="recurrence">Recurrence</Label>
+              <Select value={currentJob.jobSchedule.recurrence} onValueChange={(value) => handleSelectChange(value, 'jobSchedule.recurrence' as any)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recurrence" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recurrenceOptions.map((option) => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )
       case 'assign':
