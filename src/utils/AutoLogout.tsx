@@ -71,15 +71,38 @@ export function AutoLogoutProvider({
 
     if (status === 'authenticated') {
       const sessionExpiry = new Date(session?.expires).getTime();
-      const localNow = new Date().getTime(); // Current time in the local timezone
-      // console.log("user authenticated", sessionExpiry, localNow);
-
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      
+      // Get the local time as a formatted string (e.g., "12:01:18")
+      const localTime = new Intl.DateTimeFormat('en-US', {
+        timeZone: userTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date());
+      
+      // Parse the localTime string to extract hours, minutes, and seconds
+      const [hours, minutes, seconds] = localTime.split(':').map(Number);
+    
+      // Create a new Date object and set hours, minutes, and seconds based on localTime
+      const now = new Date();
+      now.setHours(hours);
+      now.setMinutes(minutes);
+      now.setSeconds(seconds);
+      
+      // Convert the updated 'now' to a timestamp
+      const localNow = now.getTime();
+    
+ 
+    
       if (localNow > sessionExpiry) {
         console.log("session expired");
         signOut().then();
         return true;
       }
     }
+    
 
     if (lastActivity + timeoutMs < now) {
       console.log("session expired due to inactivity");
