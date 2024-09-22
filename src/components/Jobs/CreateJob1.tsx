@@ -35,7 +35,13 @@ interface Job {
   endDate: Date | null
   recurrence: string
   technician: string[] 
-  status: JobStatus
+  location: {
+    city: string;
+    state: string;
+    zip: string;
+    
+  };
+  
 }
 
 interface Client {
@@ -60,7 +66,13 @@ export default function JobManagement({ customers, employee, jobtype }: { custom
     endDate: new Date(),
     recurrence: 'None',
     technician: [],
-    status: 'Draft'
+    location: {
+      city: '',
+      state: '',
+      zip: '',
+     
+    },
+    
   })
 
 
@@ -108,6 +120,13 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCurrentJob({ ...currentJob, [e.target.name]: e.target.value })
+  }
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentJob({ 
+      ...currentJob, 
+      location: { ...currentJob.location, [e.target.name]: e.target.value } 
+    })
   }
 
   const handleSelectChange = (value: string, field: keyof Job) => {
@@ -170,78 +189,73 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
         break
     }
   }
-
- const handleSubmit = async () => {
-  if (!validateStep()) return;
-
-  const updatedJob = {
-    ...currentJob,
-    client: selectedClients.map((client) => client.id), // Extract client IDs
-    technician: selectedTechnicians.map((tech) => tech.id), // Extract technician IDs
-    jobTypeId: currentJob.type, 
-  };
-
-  console.log(updatedJob, "updated job");
-
-  try {
-    const method = editingJobId ? 'PUT' : 'POST'; // Change method based on if editing
-    const endpoint = baseUrl + 'job'; // Base URL for job API
-
-    // Log before making the request
-    console.log("Sending request to:", endpoint);
-    
-    const response = await fetch(endpoint, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session?.user.access_token}`, // Use the access token
-      },
-      body: JSON.stringify(updatedJob),
-    });
-
-    // Log the response status and headers
-    console.log("Response status:", response.status);
-    console.log("Response headers:", response.headers);
-    
-    // Check if response is OK
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      console.log("Error response body:", errorResponse);
-      throw new Error('Failed to submit job data');
+  const handleSubmit = async () => {
+    if (!validateStep()) return;
+  
+    const updatedJob = {
+      ...currentJob,
+      client: selectedClients.map((client) => client.id),
+      technician: selectedTechnicians.map((tech) => tech.id),
+      jobTypeId: currentJob.type, 
+    };
+  
+    console.log("Submitting Job:", updatedJob); // Log the job object before submitting
+  
+    try {
+      const method = editingJobId ? 'PUT' : 'POST';
+      const endpoint = baseUrl + 'job';
+  
+      console.log(`Sending request to ${endpoint} with method ${method}`); // Log endpoint and method
+  
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.user.access_token}`,
+        },
+        body: JSON.stringify(updatedJob),
+      });
+  
+      console.log("Response status:", response.status); // Log response status
+  
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.log("Error response:", errorResponse); // Log the error response
+        throw new Error('Failed to submit job data');
+      }
+  
+      const result = await response.json();
+      console.log("Successful result:", result); // Log the successful result
+  
+      toast({
+        title: editingJobId ? "Job Updated" : "Job Created",
+        description: editingJobId ? "The job has been successfully updated." : "The new job has been successfully created and assigned.",
+      });
+  
+      setJobs(editingJobId ? jobs.map(job => job.id === editingJobId ? result : job) : [...jobs, result]);
+      setEditingJobId(null);
+      setCurrentJob({
+        id: '',
+        name: '',
+        description: '',
+        type: '',
+        client: [],
+        startDate: new Date(),
+        endDate: new Date(),
+        recurrence: 'None',
+        technician: [],
+        location: { city: '', zip: '', state: '' },
+      });
+      setStep('create');
+    } catch (error) {
+      console.error("Error submitting job:", error); // Log the caught error
+      toast({
+        title: "Submission Error",
+        variant: "destructive",
+      });
     }
-
-    const result = await response.json();
-    console.log("Response body:", result);
-
-    toast({
-      title: editingJobId ? "Job Updated" : "Job Created",
-      description: editingJobId ? "The job has been successfully updated." : "The new job has been successfully created and assigned.",
-    });
-
-    // Update state based on whether it's an edit or a new job
-    setJobs(editingJobId ? jobs.map(job => job.id === editingJobId ? result : job) : [...jobs, result]);
-    setEditingJobId(null);
-    setCurrentJob({
-      id: '',
-      name: '',
-      description: '',
-      type: '', // Reset job type after submission
-      client: [], // Clear client selections
-      startDate: new Date(),
-      endDate: new Date(),
-      recurrence: 'None',
-      technician: [], // Clear technician selections
-      status: 'Draft'
-    });
-    setStep('create');
-  } catch (error) {
-    console.error("Error submitting job:", error);
-    toast({
-      title: "Submission Error",
-      variant: "destructive"
-    });
-  }
-};
+  };
+  
 
   
   
@@ -343,7 +357,25 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
         ))}
       </div>
     </div>
+    <div>
+              <Label htmlFor="city">City</Label>
+              <Input id="city" name="city" value={currentJob.location.city} onChange={handleLocationChange} required />
+            </div>
+            <div>
+              <Label htmlFor="zip">Zip Code</Label>
+              <Input id="zip" name="zip" value={currentJob.location.zip} onChange={handleLocationChange} required />
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input id="state" name="state" value={currentJob.location.state} onChange={handleLocationChange} required />
+            </div>
+            {/* <div>
+              <Label htmlFor="otherinfo">Other Info (optional)</Label>
+              <Input id="otherinfo" name="otherinfo" value={currentJob.location.otherInfo} onChange={handleLocationChange} />
+            </div> */}
           </div>
+         
+
         )
       case 'schedule':
         return (
@@ -551,10 +583,10 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       {jobs.map((job) => (
         <Card key={job.id}>
           <CardHeader>
-            <CardTitle className="flex justify-between items-center">
+            {/* <CardTitle className="flex justify-between items-center">
               <span>{job.name}</span>
               <Badge variant={job.status === 'Completed' ? 'default' : 'secondary'}>{job.status}</Badge>
-            </CardTitle>
+            </CardTitle> */}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
