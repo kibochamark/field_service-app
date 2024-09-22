@@ -4,6 +4,8 @@ import JobManagement from '@/components/Jobs/CreateJob1';
 import { getJobTypes, getTechnicians } from '@/components/Jobs/jobactions';
 import React from 'react';
 
+export const dynamic = "force-dynamic"
+
 async function page() {
   const customers = await getCustomers() ?? [];
   const technician = await getTechnicians() ?? [];
