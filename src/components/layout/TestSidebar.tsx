@@ -16,6 +16,7 @@ import {
   User,
   UserPen,
   Users,
+  Workflow,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -72,6 +73,13 @@ const TestSidebar = () => {
 
         href: "/callpro/invoice",
     },
+    {
+      label: "workflow",
+      name: "Workflow",
+      icon: <Workflow  className=""  />,
+
+      href: "/callpro/workflow",
+  },
 
     // {
     //     label: "Library",

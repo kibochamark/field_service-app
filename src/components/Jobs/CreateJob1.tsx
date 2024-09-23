@@ -67,21 +67,18 @@ type JobStatus =
   | "In Progress"
   | "Completed";
 
-
-
-
-interface Job { 
-  id:string 
-  name: string
-  description: string
-  type: string
-  clientId: string[]  
-  technicianId: string[]
-  jobSchedule:{
-    startDate: Date | null
-    endDate: Date | null
-    recurrence: string
-  } 
+interface Job {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  clientId: string[];
+  technicianId: string[];
+  jobSchedule: {
+    startDate: Date | null;
+    endDate: Date | null;
+    recurrence: string;
+  };
   location: {
     city: string;
     state: string;
@@ -94,33 +91,39 @@ interface Client {
   name: string;
 }
 
-const recurrenceOptions = ["DAILY", "WEEKLY", "MONTHLY"]
+const recurrenceOptions = ["DAILY", "WEEKLY", "MONTHLY"];
 
-
-
-export default function JobManagement({ customers, employee, jobtype, alljobs}: { customers: any; employee: any; jobtype: any; alljobs:any} ) {
-  const [step, setStep] = useState<Step>('create')
-  const [jobs, setJobs] = useState<Job[]>([])
+export default function JobManagement({
+  customers,
+  employee,
+  jobtype,
+  alljobs,
+}: {
+  customers: any;
+  employee: any;
+  jobtype: any;
+  alljobs: any;
+}) {
+  const [step, setStep] = useState<Step>("create");
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [currentJob, setCurrentJob] = useState<Job>({
-    id:'',
-    name: '',
-    description: '',    
-    type: '',
-    clientId: [],     
+    id: "",
+    name: "",
+    description: "",
+    type: "",
+    clientId: [],
     technicianId: [],
     location: {
       city: "",
       state: "",
       zip: "",
     },
-    jobSchedule:{
-      startDate: new Date(),  
+    jobSchedule: {
+      startDate: new Date(),
       endDate: new Date(),
-      recurrence: 'None',
-
-    }
-    
-  })
+      recurrence: "None",
+    },
+  });
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
@@ -143,7 +146,7 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
   };
   const { data: session } = useSession();
 
-  console.log(session, "session")
+  console.log(session, "session");
 
   const removeClient = (clientId: string) => {
     setSelectedClients((prev) => prev.filter((c) => c.id !== clientId));
@@ -183,7 +186,7 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
     setCurrentJob({ ...currentJob, [field]: value });
   };
 
-  const handleDateChange = (date: any, field: 'startDate' | 'endDate') => {
+  const handleDateChange = (date: any, field: "startDate" | "endDate") => {
     setCurrentJob({
       ...currentJob,
       jobSchedule: {
@@ -191,20 +194,29 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
         [field]: date,
       },
     });
-  
+
     // Optional: Hide the calendar after selecting a date
-    if (field === 'startDate') setShowStartCalendar(false);
+    if (field === "startDate") setShowStartCalendar(false);
     else setShowEndCalendar(false);
   };
-  
+
   const validateStep = () => {
     switch (step) {
-      case 'create':
-        return currentJob.name && currentJob.description && currentJob.type && currentJob.clientId      
-      case 'schedule':
-        return currentJob.jobSchedule.startDate && currentJob.jobSchedule.endDate && currentJob.jobSchedule.recurrence
-      case 'assign':
-        return currentJob.technicianId
+      case "create":
+        return (
+          currentJob.name &&
+          currentJob.description &&
+          currentJob.type &&
+          currentJob.clientId
+        );
+      case "schedule":
+        return (
+          currentJob.jobSchedule.startDate &&
+          currentJob.jobSchedule.endDate &&
+          currentJob.jobSchedule.recurrence
+        );
+      case "assign":
+        return currentJob.technicianId;
       default:
         return true;
     }
@@ -249,38 +261,31 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
   const handleSubmit = async () => {
     if (!validateStep()) return;
 
-  
     let updatedJob = {
       ...currentJob,
       clientId: selectedClients.map((client) => client.id),
       technicianId: selectedTechnicians.map((tech) => tech.id),
-      jobTypeId: currentJob.type, 
+      jobTypeId: currentJob.type,
       companyId: session?.user.companyId,
-      dispatcherId: session?.user.userId   
-       
-      
+      dispatcherId: session?.user.userId,
     };
-    console.log(updatedJob, "updates")
-   
+    console.log(updatedJob, "updates");
 
-    let dataToSend = {  
+    let dataToSend = {
       name: updatedJob.name,
       description: updatedJob.description,
       jobTypeId: updatedJob.jobTypeId,
-      location:updatedJob.location,
-      clientId: updatedJob.clientId, 
-      companyId:updatedJob.companyId,
-      dispatcherId:updatedJob.dispatcherId,
-      technicianId :updatedJob.technicianId}
+      location: updatedJob.location,
+      clientId: updatedJob.clientId,
+      companyId: updatedJob.companyId,
+      dispatcherId: updatedJob.dispatcherId,
+      technicianId: updatedJob.technicianId,
+    };
 
-      console.log(dataToSend, "send this data")
+    console.log(dataToSend, "send this data");
 
+    console.log("Submitting Job:", updatedJob);
 
-    
-  
-  
-    console.log("Submitting Job:", updatedJob); 
-  
     try {
       const method = editingJobId ? "PUT" : "POST";
       const endpoint = baseUrl + "job";
@@ -321,14 +326,18 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
       );
       setEditingJobId(null);
       setCurrentJob({
-        id: '',
-        name: '',
-        description: '',
-        type: '',
+        id: "",
+        name: "",
+        description: "",
+        type: "",
         clientId: [],
-        jobSchedule:{startDate: new Date(),endDate: new Date(),recurrence: 'None',},   
+        jobSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          recurrence: "None",
+        },
         technicianId: [],
-        location: { city: '', zip: '', state: '' },
+        location: { city: "", zip: "", state: "" },
       });
       setStep("create");
     } catch (error) {
@@ -338,7 +347,7 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
         variant: "destructive",
       });
     }
-  };  
+  };
 
   const handleSaveDraft = () => {
     localStorage.setItem("jobDraft", JSON.stringify(currentJob));
@@ -512,85 +521,96 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-    {/* Start Date */}
-    <div>
-      <Label>Start Date</Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-[280px] justify-start text-left font-normal",
-              !currentJob.jobSchedule.startDate && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {currentJob.jobSchedule.startDate ? format(currentJob.jobSchedule.startDate, "PPP") : <span>Pick a start date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={currentJob.jobSchedule.startDate as Date}
-            onSelect={(date) => handleDateChange(date, 'startDate')}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
+              {/* Start Date */}
+              <div>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[280px] justify-start text-left font-normal",
+                        !currentJob.jobSchedule.startDate &&
+                          "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {currentJob.jobSchedule.startDate ? (
+                        format(currentJob.jobSchedule.startDate, "PPP")
+                      ) : (
+                        <span>Pick a start date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={currentJob.jobSchedule.startDate as Date}
+                      onSelect={(date) => handleDateChange(date, "startDate")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-    {/* End Date */}
-    <div>
-      <Label>End Date</Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-[280px] justify-start text-left font-normal",
-              !currentJob.jobSchedule.endDate && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {currentJob.jobSchedule.endDate ? format(currentJob.jobSchedule.endDate, "PPP") : <span>Pick an end date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={currentJob.jobSchedule.endDate as Date}
-            onSelect={(date) => handleDateChange(date, 'endDate')}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-  </div>
-  <div>
-  <Label htmlFor="recurrence">Recurrence</Label>
-  <Select 
-    value={currentJob.jobSchedule?.recurrence} 
-    onValueChange={(value) => 
-      setCurrentJob({
-        ...currentJob,
-        jobSchedule: {
-          ...currentJob.jobSchedule,
-          recurrence: value, 
-        },
-      })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select recurrence" />
-    </SelectTrigger>
-    <SelectContent>
-      {recurrenceOptions.map((option) => (
-        <SelectItem key={option} value={option}>{option}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-
+              {/* End Date */}
+              <div>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[280px] justify-start text-left font-normal",
+                        !currentJob.jobSchedule.endDate &&
+                          "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {currentJob.jobSchedule.endDate ? (
+                        format(currentJob.jobSchedule.endDate, "PPP")
+                      ) : (
+                        <span>Pick an end date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={currentJob.jobSchedule.endDate as Date}
+                      onSelect={(date) => handleDateChange(date, "endDate")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="recurrence">Recurrence</Label>
+              <Select
+                value={currentJob.jobSchedule?.recurrence}
+                onValueChange={(value) =>
+                  setCurrentJob({
+                    ...currentJob,
+                    jobSchedule: {
+                      ...currentJob.jobSchedule,
+                      recurrence: value,
+                    },
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recurrence" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recurrenceOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         );
       case "assign":
@@ -696,11 +716,19 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
                 </div>
                 <div>
                   <p className="font-semibold">Start Date</p>
-                  <p>{currentJob.jobSchedule.startDate ? format(currentJob.jobSchedule.startDate, 'PPP') : 'Not set'}</p>
+                  <p>
+                    {currentJob.jobSchedule.startDate
+                      ? format(currentJob.jobSchedule.startDate, "PPP")
+                      : "Not set"}
+                  </p>
                 </div>
                 <div>
                   <p className="font-semibold">End Date</p>
-                  <p>{currentJob.jobSchedule.endDate ? format(currentJob.jobSchedule.endDate, 'PPP') : 'Not set'}</p>
+                  <p>
+                    {currentJob.jobSchedule.endDate
+                      ? format(currentJob.jobSchedule.endDate, "PPP")
+                      : "Not set"}
+                  </p>
                 </div>
                 <div>
                   <p className="font-semibold">Recurrence</p>
@@ -741,7 +769,7 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
 
   const renderJobList = () => (
     <div className="space-y-4">
-      {alljobs.map((job: any) => (
+      {/* {alljobs?.map((job: any) => (
         <Card key={job.id}>
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
@@ -815,11 +843,9 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
             <Button onClick={() => handleEditJob(job)}>Edit</Button>
           </CardFooter>
         </Card>
-      ))}
+      ))} */}
     </div>
   );
-  
-  
 
   return (
     <div className="max-w-4xl mx-auto p-4">
