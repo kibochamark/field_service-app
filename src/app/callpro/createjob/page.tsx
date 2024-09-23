@@ -23,17 +23,17 @@ const page = async() =>{
     name: `${customer.firstName} ${customer.lastName}`,
   }));
 
-  // const techdata = technician.map((technician: any) => ({
-  //   id: technician.id,
-  //   name: `${technician.firstName} ${technician.lastName}`,
-  // }));
+  const techdata = technician.map((technician: any) => ({
+    id: technician.id,
+    name: `${technician.firstName} ${technician.lastName}`,
+  }));
   
-  console.log(allJobs, "alljoobs")
+  console.log(jobTypes, "types")
    
 
   return (
     <div>
-      <JobManagement customers={customerData} employee={technician} jobtype={jobTypes} alljobs={allJobs}/>
+      <JobManagement customers={customerData} employee={techdata} jobtype={jobTypes} alljobs={allJobs}/>
     </div>
   );
 }

@@ -574,17 +574,39 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                   <p>{currentJob.name}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Job Type</p>
-                  <p>{currentJob.type}</p>
-                </div>
+  <p className="font-semibold">Job Type</p>
+  <p>
+    {jobtype.find((type: any) => type.id === currentJob.type)?.name || 'No job type selected'}
+  </p>
+</div>
                 <div>
-                  <p className="font-semibold">Client</p>
-                  <p>{currentJob.clientId}</p>
-                </div>
-                <div>
-                  <p className="font-semibold">Technician</p>
-                  <p>{currentJob.technicianId}</p>
-                </div>
+  <p className="font-semibold">Client</p>
+  {selectedClients.length > 0 ? (
+    <ul>
+      {selectedClients.map((client, index) => (
+        <li key={index}>{client.name}</li> 
+      ))}
+    </ul>
+  ) : (
+    <p>No clients assigned</p>
+  )}
+</div>
+
+
+<div>
+  <p className="font-semibold">Technician</p>
+  {selectedTechnicians.length > 0 ? (
+    <ul>
+      {selectedTechnicians.map((technician, index) => (
+        <li key={index}>{technician.name}</li>
+      ))}
+    </ul>
+  ) : (
+    <p>No technicians assigned</p>
+  )}
+</div>
+
+
                 <div>
                   <p className="font-semibold">Start Date</p>
                   <p>{currentJob.jobSchedule.startDate ? format(currentJob.jobSchedule.startDate, 'PPP') : 'Not set'}</p>
