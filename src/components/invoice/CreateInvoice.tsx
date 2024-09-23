@@ -227,7 +227,7 @@ export default function InvoiceManager() {
   const handleSendEmail = async () => {
     try {
       // Replace this with your email sending logic
-      await sendEmail(recipientEmail, emailMessage); // Implement this function
+      await sendEmail(); // Implement this function
 
       setSuccessMessage("Invoice sent successfully!");
       setRecipientEmail(""); // Clear the input field
@@ -303,6 +303,9 @@ export default function InvoiceManager() {
           <Plus className="mr-2 h-4 w-4" /> Create New Invoice
         </Button>
       )} */}
+
+
+      
       {invoice && (
         <Card className="w-full max-w-4xl mx-auto">
           <CardHeader>
@@ -642,7 +645,7 @@ export default function InvoiceManager() {
     </div>
   );
 }
-const sendEmail = async (email, message) => {
+const sendEmail = async () => {
     // Here, you would implement your email sending logic (e.g., API call)
     // For demonstration purposes, we'll just resolve the promise
     return new Promise((resolve) => setTimeout(resolve, 1000));
