@@ -68,7 +68,7 @@ export default function NavbarComponent() {
                 ? 'bg-background/80 backdrop-blur-sm'
                 : 'bg-background'
             }`}>
-            <nav className="max-w-full container w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
+            <nav className="max-w-full my-2 container w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center">
                         <div className="lg:hidden">

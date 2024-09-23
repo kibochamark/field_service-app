@@ -62,6 +62,8 @@ export default {
         );
 
 
+        console.log(res)
+
 
 
         if (res.status === 200) {
