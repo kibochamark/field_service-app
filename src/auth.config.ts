@@ -99,7 +99,7 @@ export default {
       } else {
         if (!profile) {
           if (user) {
-            token.id = user?.id;
+            token.userId = (user as any)?.userId;
             token.access_token = (user as any)?.accessToken;
             token.refresh_token = (user as any)?.refreshToken;
             token.hascompany = (user as any)?.hascompany;
@@ -125,6 +125,7 @@ export default {
               token.hascompany = res.data?.data?.token?.hascompany;
               token.companyId = res.data?.data?.token?.companyId;
               token.role = res.data?.data?.token?.role;
+              token.userId = res.data?.data?.token?.userId;
             }else{
               return null
             }
@@ -148,7 +149,8 @@ export default {
           refresh_token: token?.refresh_token!,
           hascompany: token?.hascompany!,
           companyId: token?.companyId!,
-          role:token?.role
+          role:token?.role,
+          userId:token?.userId
         }
       }
     },
