@@ -1,15 +1,17 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { error } from "console";
 import { Loader } from "lucide-react";
 import Image from "next/image";
+import { EyeClosedIcon } from "@radix-ui/react-icons";
 
 const Login = () => {
+  const [view , setView] = useState(false)
   const router = useRouter()
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -123,13 +125,18 @@ const Login = () => {
                       Password
                     </label>
                   </div>
+                  <div className="relative">
                   <input
-                    type="password"
+                    type={view ? "text" :"password"}
                     id="password"
                     name="password"
                     required
-                    className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
+                    className="bg-white  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 "
                   />
+                  <EyeClosedIcon onClick={()=>{
+                    setView(!view)
+                  }} className={`${view ? "rotate-180" : ""} cursor-pointer duration-300 transition-all absolute top-4 right-4 flex items-end justify-end`}/>
+                  </div>
                 </div>
                 {/* <div>
                   <input

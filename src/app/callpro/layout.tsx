@@ -35,7 +35,7 @@ function layout({ children }: { children: ReactNode }) {
 
                 <div className="flex flex-1">
                     {/* Sidebar on the left */}
-                    <div className='hidden md:block w-64 fixed z-10 '>
+                    <div className='hidden lg:block lg:w-64 fixed z-10 '>
                         {/* <SidebarMenu /> */}
                         <TestSidebar/>
                     </div>
