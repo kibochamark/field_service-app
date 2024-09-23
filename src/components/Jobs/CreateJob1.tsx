@@ -12,10 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/ui/tabs"
 import { Badge } from "@/shadcn/ui/badge"
 import { toast } from "@/shadcn/ui/use-toast"
 import { format } from 'date-fns'
-import { AlertCircle, CheckCircle2, Clock, MapPin, User, Calendar as CalendarIcon, ArrowLeft, ArrowRight, Save, Edit, X } from "lucide-react"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shadcn/ui/command"
+import { AlertCircle, CheckCircle2, Clock, MapPin, User, Calendar as CalendarIcon, ArrowLeft, ArrowRight, Save, Edit, X, Check } from "lucide-react"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/shadcn/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
+import React from 'react'
+import { cn } from '@/lib/utils'
+import { baseUrl } from '@/utils/constants'
+import { useSession } from 'next-auth/react'
 
 type Step = 'create' | 'schedule' | 'assign' | 'review'
 type JobStatus = 'Draft' | 'Not Assigned' | 'Assigned' | 'In Progress' | 'Completed'
@@ -26,107 +30,118 @@ interface Job {
   name: string
   description: string
   type: string
-  client: string
+  client: string[] 
   startDate: Date | null
   endDate: Date | null
   recurrence: string
-  technician: string
-  status: JobStatus
+  technician: string[] 
+  location: {
+    city: string;
+    state: string;
+    zip: string;
+    
+  };
+  
 }
 
-const jobTypes = ['Maintenance', 'Repair', 'Installation', 'Inspection']
-const recurrenceOptions = ['None', 'Daily', 'Weekly', 'Monthly']
-const technicians = ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams']
-const clients = [
-  'Acme Corp',
-  'Globex Corporation',
-  'Soylent Corp',
-  'Initech',
-  'Umbrella Corporation',
-  'Hooli',
-  'Dunder Mifflin',
-  'Stark Industries',
-  'Wayne Enterprises',
-  'Cyberdyne Systems'
-]
+interface Client {
+  id: string
+  name: string
+}
 
-export default function JobManagement() {
+const recurrenceOptions = ['None', 'Daily', 'Weekly', 'Monthly']
+
+
+
+export default function JobManagement({ customers, employee, jobtype }: { customers: any; employee: any; jobtype: any }) {
   const [step, setStep] = useState<Step>('create')
   const [jobs, setJobs] = useState<Job[]>([])
   const [currentJob, setCurrentJob] = useState<Job>({
     id: '',
     name: '',
-    description: '',
+    description: '',    
     type: '',
-    client: '',
-    startDate: null,
-    endDate: null,
+    client: [],
+    startDate: new Date(),  
+    endDate: new Date(),
     recurrence: 'None',
-    technician: '',
-    status: 'Draft'
+    technician: [],
+    location: {
+      city: '',
+      state: '',
+      zip: '',
+     
+    },
+    
   })
-  const [clientSearch, setClientSearch] = useState('')
-  const [openClientSearch, setOpenClientSearch] = useState(false)
+
+
+
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Simulating fetching jobs from an API
-    const fetchedJobs: Job[] = [
-      {
-        id: '1',
-        name: 'Annual HVAC Maintenance',
-        description: 'Perform annual maintenance on HVAC system',
-        type: 'Maintenance',
-        client: 'Acme Corp',
-        startDate: new Date(2023, 5, 15),
-        endDate: new Date(2023, 5, 15),
-        recurrence: 'Yearly',
-        technician: 'John Doe',
-        status: 'Assigned'
-      },
-      {
-        id: '2',
-        name: 'Elevator Repair',
-        description: 'Fix malfunctioning elevator in Building B',
-        type: 'Repair',
-        client: 'Skyline Properties',
-        startDate: new Date(2023, 5, 20),
-        endDate: new Date(2023, 5, 21),
-        recurrence: 'None',
-        technician: 'Jane Smith',
-        status: 'In Progress'
-      }
-    ]
-    setJobs(fetchedJobs)
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
 
-    // Load draft from localStorage if it exists
-    const savedDraft = localStorage.getItem('jobDraft')
-    if (savedDraft) {
-      const parsedDraft = JSON.parse(savedDraft)
-      setCurrentJob({
-        ...parsedDraft,
-        startDate: parsedDraft.startDate ? new Date(parsedDraft.startDate) : null,
-        endDate: parsedDraft.endDate ? new Date(parsedDraft.endDate) : null,
-      })
+
+  const [openClientSearch, setOpenClientSearch] = React.useState(false)
+  const [clientSearch, setClientSearch] = React.useState("")
+  const [selectedClients, setSelectedClients] = React.useState<Client[]>([])
+
+  const handleSelectClient = (client: { id: string; name: string }) => {
+    setSelectedClients((prev) => {
+      const isSelected = prev.some((c) => c.id === client.id)
+      if (isSelected) {
+        return prev.filter((c) => c.id !== client.id)
+      } else {
+        return [...prev, client]
+      }
+    })
+  }
+  const { data: session } = useSession();
+  const removeClient = (clientId: string) => {
+    setSelectedClients((prev) => prev.filter((c) => c.id !== clientId))
+  }
+
+  const [openTechnicianSearch, setOpenTechnicianSearch] = React.useState(false)
+  const [technicianSearch, setTechnicianSearch] = React.useState("")
+  const [selectedTechnicians, setSelectedTechnicians] = React.useState<{id: string, name: string}[]>([])
+
+const handleSelectTechnician = (technician: { id: string; name: string }) => {
+  setSelectedTechnicians((prev) => {
+    const isSelected = prev.some((t) => t.id === technician.id)
+    if (isSelected) {
+      return prev.filter((t) => t.id !== technician.id)
+    } else {
+      return [...prev, technician]
     }
-  }, [])
+  })
+}
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCurrentJob({ ...currentJob, [e.target.name]: e.target.value })
+  }
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentJob({ 
+      ...currentJob, 
+      location: { ...currentJob.location, [e.target.name]: e.target.value } 
+    })
   }
 
   const handleSelectChange = (value: string, field: keyof Job) => {
     setCurrentJob({ ...currentJob, [field]: value })
   }
 
-  const handleDateChange = (date: Date | null, field: 'startDate' | 'endDate') => {
-    setCurrentJob({ ...currentJob, [field]: date })
-  }
-
+  const handleDateChange = (date: any, field: 'startDate' | 'endDate') => {
+    setCurrentJob({ ...currentJob, [field]: date });
+    if (field === 'startDate') setShowStartCalendar(false);
+    else setShowEndCalendar(false);
+  };
   const validateStep = () => {
     switch (step) {
       case 'create':
-        return currentJob.name && currentJob.description && currentJob.type && currentJob.client
+        return currentJob.name && currentJob.description && currentJob.type && currentJob.client      
       case 'schedule':
         return currentJob.startDate && currentJob.endDate && currentJob.recurrence
       case 'assign':
@@ -135,6 +150,8 @@ export default function JobManagement() {
         return true
     }
   }
+
+  
 
   const handleNext = () => {
     if (!validateStep()) {
@@ -172,38 +189,76 @@ export default function JobManagement() {
         break
     }
   }
-
-  const handleSubmit = () => {
-    if (editingJobId) {
-      setJobs(jobs.map(job => job.id === editingJobId ? currentJob : job))
-      setEditingJobId(null)
+  const handleSubmit = async () => {
+    if (!validateStep()) return;
+  
+    const updatedJob = {
+      ...currentJob,
+      client: selectedClients.map((client) => client.id),
+      technician: selectedTechnicians.map((tech) => tech.id),
+      jobTypeId: currentJob.type, 
+    };
+  
+    console.log("Submitting Job:", updatedJob); // Log the job object before submitting
+  
+    try {
+      const method = editingJobId ? 'PUT' : 'POST';
+      const endpoint = baseUrl + 'job';
+  
+      console.log(`Sending request to ${endpoint} with method ${method}`); // Log endpoint and method
+  
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.user.access_token}`,
+        },
+        body: JSON.stringify(updatedJob),
+      });
+  
+      console.log("Response status:", response.status); // Log response status
+  
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.log("Error response:", errorResponse); // Log the error response
+        throw new Error('Failed to submit job data');
+      }
+  
+      const result = await response.json();
+      console.log("Successful result:", result); // Log the successful result
+  
       toast({
-        title: "Job Updated",
-        description: "The job has been successfully updated.",
-      })
-    } else {
-        const newJob = { ...currentJob, id: Date.now().toString(), status: 'Assigned' as JobStatus }
-      setJobs([...jobs, newJob])
+        title: editingJobId ? "Job Updated" : "Job Created",
+        description: editingJobId ? "The job has been successfully updated." : "The new job has been successfully created and assigned.",
+      });
+  
+      setJobs(editingJobId ? jobs.map(job => job.id === editingJobId ? result : job) : [...jobs, result]);
+      setEditingJobId(null);
+      setCurrentJob({
+        id: '',
+        name: '',
+        description: '',
+        type: '',
+        client: [],
+        startDate: new Date(),
+        endDate: new Date(),
+        recurrence: 'None',
+        technician: [],
+        location: { city: '', zip: '', state: '' },
+      });
+      setStep('create');
+    } catch (error) {
+      console.error("Error submitting job:", error); // Log the caught error
       toast({
-        title: "Job Created",
-        description: "The new job has been successfully created and assigned.",
-      })
+        title: "Submission Error",
+        variant: "destructive",
+      });
     }
-    setCurrentJob({
-      id: '',
-      name: '',
-      description: '',
-      type: '',
-      client: '',
-      startDate: null,
-      endDate: null,
-      recurrence: 'None',
-      technician: '',
-      status: 'Draft'
-    })
-    setStep('create')
-    localStorage.removeItem('jobDraft')
-  }
+  };
+  
+
+  
+  
 
   const handleSaveDraft = () => {
     localStorage.setItem('jobDraft', JSON.stringify(currentJob))
@@ -219,8 +274,8 @@ export default function JobManagement() {
     setStep('create')
   }
 
-  const filteredClients = clients.filter((client) =>
-    client.toLowerCase().includes(clientSearch.toLowerCase())
+  const filteredClients = customers.filter((client: { id: string; name: string }) =>
+    client.name.toLowerCase().includes(clientSearch.toLowerCase())
   )
 
   const renderStep = () => {
@@ -243,72 +298,144 @@ export default function JobManagement() {
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {jobTypes.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  {jobtype.map((type:any) => (
+                    <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="client">Client</Label>
-              <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openClientSearch}
-                    className="w-full justify-between"
+            
+<div>
+      <Label htmlFor="clients">Clients</Label>
+      <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openClientSearch}
+            className="w-full justify-between"
+          >
+            {selectedClients.length > 0 ? `${selectedClients.length} selected` : "Select clients..."}
+            <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput placeholder="Search clients..." onValueChange={setClientSearch} />
+            <CommandList>
+              <CommandEmpty>No client found.</CommandEmpty>
+              <CommandGroup>
+                {filteredClients.map((client: { id: string; name: string }) => (
+                  <CommandItem
+                    key={client.id}
+                    onSelect={() => handleSelectClient(client)}
+                    className="flex items-center justify-between"
                   >
-                    {currentJob.client || "Select client..."}
-                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search clients..." onValueChange={setClientSearch} />
-                    <CommandEmpty>No client found.</CommandEmpty>
-                    <CommandGroup>
-                      {filteredClients.map((client) => (
-                        <CommandItem
-                          key={client}
-                          onSelect={() => {
-                            handleSelectChange(client, 'client')
-                            setOpenClientSearch(false)
-                          }}
-                        >
-                          {client}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                    <span>{client.name}</span>
+                    {selectedClients.some((c) => c.id === client.id) && <Check className="h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {selectedClients.map((client) => (
+          <Badge key={client.id} variant="secondary" className="flex items-center gap-1">
+            {client.name}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => removeClient(client.id)}
+            >
+              <X className="h-3 w-3" />
+              <span className="sr-only">Remove {client.name}</span>
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
+    <div>
+              <Label htmlFor="city">City</Label>
+              <Input id="city" name="city" value={currentJob.location.city} onChange={handleLocationChange} required />
             </div>
+            <div>
+              <Label htmlFor="zip">Zip Code</Label>
+              <Input id="zip" name="zip" value={currentJob.location.zip} onChange={handleLocationChange} required />
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input id="state" name="state" value={currentJob.location.state} onChange={handleLocationChange} required />
+            </div>
+            {/* <div>
+              <Label htmlFor="otherinfo">Other Info (optional)</Label>
+              <Input id="otherinfo" name="otherinfo" value={currentJob.location.otherInfo} onChange={handleLocationChange} />
+            </div> */}
           </div>
+         
+
         )
       case 'schedule':
         return (
+         
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Start Date</Label>
-                {/* <Calendar
-                  mode="single"
-                  selected={currentJob.startDate}
-                  onSelect={(date) => handleDateChange(date, 'startDate')}
-                  className="rounded-md border"
-                /> */}
-              </div>
-              <div>
-                <Label>End Date</Label>
-                {/* <Calendar
-                  mode="single"
-                  selected={currentJob.endDate}
-                  onSelect={(date) => handleDateChange(date, 'endDate')}
-                  className="rounded-md border"
-                /> */}
-              </div>
-            </div>
+    {/* Start Date */}
+    <div>
+      <Label>Start Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-[280px] justify-start text-left font-normal",
+              !currentJob.startDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {currentJob.startDate ? format(currentJob.startDate, "PPP") : <span>Pick a start date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={currentJob.startDate as Date}
+            onSelect={(date) => handleDateChange(date, 'startDate')}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+
+    {/* End Date */}
+    <div>
+      <Label>End Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-[280px] justify-start text-left font-normal",
+              !currentJob.endDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {currentJob.endDate ? format(currentJob.endDate, "PPP") : <span>Pick an end date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={currentJob.endDate as Date}
+            onSelect={(date) => handleDateChange(date, 'endDate')}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  </div>
             <div>
               <Label htmlFor="recurrence">Recurrence</Label>
               <Select value={currentJob.recurrence} onValueChange={(value) => handleSelectChange(value, 'recurrence')}>
@@ -327,20 +454,63 @@ export default function JobManagement() {
       case 'assign':
         return (
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="technician">Assign Technician</Label>
-              <Select value={currentJob.technician} onValueChange={(value) => handleSelectChange(value, 'technician')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select technician" />
-                </SelectTrigger>
-                <SelectContent>
-                  {technicians.map((tech) => (
-                    <SelectItem key={tech} value={tech}>{tech}</SelectItem>
+    <div>
+      <Label htmlFor="technicians">Assign Technician</Label>
+      <Popover open={openTechnicianSearch} onOpenChange={setOpenTechnicianSearch}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openTechnicianSearch}
+            className="w-full justify-between"
+          >
+            {selectedTechnicians.length > 0 ? `${selectedTechnicians.length} selected` : "Select technicians..."}
+            <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput placeholder="Search technicians..." onValueChange={setTechnicianSearch} />
+            <CommandList>
+              <CommandEmpty>No technician found.</CommandEmpty>
+              <CommandGroup>
+                {employee
+                  .filter((tech:{id: string; name: string}) =>
+                    tech.name.toLowerCase().includes(technicianSearch.toLowerCase())
+                  )
+                  .map((tech: { id: string; name: string }) => (
+                    <CommandItem
+                      key={tech.id}
+                      onSelect={() => handleSelectTechnician(tech)}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{tech.name}</span>
+                      {selectedTechnicians.some((t) => t.id === tech.id) && <Check className="h-4 w-4" />}
+                    </CommandItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {selectedTechnicians.map((tech) => (
+          <Badge key={tech.id} variant="secondary" className="flex items-center gap-1">
+            {tech.name}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => handleSelectTechnician(tech)}
+            >
+              <X className="h-3 w-3" />
+              <span className="sr-only">Remove {tech.name}</span>
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
+  </div>
         )
       case 'review':
         return (
@@ -395,10 +565,9 @@ export default function JobManagement() {
       <div className="flex justify-between mb-8">
         {steps.map((s, index) => (
           <div key={s} className="flex flex-col items-center">
-            <div 
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                steps.indexOf(step) >= index ? 'bg-primary text-primary-foreground' : 'bg-muted'
-              }`}
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${steps.indexOf(step) >= index ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                }`}
             >
               {index + 1}
             </div>
@@ -414,10 +583,10 @@ export default function JobManagement() {
       {jobs.map((job) => (
         <Card key={job.id}>
           <CardHeader>
-            <CardTitle className="flex justify-between items-center">
+            {/* <CardTitle className="flex justify-between items-center">
               <span>{job.name}</span>
               <Badge variant={job.status === 'Completed' ? 'default' : 'secondary'}>{job.status}</Badge>
-            </CardTitle>
+            </CardTitle> */}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
