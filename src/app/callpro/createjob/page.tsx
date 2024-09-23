@@ -28,7 +28,7 @@ const page = async() =>{
     name: `${technician.firstName} ${technician.lastName}`,
   }));
   
-  console.log(jobTypes, "types")
+  console.log(allJobs, "all jobs")
    
 
   return (
