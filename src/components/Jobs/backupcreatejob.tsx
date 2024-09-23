@@ -25,9 +25,6 @@ type Step = 'create' | 'schedule' | 'assign' | 'review'
 type JobStatus = 'Draft' | 'Not Assigned' | 'Assigned' | 'In Progress' | 'Completed'
 
 
-
-
-
 interface Job { 
   id:string 
   name: string
@@ -58,7 +55,7 @@ const recurrenceOptions = ["DAILY", "WEEKLY", "MONTHLY"]
 
 
 
-export default function JobManagement({ customers, employee, jobtype, alljobs}: { customers: any; employee: any; jobtype: any; alljobs:any} ) {
+export default function JobManagement({ customers, employee, jobtype }: { customers: any; employee: any; jobtype: any }) {
   const [step, setStep] = useState<Step>('create')
   const [jobs, setJobs] = useState<Job[]>([])
   const [currentJob, setCurrentJob] = useState<Job>({
@@ -145,19 +142,10 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
   }
 
   const handleDateChange = (date: any, field: 'startDate' | 'endDate') => {
-    setCurrentJob({
-      ...currentJob,
-      jobSchedule: {
-        ...currentJob.jobSchedule,
-        [field]: date,
-      },
-    });
-  
-    // Optional: Hide the calendar after selecting a date
+    setCurrentJob({ ...currentJob, [field]: date });
     if (field === 'startDate') setShowStartCalendar(false);
     else setShowEndCalendar(false);
   };
-  
   const validateStep = () => {
     switch (step) {
       case 'create':
@@ -223,7 +211,6 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
        
       
     };
-    console.log(updatedJob, "updates")
    
 
     let dataToSend = {  
@@ -473,31 +460,19 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       </Popover>
     </div>
   </div>
-  <div>
-  <Label htmlFor="recurrence">Recurrence</Label>
-  <Select 
-    value={currentJob.jobSchedule?.recurrence} 
-    onValueChange={(value) => 
-      setCurrentJob({
-        ...currentJob,
-        jobSchedule: {
-          ...currentJob.jobSchedule,
-          recurrence: value, 
-        },
-      })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select recurrence" />
-    </SelectTrigger>
-    <SelectContent>
-      {recurrenceOptions.map((option) => (
-        <SelectItem key={option} value={option}>{option}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-
+            <div>
+              <Label htmlFor="recurrence">Recurrence</Label>
+              <Select value={currentJob.jobSchedule.recurrence} onValueChange={(value) => handleSelectChange(value, 'jobSchedule.recurrence' as any)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recurrence" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recurrenceOptions.map((option) => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )
       case 'assign':
@@ -629,15 +604,13 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
 
   const renderJobList = () => (
     <div className="space-y-4">
-      {alljobs.map((job: any) => (
+      {jobs.map((job) => (
         <Card key={job.id}>
           <CardHeader>
-            <CardTitle className="flex justify-between items-center">
+            {/* <CardTitle className="flex justify-between items-center">
               <span>{job.name}</span>
-              <Badge variant={job.status === 'Completed' ? 'default' : 'secondary'}>
-                {job.status}
-              </Badge>
-            </CardTitle>
+              <Badge variant={job.status === 'Completed' ? 'default' : 'secondary'}>{job.status}</Badge>
+            </CardTitle> */}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
@@ -651,11 +624,11 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
               </div>
               <div>
                 <p className="font-semibold">Start Date</p>
-                <p>{job.jobSchedule?.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</p>
+                <p>{job.jobSchedule.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</p>
               </div>
               <div>
                 <p className="font-semibold">Job Type</p>
-                <p>{job.jobTypeId}</p>
+                <p>{job.type}</p>
               </div>
             </div>
           </CardContent>
@@ -675,7 +648,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Type</Label>
-                    <span className="col-span-3">{job.jobTypeId}</span>
+                    <span className="col-span-3">{job.type}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Technician</Label>
@@ -683,15 +656,15 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Start Date</Label>
-                    <span className="col-span-3">{job.jobSchedule?.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</span>
+                    <span className="col-span-3">{job.jobSchedule.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">End Date</Label>
-                    <span className="col-span-3">{job.jobSchedule?.endDate ? format(job.jobSchedule.endDate, 'PPP') : 'Not set'}</span>
+                    <span className="col-span-3">{job.jobSchedule.endDate ? format(job.jobSchedule.endDate, 'PPP') : 'Not set'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Recurrence</Label>
-                    <span className="col-span-3">{job.jobSchedule?.recurrence}</span>
+                    <span className="col-span-3">{job.jobSchedule.recurrence}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Description</Label>
@@ -705,9 +678,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
         </Card>
       ))}
     </div>
-  );
-  
-  
+  )
 
   return (
     <div className="max-w-4xl mx-auto p-4">
