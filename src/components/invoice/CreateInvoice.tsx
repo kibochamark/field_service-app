@@ -146,6 +146,13 @@ export default function InvoiceManager() {
     fetchClients();
   }, []);
 
+  useEffect(() => {
+    if (!invoice) {
+      handleCreate();
+    }
+  }, [invoice]);
+  
+
   const handleCreate = async () => {
     setIsCreating(true);
     try {
@@ -281,7 +288,7 @@ export default function InvoiceManager() {
         <select
           value={selectedClientId || ''}
           onChange={(e) => setSelectedClientId(e.target.value)}
-          className="border rounded p-2"
+          className="border rounded p-2 w-full"
         >
           <option value="" disabled>Select a client</option>
           {clients.map((client) => (
@@ -291,11 +298,11 @@ export default function InvoiceManager() {
           ))}
         </select>
       </div>
-      {!invoice && (
+      {/* {!invoice && (
         <Button onClick={handleCreate} disabled={isCreating}>
           <Plus className="mr-2 h-4 w-4" /> Create New Invoice
         </Button>
-      )}
+      )} */}
       {invoice && (
         <Card className="w-full max-w-4xl mx-auto">
           <CardHeader>

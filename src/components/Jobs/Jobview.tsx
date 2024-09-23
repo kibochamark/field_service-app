@@ -19,8 +19,8 @@ import {
   ShoppingCart,
   Truck,
   Users2,
-} from "lucide-react"
-import { Badge } from "@/shadcn/ui/badge"
+} from "lucide-react";
+import { Badge } from "@/shadcn/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -270,14 +270,12 @@ export function Jobview() {
                     Management and Insightful Analysis.
                   </CardDescription>
                 </CardHeader>
-               
 
-<CardFooter>
-  <Link href="/callpro/createjob">
-    <Button variant="outline">Create Job</Button>
-  </Link>
-</CardFooter>
-
+                <CardFooter>
+                  <Link href="/callpro/createjob">
+                    <Button variant="outline">Create Job</Button>
+                  </Link>
+                </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
                 <CardHeader className="pb-2">
@@ -353,13 +351,13 @@ export function Jobview() {
               </div>
               <TabsContent value="week">
                 <Card x-chunk="dashboard-05-chunk-3">
-                  <CardHeader className="px-7">
+                  <CardHeader className="px-2">
                     <CardTitle>Jobs</CardTitle>
                     <CardDescription>Recent Jobs</CardDescription>
                   </CardHeader>
-                  <CardContent className="max-w-2xl w-full">
+                  <CardContent className="max-w-xl">
                     <DataTable columns={jobScheduleColumn} data={dummyData} />
-                    <Table>
+                    {/* <Table> */}
                       {/* <TableHeader>
                         <TableRow>
                           <TableHead>Customer</TableHead>
@@ -537,7 +535,7 @@ export function Jobview() {
                           <TableCell className="text-right">$450.00</TableCell>
                         </TableRow>
                       </TableBody> */}
-                    </Table>
+                    {/* </Table> */}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -545,7 +543,7 @@ export function Jobview() {
             </Tabs>
           </div>
           <div>
-            <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
+            <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4 ml-8">
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
                   <CardTitle className="group flex items-center gap-2 text-lg">
