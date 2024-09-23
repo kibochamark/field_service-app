@@ -665,19 +665,19 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <p className="font-semibold">Client</p>
-                <p>{job.clientId}</p>
+                <p>{job.clients.map((client: any) => client[client.clientId]?.name).join(', ') || 'No clients'}</p>
               </div>
               <div>
                 <p className="font-semibold">Technician</p>
-                <p>{job.technicianId}</p>
+                <p>{job.technicians.map((tech:any) => tech[tech.technicianId]?.name).join(', ') || 'No technicians'}</p>
               </div>
               <div>
                 <p className="font-semibold">Start Date</p>
-                <p>{job.jobSchedule?.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</p>
+                <p>{job.jobSchedule?.startDate ? format(new Date(job.jobSchedule.startDate), 'PPP') : 'Not set'}</p>
               </div>
               <div>
                 <p className="font-semibold">Job Type</p>
-                <p>{job.jobTypeId}</p>
+                <p>{jobtype[job.jobTypeId]?.name || 'Unknown'}</p>
               </div>
             </div>
           </CardContent>
@@ -693,27 +693,27 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Client</Label>
-                    <span className="col-span-3">{job.clientId}</span>
+                    <span className="col-span-3">{job.clients.map((client:any ) => client[client.clientId]?.name).join(', ') || 'No clients'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Type</Label>
-                    <span className="col-span-3">{job.jobTypeId}</span>
+                    <span className="col-span-3">{jobtype[job.jobTypeId]?.name || 'Unknown'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Technician</Label>
-                    <span className="col-span-3">{job.technicianId}</span>
+                    <span className="col-span-3">{job.technicians.map((tech:any) => tech[tech.technicianId]?.name).join(', ') || 'No technicians'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Start Date</Label>
-                    <span className="col-span-3">{job.jobSchedule?.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</span>
+                    <span className="col-span-3">{job.jobSchedule?.startDate ? format(new Date(job.jobSchedule.startDate), 'PPP') : 'Not set'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">End Date</Label>
-                    <span className="col-span-3">{job.jobSchedule?.endDate ? format(job.jobSchedule.endDate, 'PPP') : 'Not set'}</span>
+                    <span className="col-span-3">{job.jobSchedule?.endDate ? format(new Date(job.jobSchedule.endDate), 'PPP') : 'Not set'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Recurrence</Label>
-                    <span className="col-span-3">{job.jobSchedule?.recurrence}</span>
+                    <span className="col-span-3">{job.jobSchedule?.recurrence || 'None'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Description</Label>
@@ -728,6 +728,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       ))}
     </div>
   );
+  
   
   
 
