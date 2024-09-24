@@ -1,92 +1,56 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Trash, Edit } from "lucide-react";
-import { Button } from "@/shadcn/ui/button";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/shadcn/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
-import React from "react";
 import { DataTableColumnHeader } from "../GlobalComponents/ColumnHeader";
 import StatusBadge from "./StatusBadge";
 
-// Job type definition
-// export type Job = {
-//   id: string;
-//   customer: string;
-//   type: string;
-//   status: string;
-//   startDate: string;
-//   endDate: string;
-//   amount: number;
-//   scheduleJob: string;
-//   when: string;
-// };
+// WorkflowStep type definition
 interface WorkflowStep {
-  stepName: string
-  status: "pending" | "completed" | "failed"
-  assignedTo: string
-  completedAt?: string
-  notes: string
+  stepName: string;
+  status: "pending" | "completed" | "failed";
+  assignedTo: string;
+  completedAt?: string;
+  notes: string;
 }
 
-interface Job {
-  id: string
-  title: string
-  steps: WorkflowStep[]
-}
-// Define columns for the job schedule table
-
-export const WorkFlowColumn: ColumnDef<Job>[] = [
+// Define columns for the workflow steps table
+export const WorkFlowColumn: ColumnDef<WorkflowStep>[] = [
   {
     accessorKey: "stepName",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title={"Step Name"} />;
+      return <DataTableColumnHeader column={column} title="Step Name" />;
     },
   },
   {
     accessorKey: "status",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title={"Status"} />;
+      return <DataTableColumnHeader column={column} title="Status" />;
     },
     cell: ({ cell }) => {
-      const status = cell.getValue<string>() as 'pending' | 'completed' | 'failed'; // Type assertion
+      const status = cell.getValue<string>() as "pending" | "completed" | "failed"; // Type assertion
       return <StatusBadge status={status} />;
     },
   },
   {
     accessorKey: "assignedTo",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title={"Assigned To"} />;
+      return <DataTableColumnHeader column={column} title="Assigned To" />;
     },
-  },
-  {
-    accessorKey: "notes",
-    header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title={"Start Date"} />;
-    },
-    cell: ({ cell }) => new Date(cell.getValue<string>()).toLocaleDateString(),
   },
   {
     accessorKey: "completedAt",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title={"End Date"} />;
+      return <DataTableColumnHeader column={column} title="Completed At" />;
     },
-    cell: ({ cell }) => new Date(cell.getValue<string>()).toLocaleDateString(),
+    cell: ({ cell }) => {
+      const completedAt = cell.getValue<string>();
+      return completedAt ? new Date(completedAt).toLocaleDateString() : "N/A";
+    },
   },
   {
     accessorKey: "notes",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title={"Notes"} />;
+      return <DataTableColumnHeader column={column} title="Notes" />;
     },
   },
-  // Add additional columns as needed
 ];
 
 // Export the WorkFlowColumn

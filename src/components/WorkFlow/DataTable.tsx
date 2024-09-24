@@ -23,26 +23,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/ui/table";
-import { Button } from "@/shadcn/ui/button";
 import { DataTablePagination } from "../GlobalComponents/Pagination";
 import { DataTableViewOptions } from "../GlobalComponents/ColumnToggle";
 
-// Job type definition
-export type Job = {
+interface WorkflowStep {
+  stepName: string;
+  status: "pending" | "completed" | "failed";
+  assignedTo: string;
+  completedAt?: string;
+  notes: string;
+}
+
+interface Job {
   id: string;
-  customer: string;
-  type: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-  amount: number;
-  scheduleJob: string;
-  when: string;
-};
+  title: string;
+  steps: WorkflowStep[];
+}
 
 interface DataTableProps {
-  columns: ColumnDef<Job>[];
-  data: Job[];
+  columns: ColumnDef<WorkflowStep>[]; // Change Job to WorkflowStep
+  data: WorkflowStep[]; // Now it expects WorkflowStep[] data
 }
 
 export function DataTable({ columns, data }: DataTableProps) {
@@ -51,7 +51,6 @@ export function DataTable({ columns, data }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState<string>("");
-  const [selectedJobs, setSelectedJobs] = React.useState<Job[]>([]);
 
   const table = useReactTable({
     data,
@@ -72,37 +71,15 @@ export function DataTable({ columns, data }: DataTableProps) {
     },
   });
 
-  const handleScheduleJobs = () => {
-    const selectedRows = table.getSelectedRowModel().flatRows.map((row) => row.original);
-    setSelectedJobs(selectedRows as Job[]);
-  
-    if (selectedRows.length > 0) {
-      console.log("Scheduling jobs:", selectedRows);
-      
-      // Construct the query string using URLSearchParams
-      const query = new URLSearchParams({ jobs: JSON.stringify(selectedRows) }).toString();
-      
-      // Redirect to the new page with selected job details
-      router.push(`/callpro/schedulejobs?${query}`);
-    } else {
-      alert("No jobs selected for scheduling");
-    }
-  };
-  
-  
-
   return (
     <div className="bg-white">
       <div className="flex items-center justify-between py-4">
         <Input
-          placeholder="Filter customers..."
+          placeholder="Filter jobs..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
-        {/* <Button onClick={handleScheduleJobs} className="ml-4">
-          Schedule Selected Jobs
-        </Button> */}
         <DataTableViewOptions table={table} />
       </div>
 
@@ -113,7 +90,9 @@ export function DataTable({ columns, data }: DataTableProps) {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} className="font-bold text-black">
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
