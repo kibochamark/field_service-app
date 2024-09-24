@@ -12,6 +12,8 @@ import { toast } from "@/shadcn/ui/use-toast"
 import { Printer, Mail, Share2, Pencil, Trash, Download, Plus, DollarSign, FileText, Clock, Calendar } from 'lucide-react'
 import router from 'next/router'
 import { useRouter } from 'next/navigation'
+import { DataTable } from './data-table'
+import InvoiceColumns from './InvoiceColumns'
 
 interface InvoiceItem {
   description: string;
@@ -274,7 +276,8 @@ export default function EnhancedInvoiceManager() {
           <CardTitle>All Invoices</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <DataTable columns={InvoiceColumns} data={allInvoices} />
+          {/* <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice ID</TableHead>
@@ -305,7 +308,7 @@ export default function EnhancedInvoiceManager() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </Table> */}
         </CardContent>
       </Card>
 
