@@ -664,17 +664,21 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="font-semibold">Client IDs</p>
-                <p>{job.clients.map((client: any) => client?.clientId).join(', ') || 'No clients'}</p>
+                <p className="font-semibold">Description</p>
+                <p>{job.description || 'No description provided'}</p>
               </div>
               <div>
-                <p className="font-semibold">Technician IDs</p>
-                <p>{job.technicians.map((tech: any) => tech?.technicianId).join(', ') || 'No technicians'}</p>
+                <p className="font-semibold">Job Type</p>
+                <p>{job.jobType?.name || 'Unknown'}</p>
               </div>
-              
               <div>
-                <p className="font-semibold">Job Type ID</p>
-                <p>{job.jobTypeId || 'Unknown'}</p>
+                <p className="font-semibold">Location</p>
+                {/* Display detailed location info */}
+                <p>
+                  {job.location?.city ? `${job.location.city}, ${job.location.state}` : 'Location not specified'}
+                  {job.location?.zip ? ` - ${job.location.zip}` : ''}
+                  {job.location?.otherinfo ? ` (${job.location.otherinfo})` : ''}
+                </p>
               </div>
               <div>
                 <p className="font-semibold">Start Date</p>
@@ -685,22 +689,14 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                 <p>{job.jobSchedule?.endDate ? format(new Date(job.jobSchedule.endDate), 'PPP') : 'Not set'}</p>
               </div>
               <div>
-                <p className="font-semibold">Location</p>
-                
-                <p>
-                  <span className="font-semibold">City:</span> {job.location.city || 'Unknown'}
-                </p>
-                <p>
-                  <span className="font-semibold">State:</span> {job.location.state || 'Unknown'}
-                </p>
-                <p>
-                  <span className="font-semibold">ZIP Code:</span> {job.location.zip || 'Unknown'}
-                </p>
-                {job.location.otherinfo && (
-                  <p>
-                    <span className="font-semibold">Other Info:</span> {job.location.otherinfo}
-                  </p>
-                )}
+                <p className="font-semibold">Clients</p>
+                {/* Display client names */}
+                <p>{job.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Technicians</p>
+                {/* Display technician names */}
+                <p>{job.technicians.map((tech: any) => `${tech?.technician?.firstName} ${tech?.technician?.lastName}`).join(', ') || 'No technicians'}</p>
               </div>
             </div>
           </CardContent>
@@ -715,16 +711,20 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Client IDs</Label>
-                    <span className="col-span-3">{job.clients.map((client: any) => client?.clientId).join(', ') || 'No clients'}</span>
+                    <Label className="text-right">Client</Label>
+                    <span className="col-span-3">{job.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Technician IDs</Label>
-                    <span className="col-span-3">{job.technicians.map((tech: any) => tech?.technicianId).join(', ') || 'No technicians'}</span>
+                    <Label className="text-right">Technician</Label>
+                    <span className="col-span-3">{job.technicians.map((tech: any) => `${tech?.technician?.firstName} ${tech?.technician?.lastName}`).join(', ') || 'No technicians'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Job Type ID</Label>
-                    <span className="col-span-3">{job.jobTypeId || 'Unknown'}</span>
+                    <Label className="text-right">Location</Label>
+                    <span className="col-span-3">
+                      {job.location?.city ? `${job.location.city}, ${job.location.state}` : 'Location not specified'}
+                      {job.location?.zip ? ` - ${job.location.zip}` : ''}
+                      {job.location?.otherinfo ? ` (${job.location.otherinfo})` : ''}
+                    </span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Start Date</Label>
@@ -734,29 +734,13 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                     <Label className="text-right">End Date</Label>
                     <span className="col-span-3">{job.jobSchedule?.endDate ? format(new Date(job.jobSchedule.endDate), 'PPP') : 'Not set'}</span>
                   </div>
-                  
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Recurrence</Label>
+                    <span className="col-span-3">{job.jobSchedule?.recurrence || 'None'}</span>
+                  </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Description</Label>
                     <span className="col-span-3">{job.description}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Location</Label>
-                    <div className="col-span-3 space-y-2">
-                      <p>
-                        <span className="font-semibold">City:</span> {job.location.city || 'Unknown'}
-                      </p>
-                      <p>
-                        <span className="font-semibold">State:</span> {job.location.state || 'Unknown'}
-                      </p>
-                      <p>
-                        <span className="font-semibold">ZIP Code:</span> {job.location.zip || 'Unknown'}
-                      </p>
-                      {job.location.otherinfo && (
-                        <p>
-                          <span className="font-semibold">Other Info:</span> {job.location.otherinfo}
-                        </p>
-                      )}
-                    </div>
                   </div>
                 </div>
               </DialogContent>
@@ -767,12 +751,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       ))}
     </div>
   );
-  
-  
-
-  
-  
-  
+    
 
   return (
     <div className="max-w-4xl mx-auto p-4">
