@@ -20,6 +20,7 @@ import React from 'react'
 import { cn } from '@/lib/utils'
 import { baseUrl } from '@/utils/constants'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 type Step = 'create' | 'schedule' | 'assign' | 'review'
 type JobStatus = 'Draft' | 'Not Assigned' | 'Assigned' | 'In Progress' | 'Completed'
@@ -83,7 +84,6 @@ export default function JobManagement({ customers, employee, jobtype, alljobs}: 
     
   })
 
-console.log(alljobs, "all them jobs")
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
 
@@ -107,7 +107,6 @@ console.log(alljobs, "all them jobs")
   }
   const { data: session } = useSession();
 
-  console.log(session, "session")
 
   const removeClient = (clientId: string) => {
     setSelectedClients((prev) => prev.filter((c) => c.id !== clientId))
@@ -223,7 +222,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
        
       
     };
-    console.log(updatedJob, "updates")
+
    
 
     let dataToSend = {  
@@ -236,13 +235,12 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
       dispatcherId:updatedJob.dispatcherId,
       technicianId :updatedJob.technicianId}
 
-      console.log(dataToSend, "send this data")
+
 
 
     
   
   
-    console.log("Submitting Job:", updatedJob); 
   
     try {
       const method = editingJobId ? 'PUT' : 'POST';
@@ -305,10 +303,9 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
     })
   }
 
-  const handleEditJob = (job: Job) => {
-    setCurrentJob(job)
-    setEditingJobId(job.id)
-    setStep('create')
+ const router = useRouter()
+ const handleEditClick = (id: string) => {    
+    router.push(`/callpro/jobs/${id}/edit`)
   }
 
   const filteredClients = customers.filter((client: { id: string; name: string }) =>
@@ -745,7 +742,7 @@ const handleSelectTechnician = (technician: { id: string; name: string }) => {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button onClick={() => handleEditJob(job)}>Edit</Button>
+             <Button onClick={() => handleEditClick(job.id)}>Edit Job</Button>
           </CardFooter>
         </Card>
       ))}
