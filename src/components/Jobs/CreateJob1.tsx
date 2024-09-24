@@ -703,17 +703,39 @@ export default function JobManagement({
                   <p>{currentJob.name}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Job Type</p>
-                  <p>{currentJob.type}</p>
-                </div>
+  <p className="font-semibold">Job Type</p>
+  <p>
+    {jobtype.find((type: any) => type.id === currentJob.type)?.name || 'No job type selected'}
+  </p>
+</div>
                 <div>
-                  <p className="font-semibold">Client</p>
-                  <p>{currentJob.clientId}</p>
-                </div>
-                <div>
-                  <p className="font-semibold">Technician</p>
-                  <p>{currentJob.technicianId}</p>
-                </div>
+  <p className="font-semibold">Client</p>
+  {selectedClients.length > 0 ? (
+    <ul>
+      {selectedClients.map((client, index) => (
+        <li key={index}>{client.name}</li> 
+      ))}
+    </ul>
+  ) : (
+    <p>No clients assigned</p>
+  )}
+</div>
+
+
+<div>
+  <p className="font-semibold">Technician</p>
+  {selectedTechnicians.length > 0 ? (
+    <ul>
+      {selectedTechnicians.map((technician, index) => (
+        <li key={index}>{technician.name}</li>
+      ))}
+    </ul>
+  ) : (
+    <p>No technicians assigned</p>
+  )}
+</div>
+
+
                 <div>
                   <p className="font-semibold">Start Date</p>
                   <p>
@@ -767,85 +789,92 @@ export default function JobManagement({
     );
   };
 
-  const renderJobList = () => (
-    <div className="space-y-4">
-      {/* {alljobs?.map((job: any) => (
-        <Card key={job.id}>
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              <span>{job.name}</span>
-              <Badge variant={job.status === 'Completed' ? 'default' : 'secondary'}>
-                {job.status}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <p className="font-semibold">Client</p>
-                <p>{job.clientId}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Technician</p>
-                <p>{job.technicianId}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Start Date</p>
-                <p>{job.jobSchedule?.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Job Type</p>
-                <p>{job.jobTypeId}</p>
-              </div>
+const renderJobList = () => (
+  <div className="space-y-4">
+    {alljobs.map((job: any) => (
+      <Card key={job.id}>
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            <span>{job.name}</span>
+            <Badge variant={job.status === 'Completed' ? 'default' : 'secondary'}>
+              {job.status}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="font-semibold">Client</p>
+              {/* Iterate over clients and render names */}
+              <p>{job.clients.map((client: any) => client?.name).join(', ') || 'No clients'}</p>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-end space-x-2">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">View Details</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{job.name}</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Client</Label>
-                    <span className="col-span-3">{job.clientId}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Type</Label>
-                    <span className="col-span-3">{job.jobTypeId}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Technician</Label>
-                    <span className="col-span-3">{job.technicianId}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Start Date</Label>
-                    <span className="col-span-3">{job.jobSchedule?.startDate ? format(job.jobSchedule.startDate, 'PPP') : 'Not set'}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">End Date</Label>
-                    <span className="col-span-3">{job.jobSchedule?.endDate ? format(job.jobSchedule.endDate, 'PPP') : 'Not set'}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Recurrence</Label>
-                    <span className="col-span-3">{job.jobSchedule?.recurrence}</span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Description</Label>
-                    <span className="col-span-3">{job.description}</span>
-                  </div>
+            <div>
+              <p className="font-semibold">Technician</p>
+              {/* Iterate over technicians and render names */}
+              <p>{job.technicians.map((tech: any) => tech?.name).join(', ') || 'No technicians'}</p>
+            </div>
+            <div>
+              <p className="font-semibold">Start Date</p>
+              <p>{job.jobSchedule?.startDate ? format(new Date(job.jobSchedule.startDate), 'PPP') : 'Not set'}</p>
+            </div>
+            <div>
+              <p className="font-semibold">Job Type</p>
+              {/* Assuming jobtype is a lookup object or state */}
+              <p>{jobtype[job.jobTypeId]?.name || 'Unknown'}</p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end space-x-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">View Details</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>{job.name}</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Client</Label>
+                  <span className="col-span-3">{job.clients.map((client: any) => client?.name).join(', ') || 'No clients'}</span>
                 </div>
-              </DialogContent>
-            </Dialog>
-            <Button onClick={() => handleEditJob(job)}>Edit</Button>
-          </CardFooter>
-        </Card>
-      ))} */}
-    </div>
-  );
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Type</Label>
+                  <span className="col-span-3">{jobtype[job.jobTypeId]?.name || 'Unknown'}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Technician</Label>
+                  <span className="col-span-3">{job.technicians.map((tech: any) => tech?.name).join(', ') || 'No technicians'}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Start Date</Label>
+                  <span className="col-span-3">{job.jobSchedule?.startDate ? format(new Date(job.jobSchedule.startDate), 'PPP') : 'Not set'}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">End Date</Label>
+                  <span className="col-span-3">{job.jobSchedule?.endDate ? format(new Date(job.jobSchedule.endDate), 'PPP') : 'Not set'}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Recurrence</Label>
+                  <span className="col-span-3">{job.jobSchedule?.recurrence || 'None'}</span>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Description</Label>
+                  <span className="col-span-3">{job.description}</span>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button onClick={() => handleEditJob(job)}>Edit</Button>
+        </CardFooter>
+      </Card>
+    ))}
+  </div>
+);
+
+  
+  
+  
 
   return (
     <div className="max-w-4xl mx-auto p-4">
