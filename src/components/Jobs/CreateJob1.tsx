@@ -937,3 +937,7 @@ export default function JobManagement({
     </div>
   );
 }
+function handleEditClick(id: any): void {
+  throw new Error("Function not implemented.");
+}
+
