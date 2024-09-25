@@ -12,6 +12,7 @@ declare module "next-auth" {
       hascompany: boolean;
       companyId: string;
       role:string;
+      userId: string;
     } & DefaultSession["user"];
   }
 
@@ -20,6 +21,7 @@ declare module "next-auth" {
     refresh_token: string;
     companyId: string;
     hascompany: boolean;
+    userId: string;
   }
 
   interface Token {
@@ -27,6 +29,7 @@ declare module "next-auth" {
     refresh_token: string;
     hascompany: boolean;
     companyId: string;
+    userId: string;
   }
 }
 
@@ -37,6 +40,7 @@ declare module "next-auth/jwt" {
     id?: string;
     hascompany?: boolean;
     companyId?: string;
+    userId: string;
   }
 }
 

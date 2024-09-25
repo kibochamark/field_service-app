@@ -94,7 +94,8 @@ const Signup = ({ role }: { role: any }) => {
     <div>
       <div className="grid grid-cols-1 md:grid-cols-3 min-h-screen">
         <div className="bg-primary50 flex flex-col items-center justify-center p-8">
-          <span>Field Service Inc</span>
+          <span className="flex items-center gap-2">Dispatch Rhino <Image src={"/rhino.png"} width={20} height={20} alt="logo" /></span>
+
           <p className="mt-4 max-w-md text-center text-lg">
             Create your account to access our powerful tools and features.
           </p>

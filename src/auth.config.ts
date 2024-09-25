@@ -62,14 +62,14 @@ export default {
         );
 
 
+        console.log(res)
+
 
 
         if (res.status === 200) {
-          return user = res.data;
-        } else {
-          return user;
-
+          user = res.data;
         }
+        return user;
       },
     }),
     GoogleProvider({
@@ -101,7 +101,7 @@ export default {
       } else {
         if (!profile) {
           if (user) {
-            token.id = user?.id;
+            token.userId = (user as any)?.userId;
             token.access_token = (user as any)?.accessToken;
             token.refresh_token = (user as any)?.refreshToken;
             token.hascompany = (user as any)?.hascompany;
@@ -127,12 +127,14 @@ export default {
               token.hascompany = res.data?.data?.token?.hascompany;
               token.companyId = res.data?.data?.token?.companyId;
               token.role = res.data?.data?.token?.role;
+              token.userId = res.data?.data?.token?.userId;
             }else{
               return null
             }
             
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
+            return null
           }
         }
       }
@@ -149,7 +151,8 @@ export default {
           refresh_token: token?.refresh_token!,
           hascompany: token?.hascompany!,
           companyId: token?.companyId!,
-          role:token?.role
+          role:token?.role,
+          userId:token?.userId
         }
       }
     },
@@ -157,5 +160,6 @@ export default {
   secret: process.env.AUTH_SECRET!,
   pages: {
     // signIn: "/login",
+    error: '/auth/error',
   },
 } satisfies NextAuthConfig;
