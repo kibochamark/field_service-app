@@ -22,8 +22,7 @@ const validationSchema = Yup.object({
   notes: Yup.string(),
   roleId: Yup.string(),
   profile: Yup.object({
-    address: Yup.object({
-      street: Yup.string().required('Required'),
+    address: Yup.object({      
       city: Yup.string().required('Required'),
       zip: Yup.string().required('Required'),
       state: Yup.string().required('Required'),
@@ -64,8 +63,7 @@ const CustomerForm = () => {
             notes: '',
             roleId: '',
             profile: {
-              address: {
-                street: '',
+              address: {                
                 city: '',
                 zip: '',
                 state: '',
@@ -165,15 +163,7 @@ const CustomerForm = () => {
               <div className="mt-4">
                 <h3 className="text-xl font-semibold mb-2">Personal Profile</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label>Street</label>
-                    <Field name="profile.address.street">
-                      {({ field }: { field: any }) => (
-                        <Input {...field} type="text" placeholder="Street" />
-                      )}
-                    </Field>
-                    <ErrorMessage name="profile.address.street" component="div" className="text-red-600" />
-                  </div>
+                  
 
                   <div>
                     <label>City</label>
