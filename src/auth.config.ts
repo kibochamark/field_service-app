@@ -143,6 +143,7 @@ export default {
       return token;
     },
     session: async ({ session, token }) => {
+      console.log(token)
       return {
         ...session,
         user: {

@@ -91,18 +91,18 @@ export default function NavbarComponent() {
                         <Link className="inline-flex items-center gap-2  flex-row-reverse text-xl ml-4 font-semibold text-white" href="/dashboard"><ClipboardList /> DispatchRhino</Link>
                     </div>
                     <div className="flex items-center flex-row gap-4 pr-4">
-                        <DarkModeSwitch
+                        {/* <DarkModeSwitch
                             className='mr-2 text-white sm:block'
                             checked={theme?.theme === 'dark'}
                             onChange={onDarkModeToggle}
-                            size={20} />
+                            size={20} /> */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
 
                                 <p className="font-medium rounded-full px-3  cursor-pointer py-2 text-md bg-white text-gray-900">
                                     <Suspense fallback={<Loader className="animate animate-spin text-primary600" />}>
 
-                                        {session ? session?.user?.name?.charAt(0).toUpperCase() : "U"}
+                                        {session ? session?.user?.name?.charAt(0).toUpperCase() : "D"}
                                     </Suspense>
 
                                 </p>
