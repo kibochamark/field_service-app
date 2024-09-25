@@ -65,10 +65,9 @@ export async function getJobsByCompanyId() {
       next: { tags: ["getjobs"] }
     });
 
-    const data = await res.json();
+    const data = await res.json(); 
+      return data?.data
 
- 
-      return data
       // return data.map((job: any) => ({
       //   location: {
       //     city: job.location?.city,
