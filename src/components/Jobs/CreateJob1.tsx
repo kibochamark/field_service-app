@@ -58,6 +58,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type Step = "create" | "schedule" | "assign" | "review";
 type JobStatus =
@@ -124,6 +125,8 @@ export default function JobManagement({
       recurrence: "None",
     },
   });
+
+  const router=useRouter()
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
@@ -282,6 +285,7 @@ export default function JobManagement({
       technicianId: updatedJob.technicianId,
     };
 
+    console.log(session?.user?.userId, "user")
     console.log(dataToSend, "send this data");
 
     console.log("Submitting Job:", updatedJob);
@@ -358,10 +362,12 @@ export default function JobManagement({
     });
   };
 
-  const handleEditJob = (job: Job) => {
-    setCurrentJob(job);
-    setEditingJobId(job.id);
-    setStep("create");
+  const handleEditJob = (job: string) => {
+    
+    // setCurrentJob(job);
+    // setEditingJobId(job.id);
+    // setStep("create");
+    router.push("/callpro/jobs/" + job + "/edit")
   };
 
   const filteredClients = customers.filter(
@@ -791,7 +797,7 @@ export default function JobManagement({
 
   const renderJobList = () => (
     <div className="space-y-4">
-      {alljobs.map((job: any) => (
+      {alljobs?.map((job: any) => (
         <Card key={job.id}>
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
@@ -805,38 +811,38 @@ export default function JobManagement({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <p className="font-semibold">Description</p>
-                <p>{job.description || 'No description provided'}</p>
+                <p>{job?.description || 'No description provided'}</p>
               </div>
               <div>
                 <p className="font-semibold">Job Type</p>
-                <p>{job.jobType?.name || 'Unknown'}</p>
+                <p>{job?.jobType?.name || 'Unknown'}</p>
               </div>
               <div>
                 <p className="font-semibold">Location</p>
                 {/* Display detailed location info */}
                 <p>
-                  {job.location?.city ? `${job.location.city}, ${job.location.state}` : 'Location not specified'}
-                  {job.location?.zip ? ` - ${job.location.zip}` : ''}
-                  {job.location?.otherinfo ? ` (${job.location.otherinfo})` : ''}
+                  {job?.location?.city ? `${job?.location.city}, ${job?.location.state}` : 'Location not specified'}
+                  {job?.location?.zip ? ` - ${job?.location.zip}` : ''}
+                  {job?.location?.otherinfo ? ` (${job?.location.otherinfo})` : ''}
                 </p>
               </div>
               <div>
                 <p className="font-semibold">Start Date</p>
-                <p>{job.jobSchedule?.startDate ? format(new Date(job.jobSchedule.startDate), 'PPP') : 'Not set'}</p>
+                <p>{job?.jobSchedule?.startDate ? format(new Date(job?.jobSchedule.startDate), 'PPP') : 'Not set'}</p>
               </div>
               <div>
                 <p className="font-semibold">End Date</p>
-                <p>{job.jobSchedule?.endDate ? format(new Date(job.jobSchedule.endDate), 'PPP') : 'Not set'}</p>
+                <p>{job?.jobSchedule?.endDate ? format(new Date(job?.jobSchedule.endDate), 'PPP') : 'Not set'}</p>
               </div>
               <div>
                 <p className="font-semibold">Clients</p>
                 {/* Display client names */}
-                <p>{job.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</p>
+                <p>{job?.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</p>
               </div>
               <div>
                 <p className="font-semibold">Technicians</p>
                 {/* Display technician names */}
-                <p>{job.technicians.map((tech: any) => `${tech?.technician?.firstName} ${tech?.technician?.lastName}`).join(', ') || 'No technicians'}</p>
+                <p>{job?.technicians.map((tech: any) => `${tech?.technician?.firstName} ${tech?.technician?.lastName}`).join(', ') || 'No technicians'}</p>
               </div>
             </div>
           </CardContent>
@@ -847,12 +853,12 @@ export default function JobManagement({
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>{job.name}</DialogTitle>
+                  <DialogTitle>{job?.name}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Client</Label>
-                    <span className="col-span-3">{job.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</span>
+                    <span className="col-span-3">{job?.clients?.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Technician</Label>
@@ -885,7 +891,7 @@ export default function JobManagement({
                 </div>
               </DialogContent>
             </Dialog>
-             <Button onClick={() => handleEditClick(job.id)}>Edit Job</Button>
+             <Button onClick={() => handleEditJob(job.id)}>Edit Job</Button>
           </CardFooter>
         </Card>
       ))}
@@ -937,7 +943,5 @@ export default function JobManagement({
     </div>
   );
 }
-function handleEditClick(id: any): void {
-  throw new Error("Function not implemented.");
-}
+
 
