@@ -149,7 +149,7 @@ export default function JobManagement({
   };
   const { data: session } = useSession();
 
-  console.log(session, "session");
+ 
 
   const removeClient = (clientId: string) => {
     setSelectedClients((prev) => prev.filter((c) => c.id !== clientId));

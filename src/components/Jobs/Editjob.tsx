@@ -1,101 +1,74 @@
-"use client"
+'use client'
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Formik, Form, Field } from 'formik'
+import { Formik, Form, Field, FormikErrors } from 'formik'
 import * as Yup from 'yup'
 import { Button } from "@/shadcn/ui/button"
 import { Input } from "@/shadcn/ui/input"
 import { Label } from "@/shadcn/ui/label"
 import { Textarea } from "@/shadcn/ui/textarea"
-import { Select, SelectItem } from "@/shadcn/ui/select"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/shadcn/ui/card"
+import { Select } from "@/shadcn/ui/select"
 import { format, parse } from 'date-fns'
+import toast from 'react-hot-toast'
+import { baseUrl } from '@/utils/constants'
+import { useSession } from 'next-auth/react'
+import axios from 'axios'
 
-// JobSchema for validation
 const JobSchema = Yup.object().shape({
-  name: Yup.string().required('Required'),
+  name: Yup.string().required('Job name is required'),
   description: Yup.string(),
-  status: Yup.string().required('Required'),
-  jobTypeId: Yup.string().required('Required'),
-  clientId: Yup.string().required('Required'),
-  technicianId: Yup.string().required('Required'),
-  startDate: Yup.date().nullable(),
+  status: Yup.string().required('Status is required'),
+  jobType: Yup.string().required('Job type is required'),
+  startDate: Yup.date().nullable().required('Start date is required'),
   endDate: Yup.date().nullable().min(Yup.ref('startDate'), "End date can't be before start date"),
+  location: Yup.object().shape({
+    city: Yup.string().required('City is required'),
+    state: Yup.string().required('State is required'),
+    zip: Yup.string(),
+    otherinfo: Yup.string()
+  })
 })
-
-// Define JobEditor class to manage the editing process
-class JobEditor {
-  constructor(public jobId: string) {}
-
-  // Fetch job details
-  async fetchJobDetails() {
-    const response = await fetch(`/api/jobs/${this.jobId}`);
-    const jobData = await response.json();
-    return jobData;
-  }
-
-  // Fetch all required data (jobTypes, clients, technicians)
-  async fetchDependencies() {
-    const [jobTypesRes, clientsRes, techniciansRes] = await Promise.all([
-      fetch('/api/job-types'),
-      fetch('/api/clients'),
-      fetch('/api/technicians'),
-    ]);
-
-    return {
-      jobTypes: await jobTypesRes.json(),
-      clients: await clientsRes.json(),
-      technicians: await techniciansRes.json(),
-    };
-  }
-}
 
 export default function EditJobPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const [jobTypes, setJobTypes] = useState<any[]>([])
-  const [clients, setClients] = useState<any[]>([])
-  const [technicians, setTechnicians] = useState<any[]>([])
-  const [initialValues, setInitialValues] = useState<any>({
-    name: '',
-    description: '',
-    status: '',
-    jobTypeId: '',
-    clientId: '',
-    technicianId: '',
-    startDate: '',
-    endDate: '',
-  })
+  const [initialValues, setInitialValues] = useState<any>(null)
+  const { data: session } = useSession()
 
   useEffect(() => {
-    const loadJobData = async () => {
-      const jobEditor = new JobEditor(params.id);
-
+    const fetchJob = async () => {
       try {
-        // Fetch job and dependencies
-        const jobData = await jobEditor.fetchJobDetails();
-        const { jobTypes, clients, technicians } = await jobEditor.fetchDependencies();
+        const response = await axios.get(`${baseUrl}${params.id}/retrievejob`, {
+          headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+          },
+        })
 
-        setJobTypes(jobTypes);
-        setClients(clients);
-        setTechnicians(technicians);
+        const data = response.data?.data
 
         setInitialValues({
-          ...jobData,
-          jobTypeId: jobData.jobTypeId || '',
-          clientId: jobData.clientId || '',
-          technicianId: jobData.technicianId || '',
-          startDate: jobData.jobSchedule?.startDate ? format(new Date(jobData.jobSchedule.startDate), 'yyyy-MM-dd') : '',
-          endDate: jobData.jobSchedule?.endDate ? format(new Date(jobData.jobSchedule.endDate), 'yyyy-MM-dd') : '',
-        });
+          name: data.name || '',
+          description: data.description || '',
+          status: data.status || '',
+          jobType: data.jobType?.name || '',
+          startDate: data.jobschedule?.startDate ? format(new Date(data.jobschedule.startDate), 'yyyy-MM-dd') : '',
+          endDate: data.jobschedule?.endDate ? format(new Date(data.jobschedule.endDate), 'yyyy-MM-dd') : '',
+          location: {
+            city: data.location?.city || '',
+            state: data.location?.state || '',
+            zip: data.location?.zip || '',
+            otherinfo: data.location?.otherinfo || '',
+          }
+        })
       } catch (error) {
-        console.error('Error fetching job details:', error);
+        toast.error('Failed to load job details. Please try again.')
       }
     }
 
-    loadJobData();
-  }, [params.id]);
+    fetchJob()
+  }, [params.id])
 
-  // Handle form submission
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
       const response = await fetch(`/api/jobs/${params.id}`, {
@@ -104,46 +77,53 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         body: JSON.stringify({
           ...values,
           jobSchedule: {
-            startDate: values.startDate ? parse(values.startDate, 'yyyy-MM-dd', new Date()).toISOString() : null,
-            endDate: values.endDate ? parse(values.endDate, 'yyyy-MM-dd', new Date()).toISOString() : null,
+            startDate: values.startDate ? new Date(values.startDate).toISOString() : null,
+            endDate: values.endDate ? new Date(values.endDate).toISOString() : null,
           },
-        }),
-      });
+          jobType: { name: values.jobType }
+        })
+      })
 
-      if (!response.ok) throw new Error('Failed to update job');
-      router.push('/jobs'); // Navigate to job list after successful update
+      if (!response.ok) throw new Error('Failed to update job')
+
+      toast.success('Job updated successfully!')
+      router.push('/jobs')
     } catch (error) {
-      console.error('Error updating job:', error);
+      toast.error('Failed to update job. Please try again.')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
+
+  if (!initialValues) return <div>Loading...</div>
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Edit Job</CardTitle>
+        <CardTitle>Edit Job: {initialValues.name}</CardTitle>
       </CardHeader>
       <Formik
         initialValues={initialValues}
         validationSchema={JobSchema}
         onSubmit={handleSubmit}
-        enableReinitialize
+        validate={(values) => {
+          try {
+            JobSchema.validateSync(values, { abortEarly: false })
+          } catch (errors) {}
+          return {}
+        }}
       >
-        {({ errors, touched, isSubmitting }) => (
+        {({ isSubmitting }) => (
           <Form>
             <CardContent className="space-y-4">
-              {/* Job Name */}
               <div className="space-y-2">
                 <Label htmlFor="name">Job Name</Label>
                 <Field name="name">
                   {({ field }: any) => (
-                    <Input id="name" {...field} className={errors.name && touched.name ? "border-red-500" : ""} />
+                    <Input id="name" {...field} />
                   )}
                 </Field>
               </div>
-
-              {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Field name="description">
@@ -152,66 +132,32 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                   )}
                 </Field>
               </div>
-
-              {/* Job Status */}
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Field name="status">
                   {({ field }: any) => (
-                    <Input id="status" {...field} className={errors.status && touched.status ? "border-red-500" : ""} />
-                  )}
-                </Field>
-              </div>
-
-              {/* Job Type */}
-              <div className="space-y-2">
-                <Label htmlFor="jobTypeId">Job Type</Label>
-                <Field name="jobTypeId" as="select">
-                  {({ field }: any) => (
-                    <Select {...field} className={errors.jobTypeId && touched.jobTypeId ? "border-red-500" : ""}>
-                      {jobTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
+                    <Select id="status" {...field}>
+                      <option value="">Select a status</option>
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
                     </Select>
                   )}
                 </Field>
               </div>
-
-              {/* Client */}
               <div className="space-y-2">
-                <Label htmlFor="clientId">Client</Label>
-                <Field name="clientId" as="select">
+                <Label htmlFor="jobType">Job Type</Label>
+                <Field name="jobType">
                   {({ field }: any) => (
-                    <Select {...field} className={errors.clientId && touched.clientId ? "border-red-500" : ""}>
-                      {clients.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.name}
-                        </SelectItem>
-                      ))}
+                    <Select id="jobType" {...field}>
+                      <option value="">Select a job type</option>
+                      <option value="Maintenance">Maintenance</option>
+                      <option value="Repair">Repair</option>
+                      <option value="Installation">Installation</option>
                     </Select>
                   )}
                 </Field>
               </div>
-
-              {/* Technician */}
-              <div className="space-y-2">
-                <Label htmlFor="technicianId">Technician</Label>
-                <Field name="technicianId" as="select">
-                  {({ field }: any) => (
-                    <Select {...field} className={errors.technicianId && touched.technicianId ? "border-red-500" : ""}>
-                      {technicians.map((technician) => (
-                        <SelectItem key={technician.id} value={technician.id}>
-                          {technician.name}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                  )}
-                </Field>
-              </div>
-
-              {/* Start Date */}
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
                 <Field name="startDate">
@@ -220,8 +166,6 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                   )}
                 </Field>
               </div>
-
-              {/* End Date */}
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>
                 <Field name="endDate">
@@ -230,9 +174,41 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                   )}
                 </Field>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="location.city">City</Label>
+                <Field name="location.city">
+                  {({ field }: any) => (
+                    <Input id="location.city" {...field} />
+                  )}
+                </Field>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location.state">State</Label>
+                <Field name="location.state">
+                  {({ field }: any) => (
+                    <Input id="location.state" {...field} />
+                  )}
+                </Field>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location.zip">ZIP Code</Label>
+                <Field name="location.zip">
+                  {({ field }: any) => (
+                    <Input id="location.zip" {...field} />
+                  )}
+                </Field>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="location.otherinfo">Additional Location Info</Label>
+                <Field name="location.otherinfo">
+                  {({ field }: any) => (
+                    <Input id="location.otherinfo" {...field} />
+                  )}
+                </Field>
+              </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => router.push('/callpro/jobs')}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => router.push('/jobs')}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Updating...' : 'Update Job'}
               </Button>
@@ -241,5 +217,6 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         )}
       </Formik>
     </Card>
- 
-      )}
+  )
+}
+
