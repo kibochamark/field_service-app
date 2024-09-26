@@ -16,6 +16,7 @@ import { baseUrl } from '@/utils/constants'
 import { useSession } from 'next-auth/react'
 import axios from 'axios'
 
+// Validation schema for the form
 const JobSchema = Yup.object().shape({
   name: Yup.string().required('Job name is required'),
   description: Yup.string().required('Description is required'),
@@ -30,17 +31,20 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
   const [initialValues, setInitialValues] = useState<any>(null)
   const { data: session } = useSession()  
   const [jobTypes, setJobTypes] = useState<any[]>([])
-  const statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'] // Assuming these are your statuses
+  const statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'] // Job status options
 
+  // Fetch the job data and job types on component mount
   useEffect(() => {
     const fetchJobData = async () => {
       try {
+        console.log('Fetching job data...');
+
         const [jobResponse, jobTypesResponse] = await Promise.all([
           axios.get(`${baseUrl}${params.id}/retrievejob`, {
             headers: {
               Authorization: `Bearer ${session?.user?.access_token}`,
             },
-          }),         
+          }),
           axios.get(`${baseUrl}jobtype`, {
             headers: {
               Authorization: `Bearer ${session?.user?.access_token}`,
@@ -49,9 +53,10 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         ])
 
         const jobData = jobResponse.data?.data
-        
+
         setJobTypes(jobTypesResponse.data?.data || [])
 
+        // Set initial values for the form based on the fetched job data
         setInitialValues({
           name: jobData.name || '',
           description: jobData.description || '',
@@ -78,29 +83,68 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         })
       } catch (error) {
         toast.error('Failed to load job details. Please try again.')
+        console.error('Error fetching job data:', error);
       }
     }
 
-    fetchJobData()
+    if (session) {
+      fetchJobData()
+    } else {
+      console.log('Session is not available yet.')
+    }
   }, [params.id, session])
 
+  // Handle form submission
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
+    console.log('Form submitted with values:', values);
+
     try {
-      await axios.put(`${baseUrl}${params.id}/updatejob`, values, {
+      // Build the correct payload structure for the API
+      const payload = {
+        name: values.name,
+        description: values.description,
+        status: values.status,
+        jobType: values.jobType,
+        jobschedule: {
+          startDate: values.startDate,
+          endDate: values.endDate,
+        },
+        location: {
+          city: values.location.city,
+          state: values.location.state,
+          zip: values.location.zip,
+          otherinfo: values.location.otherinfo,
+        },
+        clients: values.clients.map((client: any) => ({
+          clientId: client.id,
+          firstName: client.firstName,
+          lastName: client.lastName,
+        })),
+        technicians: values.technicians.map((tech: any) => ({
+          technicianId: tech.id,
+          firstName: tech.firstName,
+          lastName: tech.lastName,
+        })),
+      }
+
+      // Send the update request to the API
+      await axios.put(`${baseUrl}${params.id}/updatejob`, payload, {
         headers: {
           Authorization: `Bearer ${session?.user?.access_token}`,
         },
-      })
-      toast.success('Job updated successfully')
-      router.push('/jobs')
-    } catch (error) {
-      toast.error('Failed to update job. Please try again.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
+      });
 
-  if (!initialValues) return <div>Loading...</div>
+      toast.success('Job updated successfully');
+      router.push('/jobs'); // Navigate back to the jobs list
+    } catch (error) {
+      console.error('Failed to update job details:', error);
+      toast.error('Failed to update job details.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!initialValues) return <div>Loading...</div>;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -160,7 +204,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                   <SelectContent>
                     {jobTypes.map((jobType) => (
                       <SelectItem key={jobType.id} value={jobType.id}>
-                        {jobType.name} 
+                        {jobType.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -181,71 +225,55 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
 
               {/* Clients */}
               <div className="space-y-2">
-  <Label>Clients</Label>
-  <FieldArray name="clients">
-    {({ remove, push }) => (
-      <>
-        {values.clients.map((client: any, index: number) => (
-          <div key={index} className="space-y-2">
-            <Field name={`clients.${index}.firstName`} as={Input} placeholder="First Name" />
-            <Field name={`clients.${index}.lastName`} as={Input} placeholder="Last Name" />
-            
-            {/* Wrap buttons in a flex container */}
-            <div className="flex space-x-2 justify-end">
-              <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={() => remove(index)}>Remove Client</Button>
-              {index === values.clients.length - 1 && (
-                <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Client</Button>
-              )}
-            </div>
-          </div>
-        ))}
-      </>
-    )}
-  </FieldArray>
-</div>
-
+                <Label>Clients</Label>
+                <FieldArray name="clients">
+                  {({ remove, push }) => (
+                    <>
+                      {values.clients.map((client: any, index: number) => (
+                        <div key={index} className="space-y-2">
+                          <Field name={`clients.${index}.firstName`} as={Input} placeholder="First Name" />
+                          <Field name={`clients.${index}.lastName`} as={Input} placeholder="Last Name" />
+                          <div className="flex space-x-2 justify-end">
+                            <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={() => remove(index)}>Remove Client</Button>
+                            {index === values.clients.length - 1 && (
+                              <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Client</Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </FieldArray>
+              </div>
 
               {/* Technicians */}
               <div className="space-y-2">
-  <Label>Technicians</Label>
-  <FieldArray name="technicians">
-    {({ remove, push }) => (
-      <>
-        {values.technicians.map((technician: any, index: number) => (
-          <div key={index} className="space-y-2">
-            <Field name={`technicians.${index}.firstName`} as={Input} placeholder="First Name" />
-            <Field name={`technicians.${index}.lastName`} as={Input} placeholder="Last Name" />
-            
-            {/* Wrap buttons in a flex container */}
-            <div className="flex space-x-2 justify-end">
-              {/* Red Remove Technician button */}
-              <Button
-                type="button"
-                variant="destructive"  // Assuming you have a red destructive variant, or you can use className
-                className="bg-red-500 text-white hover:bg-red-600"
-                onClick={() => remove(index)}
-              >
-                Remove Technician
-              </Button>
-              
-              {/* Only show Add button next to the last technician */}
-              {index === values.technicians.length - 1 && (
-                <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>
-                  Add Technician
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
-      </>
-    )}
-  </FieldArray>
-</div>
-
+                <Label>Technicians</Label>
+                <FieldArray name="technicians">
+                  {({ remove, push }) => (
+                    <>
+                      {values.technicians.map((tech: any, index: number) => (
+                        <div key={index} className="space-y-2">
+                          <Field name={`technicians.${index}.firstName`} as={Input} placeholder="First Name" />
+                          <Field name={`technicians.${index}.lastName`} as={Input} placeholder="Last Name" />
+                          <div className="flex space-x-2 justify-end">
+                            <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={() => remove(index)}>Remove Technician</Button>
+                            {index === values.technicians.length - 1 && (
+                              <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Technician</Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </FieldArray>
+              </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => router.push('/callpro/jobs')}>Cancel</Button>
-              <Button type="submit" disabled={isSubmitting}>
+
+            <CardFooter className="space-x-2">
+              
+              <Button type="button" onClick={() => router.push('/callpro/jobs')} className="bg-gray-500 text-white hover:bg-gray-600">Cancel</Button>
+              <Button type="submit" className="bg-blue-500 text-white hover:bg-blue-600" disabled={isSubmitting}>
                 {isSubmitting ? 'Updating...' : 'Update Job'}
               </Button>
             </CardFooter>
