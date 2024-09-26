@@ -160,7 +160,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                   <SelectContent>
                     {jobTypes.map((jobType) => (
                       <SelectItem key={jobType.id} value={jobType.id}>
-                        {jobType.name} {/* Display jobType name */}
+                        {jobType.name} 
                       </SelectItem>
                     ))}
                   </SelectContent>
