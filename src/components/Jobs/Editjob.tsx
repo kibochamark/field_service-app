@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Formik, Form, Field, FormikErrors } from 'formik'
+import { Formik, Form, Field, FieldArray } from 'formik'
 import * as Yup from 'yup'
 import { Button } from "@/shadcn/ui/button"
 import { Input } from "@/shadcn/ui/input"
 import { Label } from "@/shadcn/ui/label"
 import { Textarea } from "@/shadcn/ui/textarea"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/shadcn/ui/card"
-import { Select } from "@/shadcn/ui/select"
-import { format, parse } from 'date-fns'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select"
+import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import { baseUrl } from '@/utils/constants'
 import { useSession } from 'next-auth/react'
@@ -18,75 +18,80 @@ import axios from 'axios'
 
 const JobSchema = Yup.object().shape({
   name: Yup.string().required('Job name is required'),
-  description: Yup.string(),
+  description: Yup.string().required('Description is required'),
   status: Yup.string().required('Status is required'),
-  jobType: Yup.string().required('Job type is required'),
-  startDate: Yup.date().nullable().required('Start date is required'),
-  endDate: Yup.date().nullable().min(Yup.ref('startDate'), "End date can't be before start date"),
-  location: Yup.object().shape({
-    city: Yup.string().required('City is required'),
-    state: Yup.string().required('State is required'),
-    zip: Yup.string(),
-    otherinfo: Yup.string()
-  })
+  jobType: Yup.string().required('Job Type is required'),
+  startDate: Yup.date().required('Start Date is required'),
+  endDate: Yup.date().required('End Date is required'),
 })
 
 export default function EditJobPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [initialValues, setInitialValues] = useState<any>(null)
-  const { data: session } = useSession()
+  const { data: session } = useSession()  
+  const [jobTypes, setJobTypes] = useState<any[]>([])
+  const statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'] // Assuming these are your statuses
 
   useEffect(() => {
-    const fetchJob = async () => {
+    const fetchJobData = async () => {
       try {
-        const response = await axios.get(`${baseUrl}${params.id}/retrievejob`, {
-          headers: {
-            Authorization: `Bearer ${session?.user?.access_token}`,
-          },
-        })
+        const [jobResponse, jobTypesResponse] = await Promise.all([
+          axios.get(`${baseUrl}${params.id}/retrievejob`, {
+            headers: {
+              Authorization: `Bearer ${session?.user?.access_token}`,
+            },
+          }),         
+          axios.get(`${baseUrl}jobtype`, {
+            headers: {
+              Authorization: `Bearer ${session?.user?.access_token}`,
+            },
+          })
+        ])
 
-        const data = response.data?.data
+        const jobData = jobResponse.data?.data
+        
+        setJobTypes(jobTypesResponse.data?.data || [])
 
         setInitialValues({
-          name: data.name || '',
-          description: data.description || '',
-          status: data.status || '',
-          jobType: data.jobType?.name || '',
-          startDate: data.jobschedule?.startDate ? format(new Date(data.jobschedule.startDate), 'yyyy-MM-dd') : '',
-          endDate: data.jobschedule?.endDate ? format(new Date(data.jobschedule.endDate), 'yyyy-MM-dd') : '',
+          name: jobData.name || '',
+          description: jobData.description || '',
+          status: jobData.status || '',
+          jobType: jobData.jobType?.id || '', // set jobType as id
+          startDate: jobData.jobschedule?.startDate ? format(new Date(jobData.jobschedule.startDate), 'yyyy-MM-dd') : '',
+          endDate: jobData.jobschedule?.endDate ? format(new Date(jobData.jobschedule.endDate), 'yyyy-MM-dd') : '',
           location: {
-            city: data.location?.city || '',
-            state: data.location?.state || '',
-            zip: data.location?.zip || '',
-            otherinfo: data.location?.otherinfo || '',
-          }
+            city: jobData.location?.city || '',
+            state: jobData.location?.state || '',
+            zip: jobData.location?.zip || '',
+            otherinfo: jobData.location?.otherinfo || ''
+          },
+          clients: jobData.clients.map((client: any) => ({
+            id: client.client.id,
+            firstName: client.client.firstName,
+            lastName: client.client.lastName
+          })),
+          technicians: jobData.technicians.map((tech: any) => ({
+            id: tech.technician.id,
+            firstName: tech.technician.firstName,
+            lastName: tech.technician.lastName
+          }))
         })
       } catch (error) {
         toast.error('Failed to load job details. Please try again.')
       }
     }
 
-    fetchJob()
-  }, [params.id])
+    fetchJobData()
+  }, [params.id, session])
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
-      const response = await fetch(`/api/jobs/${params.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...values,
-          jobSchedule: {
-            startDate: values.startDate ? new Date(values.startDate).toISOString() : null,
-            endDate: values.endDate ? new Date(values.endDate).toISOString() : null,
-          },
-          jobType: { name: values.jobType }
-        })
+      await axios.put(`${baseUrl}${params.id}/updatejob`, values, {
+        headers: {
+          Authorization: `Bearer ${session?.user?.access_token}`,
+        },
       })
-
-      if (!response.ok) throw new Error('Failed to update job')
-
-      toast.success('Job updated successfully!')
+      toast.success('Job updated successfully')
       router.push('/jobs')
     } catch (error) {
       toast.error('Failed to update job. Please try again.')
@@ -106,105 +111,110 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         initialValues={initialValues}
         validationSchema={JobSchema}
         onSubmit={handleSubmit}
-        validate={(values) => {
-          try {
-            JobSchema.validateSync(values, { abortEarly: false })
-          } catch (errors) {}
-          return {}
-        }}
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, values, setFieldValue }) => (
           <Form>
             <CardContent className="space-y-4">
+              {/* Job Name */}
               <div className="space-y-2">
                 <Label htmlFor="name">Job Name</Label>
-                <Field name="name">
-                  {({ field }: any) => (
-                    <Input id="name" {...field} />
-                  )}
-                </Field>
+                <Field name="name" as={Input} id="name" />
               </div>
+
+              {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Field name="description">
-                  {({ field }: any) => (
-                    <Textarea id="description" {...field} />
-                  )}
-                </Field>
+                <Field name="description" as={Textarea} id="description" />
               </div>
+
+              {/* Status */}
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Field name="status">
-                  {({ field }: any) => (
-                    <Select id="status" {...field}>
-                      <option value="">Select a status</option>
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </Select>
-                  )}
-                </Field>
+                <Select
+                  onValueChange={(value) => setFieldValue('status', value)}
+                  defaultValue={values.status}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Job Type */}
               <div className="space-y-2">
                 <Label htmlFor="jobType">Job Type</Label>
-                <Field name="jobType">
-                  {({ field }: any) => (
-                    <Select id="jobType" {...field}>
-                      <option value="">Select a job type</option>
-                      <option value="Maintenance">Maintenance</option>
-                      <option value="Repair">Repair</option>
-                      <option value="Installation">Installation</option>
-                    </Select>
-                  )}
-                </Field>
+                <Select
+                  onValueChange={(value) => setFieldValue('jobType', value)}
+                  defaultValue={values.jobType}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTypes.map((jobType) => (
+                      <SelectItem key={jobType.id} value={jobType.id}>
+                        {jobType.name} {/* Display jobType name */}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Start Date */}
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
-                <Field name="startDate">
-                  {({ field }: any) => (
-                    <Input id="startDate" type="date" {...field} />
-                  )}
-                </Field>
+                <Field name="startDate" type="date" as={Input} id="startDate" />
               </div>
+
+              {/* End Date */}
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>
-                <Field name="endDate">
-                  {({ field }: any) => (
-                    <Input id="endDate" type="date" {...field} />
-                  )}
-                </Field>
+                <Field name="endDate" type="date" as={Input} id="endDate" />
               </div>
+
+              {/* Clients */}
               <div className="space-y-2">
-                <Label htmlFor="location.city">City</Label>
-                <Field name="location.city">
-                  {({ field }: any) => (
-                    <Input id="location.city" {...field} />
+                <Label>Clients</Label>
+                <FieldArray name="clients">
+                  {({ remove, push }) => (
+                    <>
+                      {values.clients.map((client: any, index: number) => (
+                        <div key={index} className="space-y-2">
+                          <Field name={`clients.${index}.firstName`} as={Input} placeholder="First Name" />
+                          <Field name={`clients.${index}.lastName`} as={Input} placeholder="Last Name" />
+                          <Button type="button" onClick={() => remove(index)}>Remove Client</Button>
+                        </div>
+                      ))}
+                      <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Client</Button>
+                    </>
                   )}
-                </Field>
+                </FieldArray>
               </div>
+
+              {/* Technicians */}
               <div className="space-y-2">
-                <Label htmlFor="location.state">State</Label>
-                <Field name="location.state">
-                  {({ field }: any) => (
-                    <Input id="location.state" {...field} />
+                <Label>Technicians</Label>
+                <FieldArray name="technicians">
+                  {({ remove, push }) => (
+                    <>
+                      {values.technicians.map((technician: any, index: number) => (
+                        <div key={index} className="space-y-2">
+                          <Field name={`technicians.${index}.firstName`} as={Input} placeholder="First Name" />
+                          <Field name={`technicians.${index}.lastName`} as={Input} placeholder="Last Name" />
+                          <Button type="button" onClick={() => remove(index)}>Remove Technician</Button>
+                        </div>
+                      ))}
+                      <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Technician</Button>
+                    </>
                   )}
-                </Field>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location.zip">ZIP Code</Label>
-                <Field name="location.zip">
-                  {({ field }: any) => (
-                    <Input id="location.zip" {...field} />
-                  )}
-                </Field>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location.otherinfo">Additional Location Info</Label>
-                <Field name="location.otherinfo">
-                  {({ field }: any) => (
-                    <Input id="location.otherinfo" {...field} />
-                  )}
-                </Field>
+                </FieldArray>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
@@ -219,4 +229,3 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
     </Card>
   )
 }
-
