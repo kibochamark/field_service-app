@@ -6,7 +6,14 @@ import AddEmployee from "./AddEmployee";
 import EditEmployee from "./EditEmployee";
 import { Button } from "@/shadcn/ui/button";
 import { Badge } from "@/shadcn/ui/badge";
-import { Edit, File, ListFilter, MoreHorizontal, PlusCircle, Trash } from "lucide-react";
+import {
+  Edit,
+  File,
+  ListFilter,
+  MoreHorizontal,
+  PlusCircle,
+  Trash,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,12 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shadcn/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,7 +51,10 @@ interface HandleAddEditProps {
   employees: any[];
 }
 
-const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [] }) => {
+const HandleAddEdit: React.FC<HandleAddEditProps> = ({
+  roles = [],
+  employees = [],
+}) => {
   const { isAdd, isEdit, currentEmployee } = useSelector(
     (state: RootState) => state.employee
   );
@@ -100,12 +105,12 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
         headers: {
           Authorization: "Bearer " + session?.user?.access_token,
         },
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
         const errorResponse = await response.json();
-        throw new Error(errorResponse.message || 'Failed to delete employee');
+        throw new Error(errorResponse.message || "Failed to delete employee");
       }
 
       toast.success("Employee deleted successfully");
@@ -148,26 +153,34 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
                 className="px-4 py-2 border rounded-md flex-grow w-full sm:w-auto"
               >
                 <option value="">All Roles</option>
-                {Array.isArray(roles) && roles.map((role) => (
-                  <option key={role.name} value={role.name}>
-                    {role.name}
-                  </option>
-                ))}
+                {Array.isArray(roles) &&
+                  roles.map((role) => (
+                    <option key={role.name} value={role.name}>
+                      {role.name}
+                    </option>
+                  ))}
               </select>
             </div>
-            <Button
-              size="sm"
-              className="h-8 gap-1 w-full sm:w-auto"
-              onClick={() => {
-                dispatch(handleAdd({ isAdd: true }));
-              }}
-            >
-              <PlusCircle className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Employee
-              </span>
-            </Button>
-            <BulkImportButton />
+            {session?.user.role === "business owner" ||
+            session?.user.role === "business admin" ? (
+              <Button
+                size="sm"
+                className="h-8 gap-1 w-full sm:w-auto"
+                onClick={() => {
+                  dispatch(handleAdd({ isAdd: true }));
+                }}
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Add Employee
+                </span>
+              </Button>
+            ) : null}
+            {session?.user.role === "business owner" ||
+            session?.user.role === "business admin" ? (
+              <BulkImportButton />
+            ) : null}
           </div>
           <TabsContent value="all">
             <Card>
@@ -200,7 +213,9 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
                               <TableCell key={field}>
                                 {field === "permissions" ? (
                                   <Badge variant="outline">
-                                    {getPermissionsForRole(employee.role?.name).join(", ") || "No Permissions"}
+                                    {getPermissionsForRole(
+                                      employee.role?.name
+                                    ).join(", ") || "No Permissions"}
                                   </Badge>
                                 ) : field === "role" ? (
                                   <Badge variant="outline">
@@ -213,42 +228,53 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
                                 )}
                               </TableCell>
                             ))}
-                            <TableCell>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button aria-haspopup="true" size="icon" variant="ghost">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Toggle menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      dispatch(
-                                        handleEdit({
-                                          isEdit: true,
-                                          employee,
-                                        })
-                                      )
-                                    }
-                                    className="text-blue-600"
-                                  >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      handleDeleteEmployee(employee.id);
-                                    }}
-                                    className="text-red-600"
-                                  >
-                                    <Trash className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
+                            {session?.user.role === "business owner" ||
+                            session?.user.role === "business admin" ? (
+                              <TableCell>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      aria-haspopup="true"
+                                      size="icon"
+                                      variant="ghost"
+                                    >
+                                      <MoreHorizontal className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        Toggle menu
+                                      </span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>
+                                      Actions
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        dispatch(
+                                          handleEdit({
+                                            isEdit: true,
+                                            employee,
+                                          })
+                                        )
+                                      }
+                                      className="text-blue-600"
+                                    >
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        handleDeleteEmployee(employee.id);
+                                      }}
+                                      className="text-red-600"
+                                    >
+                                      <Trash className="mr-2 h-4 w-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            ) : null}
                           </TableRow>
                         ))}
                       </TableBody>
@@ -256,7 +282,8 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
                   </div>
                 ) : (
                   <div className="text-center text-muted-foreground">
-                    No employees found. Please adjust your filters or add new employees.
+                    No employees found. Please adjust your filters or add new
+                    employees.
                   </div>
                 )}
               </CardContent>
