@@ -166,7 +166,7 @@ export function Jobview() {
                 </CardHeader>
                 {session?.user.role === "business owner" ||
                 session?.user.role === "business admin" ||
-                sessionStorage?.user?.role === "dispatcher" ? (
+                session?.user?.role === "dispatcher" ? (
                   <CardFooter>
                     <Link href="/callpro/createjob">
                       <Button
