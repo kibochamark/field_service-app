@@ -232,7 +232,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => router.push('callpro/jobs')}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => router.push('/callpro/jobs')}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Updating...' : 'Update Job'}
               </Button>
