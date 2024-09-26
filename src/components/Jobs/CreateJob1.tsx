@@ -364,9 +364,7 @@ export default function JobManagement({
 
   const handleEditJob = (job: string) => {
     
-    // setCurrentJob(job);
-    // setEditingJobId(job.id);
-    // setStep("create");
+    
     router.push("/callpro/jobs/" + job + "/edit")
   };
 

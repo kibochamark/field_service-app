@@ -35,7 +35,6 @@ interface allInvoices {
   updatedAt: string;
 }
 
-
 export const InvoiceColumns: ColumnDef<allInvoices>[] = [
   {
     accessorKey: "clientId",
@@ -116,6 +115,7 @@ export const InvoiceColumns: ColumnDef<allInvoices>[] = [
 import React from "react";
 import { DataTableColumnHeader } from "../GlobalComponents/ColumnHeader";
 import StatusBadge from "./StatusBadge";
+import { useSession } from "next-auth/react";
 
 const Action = ({ row }: { row: any }) => {
   const router = useRouter();
@@ -123,9 +123,13 @@ const Action = ({ row }: { row: any }) => {
   function handleDelete(id: any): void {
     throw new Error("Function not implemented.");
   }
+  const { data: session } = useSession();
+
 
   return (
     <div>
+      {session?.user.role === "business owner" ||  session?.user.role === "business admin" ? (
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -143,6 +147,7 @@ const Action = ({ row }: { row: any }) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      ): null }
     </div>
   );
 };
