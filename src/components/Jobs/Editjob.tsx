@@ -181,44 +181,70 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
 
               {/* Clients */}
               <div className="space-y-2">
-                <Label>Clients</Label>
-                <FieldArray name="clients">
-                  {({ remove, push }) => (
-                    <>
-                      {values.clients.map((client: any, index: number) => (
-                        <div key={index} className="space-y-2">
-                          <Field name={`clients.${index}.firstName`} as={Input} placeholder="First Name" />
-                          <Field name={`clients.${index}.lastName`} as={Input} placeholder="Last Name" />
-                          <Button type="button" onClick={() => remove(index)}>Remove Client</Button>
-                        </div>
-                      ))}
-                      <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Client</Button>
-                    </>
-                  )}
-                </FieldArray>
-              </div>
+  <Label>Clients</Label>
+  <FieldArray name="clients">
+    {({ remove, push }) => (
+      <>
+        {values.clients.map((client: any, index: number) => (
+          <div key={index} className="space-y-2">
+            <Field name={`clients.${index}.firstName`} as={Input} placeholder="First Name" />
+            <Field name={`clients.${index}.lastName`} as={Input} placeholder="Last Name" />
+            
+            {/* Wrap buttons in a flex container */}
+            <div className="flex space-x-2 justify-end">
+              <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={() => remove(index)}>Remove Client</Button>
+              {index === values.clients.length - 1 && (
+                <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Client</Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </>
+    )}
+  </FieldArray>
+</div>
+
 
               {/* Technicians */}
               <div className="space-y-2">
-                <Label>Technicians</Label>
-                <FieldArray name="technicians">
-                  {({ remove, push }) => (
-                    <>
-                      {values.technicians.map((technician: any, index: number) => (
-                        <div key={index} className="space-y-2">
-                          <Field name={`technicians.${index}.firstName`} as={Input} placeholder="First Name" />
-                          <Field name={`technicians.${index}.lastName`} as={Input} placeholder="Last Name" />
-                          <Button type="button" onClick={() => remove(index)}>Remove Technician</Button>
-                        </div>
-                      ))}
-                      <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Technician</Button>
-                    </>
-                  )}
-                </FieldArray>
-              </div>
+  <Label>Technicians</Label>
+  <FieldArray name="technicians">
+    {({ remove, push }) => (
+      <>
+        {values.technicians.map((technician: any, index: number) => (
+          <div key={index} className="space-y-2">
+            <Field name={`technicians.${index}.firstName`} as={Input} placeholder="First Name" />
+            <Field name={`technicians.${index}.lastName`} as={Input} placeholder="Last Name" />
+            
+            {/* Wrap buttons in a flex container */}
+            <div className="flex space-x-2 justify-end">
+              {/* Red Remove Technician button */}
+              <Button
+                type="button"
+                variant="destructive"  // Assuming you have a red destructive variant, or you can use className
+                className="bg-red-500 text-white hover:bg-red-600"
+                onClick={() => remove(index)}
+              >
+                Remove Technician
+              </Button>
+              
+              {/* Only show Add button next to the last technician */}
+              {index === values.technicians.length - 1 && (
+                <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>
+                  Add Technician
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </>
+    )}
+  </FieldArray>
+</div>
+
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button type="button" variant="outline" onClick={() => router.push('/jobs')}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => router.push('/callpro/jobs')}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Updating...' : 'Update Job'}
               </Button>
