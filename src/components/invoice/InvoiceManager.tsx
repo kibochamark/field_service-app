@@ -14,6 +14,7 @@ import router from 'next/router'
 import { useRouter } from 'next/navigation'
 import { DataTable } from './data-table'
 import InvoiceColumns from './InvoiceColumns'
+import { useSession } from 'next-auth/react'
 
 interface InvoiceItem {
   description: string;
@@ -125,6 +126,10 @@ export default function EnhancedInvoiceManager() {
 
 
   const router = useRouter();
+
+  //session
+  const { data: session } = useSession()
+
 
   useEffect(() => {
     fetchInvoices();
@@ -264,12 +269,15 @@ export default function EnhancedInvoiceManager() {
       </div>
 
       {/* Create New Invoice Button */}
-      <div className="mb-6">
+      {session?.user.role === "business owner" ||  session?.user.role === "business admin" ?(
+        <div className="mb-6">
         <Button onClick={handleCreate} disabled={isCreating}>
           <Plus className="mr-2 h-4 w-4" /> Create New Invoice
         </Button>
       </div>
 
+      ) : null }
+      
       {/* All Invoices Table */}
       <Card className="mb-6">
         <CardHeader>
