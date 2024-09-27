@@ -59,7 +59,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         const jobData = jobResponse.data?.data;
         setJobTypes(jobTypesResponse.data?.data || []);
         setClients(clientsResponse.data?.data || []);
-        setTechnicians(techniciansResponse.data?.data || []);
+        setTechnicians(techniciansResponse.data || []);
 
         setInitialValues({
           name: jobData.name || '',
@@ -126,7 +126,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
       <CardHeader>
         <CardTitle>Edit Job: {initialValues.name}</CardTitle>
       </CardHeader>
-      <Formik initialValues={initialValues} validationSchema={JobSchema} onSubmit={handleSubmit}>
+      <Formik initialValues={initialValues}  onSubmit={handleSubmit}>
         {({ isSubmitting, values, setFieldValue }) => (
           <Form>
             <CardContent className="space-y-4">
