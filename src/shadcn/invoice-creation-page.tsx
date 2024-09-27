@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from "@/shadcn/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shadcn/ui/card"
-import { Input } from "@/shadcn/ui/input"
-import { Label } from "@/shadcn/ui/label"
-import { Textarea } from "@/shadcn/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Check, ChevronRight, Search, Trash2, Edit, Send, User } from 'lucide-react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/shadcn/ui/alert-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 // Mock client data
 const clients = [
@@ -18,7 +18,7 @@ const clients = [
 ]
 
 // ClientSearch component
-const ClientSearch = ({ onSelectClient }:{onSelectClient:any}) => {
+const ClientSearch = ({ onSelectClient }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
@@ -69,7 +69,7 @@ const ClientSearch = ({ onSelectClient }:{onSelectClient:any}) => {
 }
 
 // ClientInfo component
-const ClientInfo = ({ client }:{client:any}) => {
+const ClientInfo = ({ client }) => {
   if (!client) return null
 
   return (
@@ -82,7 +82,7 @@ const ClientInfo = ({ client }:{client:any}) => {
 }
 
 // Stepper component
-const Stepper = ({ currentStep, totalSteps }:{currentStep:any; totalSteps:any;}) => {
+const Stepper = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex justify-between mb-8">
       {Array.from({ length: totalSteps }, (_, i) => (
@@ -102,7 +102,7 @@ const Stepper = ({ currentStep, totalSteps }:{currentStep:any; totalSteps:any;})
 }
 
 // Step 1: Select or search client
-const SelectClientStep = ({ onNext, selectedClient, onSelectClient }:{ onNext:any; selectedClient:any; onSelectClient:any; }) => {
+const SelectClientStep = ({ onNext, selectedClient, onSelectClient }) => {
   return (
     <Card>
       <CardHeader>
@@ -272,7 +272,7 @@ const ViewEditInvoiceStep = ({ onNext, onPrev, selectedClient, invoice, setInvoi
 }
 
 // Step 4: Send invoice
-const SendInvoiceStep = ({ onPrev, selectedClient, invoice }:{onPrev:any; selectedClient:any; invoice:any;}) => {
+const SendInvoiceStep = ({ onPrev, selectedClient, invoice }) => {
   return (
     <Card>
       <CardHeader>
@@ -300,7 +300,7 @@ const SendInvoiceStep = ({ onPrev, selectedClient, invoice }:{onPrev:any; select
 }
 
 // Main component
-export default function InvoiceCreationPage() {
+export function InvoiceCreationPageComponent() {
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedClient, setSelectedClient] = useState(null)
   const [invoice, setInvoice] = useState({
