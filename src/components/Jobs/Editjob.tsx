@@ -16,7 +16,7 @@ import { baseUrl } from '@/utils/constants'
 import { useSession } from 'next-auth/react'
 import axios from 'axios'
 
-// Validation schema for the form
+// Validation schema
 const JobSchema = Yup.object().shape({
   name: Yup.string().required('Job name is required'),
   description: Yup.string().required('Description is required'),
@@ -24,82 +24,73 @@ const JobSchema = Yup.object().shape({
   jobType: Yup.string().required('Job Type is required'),
   startDate: Yup.date().required('Start Date is required'),
   endDate: Yup.date().required('End Date is required'),
-})
+});
 
 export default function EditJobPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [initialValues, setInitialValues] = useState<any>(null)
-  const { data: session } = useSession()  
-  const [jobTypes, setJobTypes] = useState<any[]>([])
-  const statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'] // Job status options
+  const router = useRouter();
+  const [initialValues, setInitialValues] = useState<any>(null);
+  const { data: session } = useSession();
+  const [jobTypes, setJobTypes] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [technicians, setTechnicians] = useState<any[]>([]);
+  const statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
 
-  // Fetch the job data and job types on component mount
   useEffect(() => {
     const fetchJobData = async () => {
       try {
-        console.log('Fetching job data...');
-
-        const [jobResponse, jobTypesResponse] = await Promise.all([
+        const [jobResponse, jobTypesResponse, clientsResponse, techniciansResponse] = await Promise.all([
           axios.get(`${baseUrl}${params.id}/retrievejob`, {
-            headers: {
-              Authorization: `Bearer ${session?.user?.access_token}`,
-            },
+            headers: { Authorization: `Bearer ${session?.user?.access_token}` },
           }),
           axios.get(`${baseUrl}jobtype`, {
-            headers: {
-              Authorization: `Bearer ${session?.user?.access_token}`,
-            },
-          })
-        ])
+            headers: { Authorization: `Bearer ${session?.user?.access_token}` },
+          }),
+          axios.get(`${baseUrl}customers/${session?.user?.companyId}`, {
+            headers: { Authorization: `Bearer ${session?.user?.access_token}` },
+          }),
+          axios.get(`${baseUrl}${session?.user?.companyId}/technician`, {
+            headers: { Authorization: `Bearer ${session?.user?.access_token}` },
+          }),
+        ]);
 
-        const jobData = jobResponse.data?.data
+        console.log('Technician data:', techniciansResponse.data);
 
-        setJobTypes(jobTypesResponse.data?.data || [])
 
-        // Set initial values for the form based on the fetched job data
+        const jobData = jobResponse.data?.data;
+        setJobTypes(jobTypesResponse.data?.data || []);
+        setClients(clientsResponse.data?.data || []);
+        setTechnicians(techniciansResponse.data?.data || []);
+
         setInitialValues({
           name: jobData.name || '',
           description: jobData.description || '',
           status: jobData.status || '',
-          jobType: jobData.jobType?.id || '', // set jobType as id
+          jobType: jobData.jobType?.id || '',
           startDate: jobData.jobschedule?.startDate ? format(new Date(jobData.jobschedule.startDate), 'yyyy-MM-dd') : '',
           endDate: jobData.jobschedule?.endDate ? format(new Date(jobData.jobschedule.endDate), 'yyyy-MM-dd') : '',
           location: {
             city: jobData.location?.city || '',
             state: jobData.location?.state || '',
             zip: jobData.location?.zip || '',
-            otherinfo: jobData.location?.otherinfo || ''
+            otherinfo: jobData.location?.otherinfo || '',
           },
-          clients: jobData.clients.map((client: any) => ({
-            id: client.client.id,
-            firstName: client.client.firstName,
-            lastName: client.client.lastName
-          })),
-          technicians: jobData.technicians.map((tech: any) => ({
-            id: tech.technician.id,
-            firstName: tech.technician.firstName,
-            lastName: tech.technician.lastName
-          }))
-        })
+          clients: jobData.clients.map((client: any) => client.client.id),
+          technicians: jobData.technicians.map((tech: any) => tech.technician.id),
+        });
+        
       } catch (error) {
-        toast.error('Failed to load job details. Please try again.')
+        toast.error('Failed to load job details. Please try again.');
         console.error('Error fetching job data:', error);
       }
-    }
+    };
 
     if (session) {
-      fetchJobData()
-    } else {
-      console.log('Session is not available yet.')
+      fetchJobData();
     }
-  }, [params.id, session])
+  }, [params.id, session]);
 
-  // Handle form submission
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
-    console.log('Form submitted with values:', values);
-
     try {
-      // Build the correct payload structure for the API
       const payload = {
         name: values.name,
         description: values.description,
@@ -109,33 +100,17 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
           startDate: values.startDate,
           endDate: values.endDate,
         },
-        location: {
-          city: values.location.city,
-          state: values.location.state,
-          zip: values.location.zip,
-          otherinfo: values.location.otherinfo,
-        },
-        clients: values.clients.map((client: any) => ({
-          clientId: client.id,
-          firstName: client.firstName,
-          lastName: client.lastName,
-        })),
-        technicians: values.technicians.map((tech: any) => ({
-          technicianId: tech.id,
-          firstName: tech.firstName,
-          lastName: tech.lastName,
-        })),
-      }
+        location: values.location,
+        clients: values.clients.map((clientId: string) => ({ id: clientId })),
+        technicians: values.technicians.map((techId: string) => ({ id: techId })),
+      };
 
-      // Send the update request to the API
       await axios.put(`${baseUrl}${params.id}/updatejob`, payload, {
-        headers: {
-          Authorization: `Bearer ${session?.user?.access_token}`,
-        },
+        headers: { Authorization: `Bearer ${session?.user?.access_token}` },
       });
 
       toast.success('Job updated successfully');
-      router.push('/jobs'); // Navigate back to the jobs list
+      router.push('/callpro/jobs');
     } catch (error) {
       console.error('Failed to update job details:', error);
       toast.error('Failed to update job details.');
@@ -151,33 +126,23 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
       <CardHeader>
         <CardTitle>Edit Job: {initialValues.name}</CardTitle>
       </CardHeader>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={JobSchema}
-        onSubmit={handleSubmit}
-      >
+      <Formik initialValues={initialValues} validationSchema={JobSchema} onSubmit={handleSubmit}>
         {({ isSubmitting, values, setFieldValue }) => (
           <Form>
             <CardContent className="space-y-4">
-              {/* Job Name */}
               <div className="space-y-2">
                 <Label htmlFor="name">Job Name</Label>
                 <Field name="name" as={Input} id="name" />
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Field name="description" as={Textarea} id="description" />
               </div>
 
-              {/* Status */}
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select
-                  onValueChange={(value) => setFieldValue('status', value)}
-                  defaultValue={values.status}
-                >
+                <Select onValueChange={(value) => setFieldValue('status', value)} defaultValue={values.status}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
@@ -191,13 +156,9 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                 </Select>
               </div>
 
-              {/* Job Type */}
               <div className="space-y-2">
                 <Label htmlFor="jobType">Job Type</Label>
-                <Select
-                  onValueChange={(value) => setFieldValue('jobType', value)}
-                  defaultValue={values.jobType}
-                >
+                <Select onValueChange={(value) => setFieldValue('jobType', value)} defaultValue={values.jobType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a job type" />
                   </SelectTrigger>
@@ -211,13 +172,11 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                 </Select>
               </div>
 
-              {/* Start Date */}
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
                 <Field name="startDate" type="date" as={Input} id="startDate" />
               </div>
 
-              {/* End Date */}
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>
                 <Field name="endDate" type="date" as={Input} id="endDate" />
@@ -225,61 +184,70 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
 
               {/* Clients */}
               <div className="space-y-2">
-                <Label>Clients</Label>
-                <FieldArray name="clients">
-                  {({ remove, push }) => (
-                    <>
-                      {values.clients.map((client: any, index: number) => (
-                        <div key={index} className="space-y-2">
-                          <Field name={`clients.${index}.firstName`} as={Input} placeholder="First Name" />
-                          <Field name={`clients.${index}.lastName`} as={Input} placeholder="Last Name" />
-                          <div className="flex space-x-2 justify-end">
-                            <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={() => remove(index)}>Remove Client</Button>
-                            {index === values.clients.length - 1 && (
-                              <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Client</Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </FieldArray>
-              </div>
+  <Label>Clients</Label>
+  <div className="border p-2 rounded">
+    {clients.map((client) => (
+      <div key={client.id} className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          value={client.id}
+          checked={values.clients.includes(client.id)}
+          onChange={(e) => {
+            const selectedClients = e.target.checked
+              ? [...values.clients, client.id]
+              : values.clients.filter((id: string) => id !== client.id);
+            setFieldValue('clients', selectedClients);
+          }}
+        />
+        <span>{client.firstName} {client.lastName}</span>
+      </div>
+    ))}
+  </div>
+</div>
 
-              {/* Technicians */}
-              <div className="space-y-2">
-                <Label>Technicians</Label>
-                <FieldArray name="technicians">
-                  {({ remove, push }) => (
-                    <>
-                      {values.technicians.map((tech: any, index: number) => (
-                        <div key={index} className="space-y-2">
-                          <Field name={`technicians.${index}.firstName`} as={Input} placeholder="First Name" />
-                          <Field name={`technicians.${index}.lastName`} as={Input} placeholder="Last Name" />
-                          <div className="flex space-x-2 justify-end">
-                            <Button type="button" className="bg-red-500 text-white hover:bg-red-600" onClick={() => remove(index)}>Remove Technician</Button>
-                            {index === values.technicians.length - 1 && (
-                              <Button type="button" onClick={() => push({ firstName: '', lastName: '' })}>Add Technician</Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </FieldArray>
-              </div>
+
+            
+{/* Technicians */}
+<div className="space-y-2">
+  <Label>Technicians</Label>
+  <div className="border p-2 rounded">
+    {technicians.length > 0 ? (
+      technicians.map((tech) => (
+        <div key={tech.id} className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            value={tech.id}
+            checked={values.technicians.includes(tech.id)}
+            onChange={(e) => {
+              const selectedTechnicians = e.target.checked
+                ? [...values.technicians, tech.id]
+                : values.technicians.filter((id: string) => id !== tech.id);
+              setFieldValue('technicians', selectedTechnicians);
+            }}
+          />
+          <span>{tech.firstName} {tech.lastName}</span>
+        </div>
+      ))
+    ) : (
+      <p>No technicians available</p> // Fallback if no technicians are available
+    )}
+  </div>
+</div>
+
+
             </CardContent>
 
             <CardFooter className="space-x-2">
-              
-              <Button type="button" onClick={() => router.push('/callpro/jobs')} className="bg-gray-500 text-white hover:bg-gray-600">Cancel</Button>
+              <Button type="button" onClick={() => router.push('/callpro/jobs')} className="bg-gray-500 text-white hover:bg-gray-600">
+                Cancel
+              </Button>
               <Button type="submit" className="bg-blue-500 text-white hover:bg-blue-600" disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Update Job'}
+                {isSubmitting ? 'updating...' : 'update'}
               </Button>
             </CardFooter>
           </Form>
         )}
       </Formik>
     </Card>
-  )
+  );
 }
