@@ -86,7 +86,7 @@ export default function JobManagementSystem({
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Job List</CardTitle>
-          <CardDescription>Manage and track all scheduled jobs</CardDescription>
+          <CardDescription>Manage and track all jobs</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row justify-between mb-4 space-y-2 sm:space-y-0 sm:space-x-2">
