@@ -116,7 +116,7 @@ export default function JobManagementSystem({
                   <TableHead>Client</TableHead>
                   <TableHead>Service</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Job Type</TableHead>
                   <TableHead>Technician</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Actions</TableHead>
@@ -135,7 +135,7 @@ export default function JobManagementSystem({
                         <span className="ml-1">{job.status}</span>
                       </Badge>
                     </TableCell>
-                    <TableCell>{`${job.jobSchedule?.startDate || ''} ${job.jobSchedule?.startTime || ''}`}</TableCell>
+                    <TableCell>{job?.jobType?.name || 'Unknown'}</TableCell>
                     <TableCell>{job?.technicians.map((tech: any) => `${tech?.technician?.firstName} ${tech?.technician?.lastName}`).join(', ') || 'No technicians'}</TableCell>
                     <TableCell className="max-w-xs truncate" title={job?.location?.address || 'N/A'}>
   <span className="flex items-center">
