@@ -206,20 +206,7 @@ const CustomerForm = () => {
                     <ErrorMessage name="profile.phone" component="div" className="text-red-600" />
                   </div>
                 </div>
-              </div>
-
-              {/* <div className="mt-4">
-                <label>Role</label>
-                <Field as="select" name="roleId" className="form-select">
-                  <option value="">Select Role</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage name="roleId" component="div" className="text-red-600" />
-              </div> */}
+              </div>          
 
               <div className="mt-6 flex justify-end gap-4">
                 <button type="submit" className="bg-primary700 hover:bg-primary500 text-white px-4 py-2 rounded" disabled={isSubmitting}>
