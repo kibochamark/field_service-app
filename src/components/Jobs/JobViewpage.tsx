@@ -53,7 +53,7 @@ export default function JobManagementSystem({
   return (
     <div className="container mx-auto p-4 bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Job Management System</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Job Management</h1>
         {canCreateJob && (
           <Link href="/callpro/createjob">
             <Button variant="outline" className="bg-blue-600 text-white">
