@@ -217,16 +217,18 @@ export default function JobManagement({
           currentJob.type &&
           currentJob.clientId
         );
-      case "schedule":
-        return (
-          currentJob.jobSchedule.startDate &&
-          currentJob.jobSchedule.endDate &&
-          currentJob.jobSchedule.recurrence
-        );
+     
       case "assign":
         return currentJob.technicianId;
       default:
         return true;
+
+     case "schedule":
+          return (
+            currentJob.jobSchedule.startDate &&
+            currentJob.jobSchedule.endDate &&
+            currentJob.jobSchedule.recurrence
+          );
     }
   };
 
@@ -244,23 +246,26 @@ export default function JobManagement({
       case "create":
         setStep("schedule");
         break;
-      case "schedule":
-        setStep("assign");
-        break;
+      
       case "assign":
         setStep("review");
         break;
+
+      case "schedule":
+          setStep("assign");
+          break;
     }
   };
 
   const handleBack = () => {
     switch (step) {
-      case "schedule":
-        setStep("create");
-        break;
+      
       case "assign":
         setStep("schedule");
         break;
+      case "schedule":
+          setStep("create");
+          break;
       case "review":
         setStep("assign");
         break;
@@ -531,102 +536,7 @@ export default function JobManagement({
             </div> */}
           </div>
         );
-      case "schedule":
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Start Date */}
-              <div>
-                <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !currentJob.jobSchedule.startDate &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currentJob.jobSchedule.startDate ? (
-                        format(currentJob.jobSchedule.startDate, "PPP")
-                      ) : (
-                        <span>Pick a start date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={currentJob.jobSchedule.startDate as Date}
-                      onSelect={(date) => handleDateChange(date, "startDate")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* End Date */}
-              <div>
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !currentJob.jobSchedule.endDate &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currentJob.jobSchedule.endDate ? (
-                        format(currentJob.jobSchedule.endDate, "PPP")
-                      ) : (
-                        <span>Pick an end date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={currentJob.jobSchedule.endDate as Date}
-                      onSelect={(date) => handleDateChange(date, "endDate")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="recurrence">Recurrence</Label>
-              <Select
-                value={currentJob.jobSchedule?.recurrence}
-                onValueChange={(value) =>
-                  setCurrentJob({
-                    ...currentJob,
-                    jobSchedule: {
-                      ...currentJob.jobSchedule,
-                      recurrence: value,
-                    },
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recurrence" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recurrenceOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        );
+     
       case "assign":
         return (
           <div className="space-y-4">
@@ -704,6 +614,102 @@ export default function JobManagement({
             </div>
           </div>
         );
+        case "schedule":
+          return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Start Date */}
+                <div>
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !currentJob.jobSchedule.startDate &&
+                            "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentJob.jobSchedule.startDate ? (
+                          format(currentJob.jobSchedule.startDate, "PPP")
+                        ) : (
+                          <span>Pick a start date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={currentJob.jobSchedule.startDate as Date}
+                        onSelect={(date) => handleDateChange(date, "startDate")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+  
+                {/* End Date */}
+                <div>
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !currentJob.jobSchedule.endDate &&
+                            "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentJob.jobSchedule.endDate ? (
+                          format(currentJob.jobSchedule.endDate, "PPP")
+                        ) : (
+                          <span>Pick an end date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={currentJob.jobSchedule.endDate as Date}
+                        onSelect={(date) => handleDateChange(date, "endDate")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="recurrence">Recurrence</Label>
+                <Select
+                  value={currentJob.jobSchedule?.recurrence}
+                  onValueChange={(value) =>
+                    setCurrentJob({
+                      ...currentJob,
+                      jobSchedule: {
+                        ...currentJob.jobSchedule,
+                        recurrence: value,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select recurrence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {recurrenceOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          );
       case "review":
         return (
           <Card>
@@ -782,7 +788,7 @@ export default function JobManagement({
   };
 
   const renderProgressTracker = () => {
-    const steps: Step[] = ["create", "schedule", "assign", "review"];
+    const steps: Step[] = ["create", "assign", "schedule", "review"];
     return (
       <div className="flex justify-between mb-8">
         {steps.map((s, index) => (

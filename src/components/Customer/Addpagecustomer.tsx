@@ -89,7 +89,7 @@ export default function CreateCustomerPage() {
               );
             toast.success('Customer created successfully!')
             Revalidate("getcustomers")
-            router.push('/callpro/createjob') // Adjust this path as needed
+            router.push('/callpro/createjob') 
           } catch (error: any) {
             if (error.response) {
               console.error('Error response:', error.response)
