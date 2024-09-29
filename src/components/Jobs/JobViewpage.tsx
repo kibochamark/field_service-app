@@ -41,7 +41,7 @@ export default function JobManagementSystem({
       case "In Progress": return <Clock className="h-4 w-4 text-yellow-500" />
       case "Completed": return <CheckCircle className="h-4 w-4 text-green-500" />
       case "Cancelled": return <XCircle className="h-4 w-4 text-red-500" />
-      case "Pending": return <AlertTriangle className="h-4 w-4 text-orange-500" />
+      case "NOTASSIGNED": return <AlertTriangle className="h-4 w-4 text-orange-500" />
       default: return null
     }
   }
@@ -103,7 +103,7 @@ export default function JobManagementSystem({
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                {["All", "Scheduled", "In Progress", "Completed", "Cancelled", "Pending"].map((status) => (
+                {["All", "Scheduled", "In Progress", "Completed", "Cancelled", "NOTASSIGNED"].map((status) => (
                   <SelectItem key={status} value={status}>{status}</SelectItem>
                 ))}
               </SelectContent>
