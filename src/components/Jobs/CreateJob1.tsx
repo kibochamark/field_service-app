@@ -191,7 +191,7 @@ export default function JobManagement({
     setCurrentJob({ ...currentJob, [field]: value });
   };
   const handleCreateNewClient = () => {
-    router.push('/callpro/customer') 
+    router.push('/callpro/createcustomer') 
   }
 
   const handleDateChange = (date: any, field: "startDate" | "endDate") => {
