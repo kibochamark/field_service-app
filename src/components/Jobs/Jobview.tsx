@@ -258,8 +258,8 @@ export function Jobview() {
                     <CardDescription>Recent Jobs</CardDescription>
                   </CardHeader>
                   <CardContent className="w-full">
-                    {/* <DataTable columns={jobScheduleColumn} data={dummyData} /> */}
-                    <Table> 
+                    <DataTable columns={jobScheduleColumn} data={dummyData} />
+                    {/* <Table> 
                     <TableHeader>
                         <TableRow>
                           <TableHead>Customer</TableHead>
@@ -437,7 +437,7 @@ export function Jobview() {
                           <TableCell className="text-right">$450.00</TableCell>
                         </TableRow>
                       </TableBody>
-                    </Table> 
+                    </Table>  */}
                   </CardContent>
                 </Card>
               </TabsContent>
