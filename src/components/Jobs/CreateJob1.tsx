@@ -379,14 +379,6 @@ export default function JobManagement({
     }
   };
 
-  const handleSaveDraft = () => {
-    localStorage.setItem("jobDraft", JSON.stringify(currentJob));
-    toast({
-      title: "Draft Saved",
-      description:
-        "Your job draft has been saved. You can continue editing later.",
-    });
-  };
 
   const handleEditJob = (job: string) => {
     
