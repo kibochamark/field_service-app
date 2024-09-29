@@ -61,8 +61,10 @@ import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Separator } from "@radix-ui/react-dropdown-menu";
+import AnimatedStepProgression from "./Progressbar";
+import { FileText, Users, Star } from 'lucide-react'
 
-type Step = "create" | "schedule" | "assign" | "review";
+
 type JobStatus =
   | "Draft"
   | "Not Assigned"
@@ -94,6 +96,20 @@ interface Client {
   name: string;
 }
 
+interface Step {
+  id: number
+  title: string
+  icon: React.ReactNode
+}
+
+
+const steps: Step[] = [
+  { id: 1, title: "Create", icon: <FileText className="w-6 h-6" /> },
+  { id: 2, title: "Assign", icon: <Users className="w-6 h-6" /> },
+  { id: 3, title: "Schedule", icon: <Calendar className="w-6 h-6" /> },
+  { id: 4, title: "Review", icon: <Star className="w-6 h-6" /> },
+]
+
 const recurrenceOptions = ["DAILY", "WEEKLY", "MONTHLY"];
 
 export default function JobManagement({
@@ -107,7 +123,7 @@ export default function JobManagement({
   jobtype: any;
   alljobs: any;
 }) {
-  const [step, setStep] = useState<Step>("create");
+  const [step, setStep] = useState<number>(1);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [currentJob, setCurrentJob] = useState<Job>({
     id: "",
@@ -210,7 +226,7 @@ export default function JobManagement({
 
   const validateStep = () => {
     switch (step) {
-      case "create":
+      case 1:
         return (
           currentJob.name &&
           currentJob.description &&
@@ -218,12 +234,12 @@ export default function JobManagement({
           currentJob.clientId
         );
      
-      case "assign":
+      case 2:
         return currentJob.technicianId;
       default:
         return true;
 
-     case "schedule":
+     case 3:
           return (
             currentJob.jobSchedule.startDate &&
             currentJob.jobSchedule.endDate &&
@@ -243,16 +259,16 @@ export default function JobManagement({
     }
 
     switch (step) {
-      case "create":
-        setStep("assign");
+      case 1:
+        setStep(2);
         break;
       
-      case "assign":
-        setStep("schedule");
+      case 2:
+        setStep(3);
         break;
 
-      case "schedule":
-          setStep("review");
+      case 3:
+          setStep(4);
           break;
     }
   };
@@ -260,14 +276,14 @@ export default function JobManagement({
   const handleBack = () => {
     switch (step) {
       
-      case "assign":
-        setStep("create");
+      case 2:
+        setStep(1);
         break;
-      case "schedule":
-          setStep("assign");
+      case 3:
+          setStep(2);
           break;
-      case "review":
-        setStep("schedule");
+      case 4:
+        setStep(3);
         break;
     }
   };
@@ -353,7 +369,7 @@ export default function JobManagement({
         technicianId: [],
         location: { city: "", zip: "", state: "" },
       });
-      setStep("create");
+      setStep(1);
     } catch (error) {
       console.error("Error submitting job:", error); // Log the caught error
       toast({
@@ -385,7 +401,7 @@ export default function JobManagement({
 
   const renderStep = () => {
     switch (step) {
-      case "create":
+      case 1:
         return (
           <div className="space-y-4">
             <div>
@@ -537,7 +553,7 @@ export default function JobManagement({
           </div>
         );
      
-      case "assign":
+      case 2:
         return (
           <div className="space-y-4">
             <div>
@@ -614,7 +630,7 @@ export default function JobManagement({
             </div>
           </div>
         );
-        case "schedule":
+        case 3:
           return (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -710,7 +726,7 @@ export default function JobManagement({
               </div>
             </div>
           );
-      case "review":
+      case 4:
         return (
           <Card>
             <CardHeader>
@@ -787,27 +803,30 @@ export default function JobManagement({
     }
   };
 
-  const renderProgressTracker = () => {
-    const steps: Step[] = ["create", "assign", "schedule", "review"];
-    return (
-      <div className="flex justify-between mb-8">
-        {steps.map((s, index) => (
-          <div key={s} className="flex flex-col items-center">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                steps.indexOf(step) >= index
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
-              }`}
-            >
-              {index + 1}
-            </div>
-            <span className="text-sm mt-1 capitalize">{s}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  // const renderProgressTracker = () => {
+  //   const steps: Step[] = ["create", 2, 3, 4];
+  //   return (
+  //     <div className="flex justify-between mb-8">
+  //       {steps.map((s, index) => (
+  //         <div key={s} className="flex flex-col items-center">
+  //           <div
+  //             className={`w-8 h-8 rounded-full flex items-center justify-center ${
+  //               steps.indexOf(step) >= index
+  //                 ? "bg-primary text-primary-foreground"
+  //                 : "bg-muted"
+  //             }`}
+  //           >
+  //             {index + 1}
+  //           </div>
+  //           <span className="text-sm mt-1 capitalize">{s}</span>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   );
+  // };
+  <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
+
+  
 
   const renderJobList = () => (
     <div className="space-y-4">
@@ -924,30 +943,26 @@ export default function JobManagement({
           <h1 className="text-2xl font-bold mb-4">
             {editingJobId ? "Edit Job" : "Create New Job"}
           </h1>
-          {renderProgressTracker()}
+          <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
           {renderStep()}
-          <div className="flex justify-between mt-6">
-            {step !== "create" && (
-              <Button onClick={handleBack} variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-            )}
-            {!editingJobId && (
-              <Button onClick={handleSaveDraft} variant="outline">
-                <Save className="mr-2 h-4 w-4" /> Save Draft
-              </Button>
-            )}
-            {step !== "review" ? (
-              <Button onClick={handleNext} className="ml-auto">
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit} className="ml-auto">
-                {editingJobId ? "Update Job" : "Create Job"}{" "}
-                <CheckCircle2 className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          <div className="flex justify-between items-center mt-4">
+        <Button
+          onClick={handleBack}
+          disabled={step === 1}
+          variant="outline"
+        >
+          Previous
+        </Button>
+        <span className="text-lg font-semibold">
+          Step {step} of {steps.length}
+        </span>
+        <Button
+          onClick={handleNext}
+          disabled={step === steps.length}
+        >
+          {step === steps.length ? "Complete" : "Next"}
+        </Button>
+      </div>
         </TabsContent>
         <TabsContent value="track">
           <h1 className="text-2xl font-bold mb-4">Job Tracking</h1>

@@ -38,6 +38,7 @@
     "countries-list": "^3.1.1",
     "date-fns": "^3.6.0",
     "formik": "^2.4.6",
+    "framer-motion": "^11.9.0",
     "libphonenumber-js": "^1.11.8",
     "lucide-react": "^0.428.0",
     "next": "14.2.5",
