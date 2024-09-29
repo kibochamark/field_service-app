@@ -244,15 +244,15 @@ export default function JobManagement({
 
     switch (step) {
       case "create":
-        setStep("schedule");
+        setStep("assign");
         break;
       
       case "assign":
-        setStep("review");
+        setStep("schedule");
         break;
 
       case "schedule":
-          setStep("assign");
+          setStep("review");
           break;
     }
   };
@@ -261,13 +261,13 @@ export default function JobManagement({
     switch (step) {
       
       case "assign":
-        setStep("schedule");
+        setStep("create");
         break;
       case "schedule":
-          setStep("create");
+          setStep("assign");
           break;
       case "review":
-        setStep("assign");
+        setStep("schedule");
         break;
     }
   };
