@@ -801,29 +801,7 @@ export default function JobManagement({
           </Card>
         );
     }
-  };
-
-  // const renderProgressTracker = () => {
-  //   const steps: Step[] = ["create", 2, 3, 4];
-  //   return (
-  //     <div className="flex justify-between mb-8">
-  //       {steps.map((s, index) => (
-  //         <div key={s} className="flex flex-col items-center">
-  //           <div
-  //             className={`w-8 h-8 rounded-full flex items-center justify-center ${
-  //               steps.indexOf(step) >= index
-  //                 ? "bg-primary text-primary-foreground"
-  //                 : "bg-muted"
-  //             }`}
-  //           >
-  //             {index + 1}
-  //           </div>
-  //           <span className="text-sm mt-1 capitalize">{s}</span>
-  //         </div>
-  //       ))}
-  //     </div>
-  //   );
-  // };
+  }; 
   <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
 
   
@@ -957,8 +935,10 @@ export default function JobManagement({
           Step {step} of {steps.length}
         </span>
         <Button
-          onClick={handleNext}
-          disabled={step === steps.length}
+          onClick={step === steps.length ? handleSubmit: handleNext}
+          type={step === steps.length ? "submit" : "button"} 
+
+          // disabled={step === steps.length}
         >
           {step === steps.length ? "Complete" : "Next"}
         </Button>
