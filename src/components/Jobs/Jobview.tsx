@@ -257,10 +257,10 @@ export function Jobview() {
                     <CardTitle>Jobs</CardTitle>
                     <CardDescription>Recent Jobs</CardDescription>
                   </CardHeader>
-                  <CardContent className="max-w-xl">
-                    <DataTable columns={jobScheduleColumn} data={dummyData} />
-                    {/* <Table> */}
-                    {/* <TableHeader>
+                  <CardContent className="w-full">
+                    {/* <DataTable columns={jobScheduleColumn} data={dummyData} /> */}
+                    <Table> 
+                    <TableHeader>
                         <TableRow>
                           <TableHead>Customer</TableHead>
                           <TableHead className="hidden sm:table-cell">
@@ -436,8 +436,8 @@ export function Jobview() {
                           </TableCell>
                           <TableCell className="text-right">$450.00</TableCell>
                         </TableRow>
-                      </TableBody> */}
-                    {/* </Table> */}
+                      </TableBody>
+                    </Table> 
                   </CardContent>
                 </Card>
               </TabsContent>
