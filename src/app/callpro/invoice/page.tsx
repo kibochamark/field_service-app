@@ -1,10 +1,13 @@
 import InvoiceManager from '@/components/invoice/InvoiceManager'
 import React from 'react'
 
-const page = () => {
+const page = async() => {
+
+  
+  
   return (
     <div>
-        <InvoiceManager/>
+        <InvoiceManager />
     </div>
   )
 }
