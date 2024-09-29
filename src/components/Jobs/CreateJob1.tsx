@@ -37,6 +37,7 @@ import {
   Edit,
   X,
   Check,
+  PlusCircle,
 } from "lucide-react";
 import {
   Command,
@@ -59,6 +60,7 @@ import { cn } from "@/lib/utils";
 import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 
 type Step = "create" | "schedule" | "assign" | "review";
 type JobStatus =
@@ -188,6 +190,9 @@ export default function JobManagement({
   const handleSelectChange = (value: string, field: keyof Job) => {
     setCurrentJob({ ...currentJob, [field]: value });
   };
+  const handleCreateNewClient = () => {
+    router.push('/callpro/customer') 
+  }
 
   const handleDateChange = (date: any, field: "startDate" | "endDate") => {
     setCurrentJob({
@@ -418,73 +423,78 @@ export default function JobManagement({
             </div>
 
             <div>
-              <Label htmlFor="clients">Clients</Label>
-              <Popover
-                open={openClientSearch}
-                onOpenChange={setOpenClientSearch}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openClientSearch}
-                    className="w-full justify-between"
-                  >
-                    {selectedClients.length > 0
-                      ? `${selectedClients.length} selected`
-                      : "Select clients..."}
-                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search clients..."
-                      onValueChange={setClientSearch}
-                    />
-                    <CommandList>
-                      <CommandEmpty>No client found.</CommandEmpty>
-                      <CommandGroup>
-                        {filteredClients.map(
-                          (client: { id: string; name: string }) => (
-                            <CommandItem
-                              key={client.id}
-                              onSelect={() => handleSelectClient(client)}
-                              className="flex items-center justify-between"
-                            >
-                              <span>{client.name}</span>
-                              {selectedClients.some(
-                                (c) => c.id === client.id
-                              ) && <Check className="h-4 w-4" />}
-                            </CommandItem>
-                          )
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {selectedClients.map((client) => (
-                  <Badge
+      <Label htmlFor="clients">Clients</Label>
+      <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openClientSearch}
+            className="w-full justify-between"
+          >
+            {selectedClients.length > 0
+              ? `${selectedClients.length} selected`
+              : "Select clients..."}
+            <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput
+              placeholder="Search clients..."
+              onValueChange={setClientSearch}
+            />
+            <CommandList>
+              <CommandEmpty>
+                No client found.
+              </CommandEmpty>
+              <CommandGroup>
+                {filteredClients.map((client: Client) => (
+                  <CommandItem
                     key={client.id}
-                    variant="secondary"
-                    className="flex items-center gap-1"
+                    onSelect={() => handleSelectClient(client)}
+                    className="flex items-center justify-between"
                   >
-                    {client.name}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0"
-                      onClick={() => removeClient(client.id)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove {client.name}</span>
-                    </Button>
-                  </Badge>
+                    <span>{client.name}</span>
+                    {selectedClients.some((c) => c.id === client.id) && (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </CommandItem>
                 ))}
-              </div>
-            </div>
+              </CommandGroup>
+              <Separator className="my-2" />
+              <CommandItem
+                onSelect={handleCreateNewClient}
+                className="justify-center text-primary"
+              >
+                <PlusCircle className="mr-2 h-4 w-4 mb-2" />
+                Create new client
+              </CommandItem>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {selectedClients.map((client) => (
+          <Badge
+            key={client.id}
+            variant="secondary"
+            className="flex items-center gap-1"
+          >
+            {client.name}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => removeClient(client.id)}
+            >
+              <X className="h-3 w-3" />
+              <span className="sr-only">Remove {client.name}</span>
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
             <div>
               <Label htmlFor="city">City</Label>
               <Input
