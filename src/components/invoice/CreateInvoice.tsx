@@ -47,12 +47,20 @@ import { useSession } from "next-auth/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { getClints } from "./ServerActions";
+import { searchNumbers } from "libphonenumber-js";
 
 interface Client {
+  id:string;
+  client: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+interface Job {
   id: string;
-  firstName: string;
-  email: string;
-  companyId: string;
+  clients: Client[];
 }
 
 // Mock client data
@@ -98,18 +106,23 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
 
   useEffect(() => {
     const fetchCustomers = async () => {
-      const customerdetails = await getCustomers();
-      console.log(customerdetails, "customerinfo22");
-      setClients(customerdetails);
+      const customerdetails = await getClints();
+      console.log(customerdetails, "customerinfo22 retrieved");
+      // setClients(customerdetails);
+      const allClients = customerdetails.flatMap((job: Job) => job.clients);
+      setClients(allClients); // Flattened clients array
+      console.log(allClients, "allClients");
+
     };
     fetchCustomers();
   }, []);
 
   const filteredClients = clients.filter(
     (client) =>
-      client.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.companyId.toLowerCase().includes(searchTerm.toLowerCase())
+      client.id?.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
+      client.client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.client.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.client.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -133,7 +146,7 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
         <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
           {filteredClients.map((client) => (
             <div
-              key={client.id}
+              key={client.client.id}
               className="p-2 hover:bg-accent cursor-pointer"
               onClick={() => {
                 onSelectClient(client);
@@ -141,12 +154,12 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
                 setSearchTerm("");
               }}
             >
-              <div className="font-medium">{client.firstName}</div>
+              <div className="font-medium">{client.client.firstName} {client.client.lastName}{client.id}</div>
               <div className="text-sm text-muted-foreground">
-                {client.email}
+                {client.client.lastName}
               </div>
               <div className="text-sm text-muted-foreground">
-                {client.companyId}
+                {client.id}
               </div>
             </div>
           ))}
@@ -162,9 +175,9 @@ const ClientInfo = ({ client }: { client: any }) => {
 
   return (
     <div className="p-2 bg-muted rounded-md">
-      <div className="font-medium">{client.firstName}</div>
-      <div className="text-sm text-muted-foreground">{client.email}</div>
-      <div className="text-sm text-muted-foreground">{client.company}</div>
+      <div className="font-medium">{client.clientfirstName}</div>
+      <div className="text-sm text-muted-foreground">{client.client.lastName}</div>
+      <div className="text-sm text-muted-foreground">{client.id}</div>
     </div>
   );
 };
@@ -636,6 +649,7 @@ export default function InvoiceCreationPage() {
     subTotal: "",
     id: "",
     notes: "",
+    jobId:""
   });
   const totalSteps = 4;
 
@@ -654,6 +668,7 @@ export default function InvoiceCreationPage() {
       tax: "",
       dueDate: "",
       clientId:"",
+      jobId:"",
     });
     setCurrentStep(2); // Go back to create invoice step
   };
@@ -662,7 +677,7 @@ export default function InvoiceCreationPage() {
     try {
       // Gather necessary data to submit
       const data = {
-        clientId: selectedClient?.id,
+        clientId: selectedClient?.client?.id,
         companyId: session?.user?.companyId,
         createdBy: session?.user?.userId,
         totalAmount: invoice.amount,
@@ -670,6 +685,7 @@ export default function InvoiceCreationPage() {
         tax: invoice.tax || 0,
         dueDate: invoice.dueDate,
         notes: invoice.notes || "No additional notes.",
+        jobId: invoice.id
       };
   
       // Basic validation
@@ -678,17 +694,17 @@ export default function InvoiceCreationPage() {
         return;
       }
   
-      console.log(data, "data api");
+      console.log(data, "sending data api");
   
       // Send the POST request to the API endpoint
-      const response = await fetch(baseUrl + "invoice", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user?.access_token}`,
-        },
-        body: JSON.stringify(data),
-      });
+      // const response = await fetch(baseUrl + "invoice", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${session?.user?.access_token}`,
+      //   },
+      //   body: JSON.stringify(data),
+      // });
   
       if (response.ok) {
         const result = await response.json();
