@@ -162,7 +162,7 @@ const ClientInfo = ({ client }: { client: any }) => {
 
   return (
     <div className="p-2 bg-muted rounded-md">
-      <div className="font-medium">{client.name}</div>
+      <div className="font-medium">{client.firstName}</div>
       <div className="text-sm text-muted-foreground">{client.email}</div>
       <div className="text-sm text-muted-foreground">{client.company}</div>
     </div>
@@ -707,7 +707,6 @@ export default function InvoiceCreationPage() {
     }
   };
   
-
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">Create Invoice</h1>
