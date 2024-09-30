@@ -37,6 +37,7 @@ import {
   Edit,
   X,
   Check,
+  PlusCircle,
 } from "lucide-react";
 import {
   Command,
@@ -59,8 +60,11 @@ import { cn } from "@/lib/utils";
 import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import AnimatedStepProgression from "./Progressbar";
+import { FileText, Users, Star } from 'lucide-react'
 
-type Step = "create" | "schedule" | "assign" | "review";
+
 type JobStatus =
   | "Draft"
   | "Not Assigned"
@@ -92,6 +96,20 @@ interface Client {
   name: string;
 }
 
+interface Step {
+  id: number
+  title: string
+  icon: React.ReactNode
+}
+
+
+const steps: Step[] = [
+  { id: 1, title: "Create", icon: <FileText className="w-6 h-6" /> },
+  { id: 2, title: "Assign", icon: <Users className="w-6 h-6" /> },
+  { id: 3, title: "Schedule", icon: <Calendar className="w-6 h-6" /> },
+  { id: 4, title: "Review", icon: <Star className="w-6 h-6" /> },
+]
+
 const recurrenceOptions = ["DAILY", "WEEKLY", "MONTHLY"];
 
 export default function JobManagement({
@@ -105,7 +123,7 @@ export default function JobManagement({
   jobtype: any;
   alljobs: any;
 }) {
-  const [step, setStep] = useState<Step>("create");
+  const [step, setStep] = useState<number>(1);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [currentJob, setCurrentJob] = useState<Job>({
     id: "",
@@ -149,7 +167,7 @@ export default function JobManagement({
   };
   const { data: session } = useSession();
 
-  console.log(session, "session");
+ 
 
   const removeClient = (clientId: string) => {
     setSelectedClients((prev) => prev.filter((c) => c.id !== clientId));
@@ -188,6 +206,9 @@ export default function JobManagement({
   const handleSelectChange = (value: string, field: keyof Job) => {
     setCurrentJob({ ...currentJob, [field]: value });
   };
+  const handleCreateNewClient = () => {
+    router.push('/callpro/createcustomer') 
+  }
 
   const handleDateChange = (date: any, field: "startDate" | "endDate") => {
     setCurrentJob({
@@ -205,23 +226,25 @@ export default function JobManagement({
 
   const validateStep = () => {
     switch (step) {
-      case "create":
+      case 1:
         return (
           currentJob.name &&
           currentJob.description &&
           currentJob.type &&
           currentJob.clientId
         );
-      case "schedule":
-        return (
-          currentJob.jobSchedule.startDate &&
-          currentJob.jobSchedule.endDate &&
-          currentJob.jobSchedule.recurrence
-        );
-      case "assign":
+     
+      case 2:
         return currentJob.technicianId;
       default:
         return true;
+
+     case 3:
+          return (
+            currentJob.jobSchedule.startDate &&
+            currentJob.jobSchedule.endDate &&
+            currentJob.jobSchedule.recurrence
+          );
     }
   };
 
@@ -236,28 +259,31 @@ export default function JobManagement({
     }
 
     switch (step) {
-      case "create":
-        setStep("schedule");
+      case 1:
+        setStep(2);
         break;
-      case "schedule":
-        setStep("assign");
+      
+      case 2:
+        setStep(3);
         break;
-      case "assign":
-        setStep("review");
-        break;
+
+      case 3:
+          setStep(4);
+          break;
     }
   };
 
   const handleBack = () => {
     switch (step) {
-      case "schedule":
-        setStep("create");
+      
+      case 2:
+        setStep(1);
         break;
-      case "assign":
-        setStep("schedule");
-        break;
-      case "review":
-        setStep("assign");
+      case 3:
+          setStep(2);
+          break;
+      case 4:
+        setStep(3);
         break;
     }
   };
@@ -343,7 +369,7 @@ export default function JobManagement({
         technicianId: [],
         location: { city: "", zip: "", state: "" },
       });
-      setStep("create");
+      setStep(1);
     } catch (error) {
       console.error("Error submitting job:", error); // Log the caught error
       toast({
@@ -353,14 +379,6 @@ export default function JobManagement({
     }
   };
 
-  const handleSaveDraft = () => {
-    localStorage.setItem("jobDraft", JSON.stringify(currentJob));
-    toast({
-      title: "Draft Saved",
-      description:
-        "Your job draft has been saved. You can continue editing later.",
-    });
-  };
 
   const handleEditJob = (job: string) => {
     
@@ -375,7 +393,7 @@ export default function JobManagement({
 
   const renderStep = () => {
     switch (step) {
-      case "create":
+      case 1:
         return (
           <div className="space-y-4">
             <div>
@@ -418,73 +436,78 @@ export default function JobManagement({
             </div>
 
             <div>
-              <Label htmlFor="clients">Clients</Label>
-              <Popover
-                open={openClientSearch}
-                onOpenChange={setOpenClientSearch}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openClientSearch}
-                    className="w-full justify-between"
-                  >
-                    {selectedClients.length > 0
-                      ? `${selectedClients.length} selected`
-                      : "Select clients..."}
-                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search clients..."
-                      onValueChange={setClientSearch}
-                    />
-                    <CommandList>
-                      <CommandEmpty>No client found.</CommandEmpty>
-                      <CommandGroup>
-                        {filteredClients.map(
-                          (client: { id: string; name: string }) => (
-                            <CommandItem
-                              key={client.id}
-                              onSelect={() => handleSelectClient(client)}
-                              className="flex items-center justify-between"
-                            >
-                              <span>{client.name}</span>
-                              {selectedClients.some(
-                                (c) => c.id === client.id
-                              ) && <Check className="h-4 w-4" />}
-                            </CommandItem>
-                          )
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {selectedClients.map((client) => (
-                  <Badge
+      <Label htmlFor="clients">Clients</Label>
+      <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openClientSearch}
+            className="w-full justify-between"
+          >
+            {selectedClients.length > 0
+              ? `${selectedClients.length} selected`
+              : "Select clients..."}
+            <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput
+              placeholder="Search clients..."
+              onValueChange={setClientSearch}
+            />
+            <CommandList>
+              <CommandEmpty>
+                No client found.
+              </CommandEmpty>
+              <CommandGroup>
+                {filteredClients.map((client: Client) => (
+                  <CommandItem
                     key={client.id}
-                    variant="secondary"
-                    className="flex items-center gap-1"
+                    onSelect={() => handleSelectClient(client)}
+                    className="flex items-center justify-between"
                   >
-                    {client.name}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0"
-                      onClick={() => removeClient(client.id)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove {client.name}</span>
-                    </Button>
-                  </Badge>
+                    <span>{client.name}</span>
+                    {selectedClients.some((c) => c.id === client.id) && (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </CommandItem>
                 ))}
-              </div>
-            </div>
+              </CommandGroup>
+              <Separator className="my-2" />
+              <CommandItem
+                onSelect={handleCreateNewClient}
+                className="justify-center text-primary"
+              >
+                <PlusCircle className="mr-2 h-4 w-4 mb-2" />
+                Create new client
+              </CommandItem>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {selectedClients.map((client) => (
+          <Badge
+            key={client.id}
+            variant="secondary"
+            className="flex items-center gap-1"
+          >
+            {client.name}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => removeClient(client.id)}
+            >
+              <X className="h-3 w-3" />
+              <span className="sr-only">Remove {client.name}</span>
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
             <div>
               <Label htmlFor="city">City</Label>
               <Input
@@ -521,103 +544,8 @@ export default function JobManagement({
             </div> */}
           </div>
         );
-      case "schedule":
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Start Date */}
-              <div>
-                <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !currentJob.jobSchedule.startDate &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currentJob.jobSchedule.startDate ? (
-                        format(currentJob.jobSchedule.startDate, "PPP")
-                      ) : (
-                        <span>Pick a start date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={currentJob.jobSchedule.startDate as Date}
-                      onSelect={(date) => handleDateChange(date, "startDate")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* End Date */}
-              <div>
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !currentJob.jobSchedule.endDate &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currentJob.jobSchedule.endDate ? (
-                        format(currentJob.jobSchedule.endDate, "PPP")
-                      ) : (
-                        <span>Pick an end date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={currentJob.jobSchedule.endDate as Date}
-                      onSelect={(date) => handleDateChange(date, "endDate")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="recurrence">Recurrence</Label>
-              <Select
-                value={currentJob.jobSchedule?.recurrence}
-                onValueChange={(value) =>
-                  setCurrentJob({
-                    ...currentJob,
-                    jobSchedule: {
-                      ...currentJob.jobSchedule,
-                      recurrence: value,
-                    },
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recurrence" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recurrenceOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        );
-      case "assign":
+     
+      case 2:
         return (
           <div className="space-y-4">
             <div>
@@ -694,7 +622,103 @@ export default function JobManagement({
             </div>
           </div>
         );
-      case "review":
+        case 3:
+          return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Start Date */}
+                <div>
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !currentJob.jobSchedule.startDate &&
+                            "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentJob.jobSchedule.startDate ? (
+                          format(currentJob.jobSchedule.startDate, "PPP")
+                        ) : (
+                          <span>Pick a start date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={currentJob.jobSchedule.startDate as Date}
+                        onSelect={(date) => handleDateChange(date, "startDate")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+  
+                {/* End Date */}
+                <div>
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !currentJob.jobSchedule.endDate &&
+                            "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentJob.jobSchedule.endDate ? (
+                          format(currentJob.jobSchedule.endDate, "PPP")
+                        ) : (
+                          <span>Pick an end date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={currentJob.jobSchedule.endDate as Date}
+                        onSelect={(date) => handleDateChange(date, "endDate")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="recurrence">Recurrence</Label>
+                <Select
+                  value={currentJob.jobSchedule?.recurrence}
+                  onValueChange={(value) =>
+                    setCurrentJob({
+                      ...currentJob,
+                      jobSchedule: {
+                        ...currentJob.jobSchedule,
+                        recurrence: value,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select recurrence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {recurrenceOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          );
+      case 4:
         return (
           <Card>
             <CardHeader>
@@ -769,29 +793,10 @@ export default function JobManagement({
           </Card>
         );
     }
-  };
+  }; 
+  <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
 
-  const renderProgressTracker = () => {
-    const steps: Step[] = ["create", "schedule", "assign", "review"];
-    return (
-      <div className="flex justify-between mb-8">
-        {steps.map((s, index) => (
-          <div key={s} className="flex flex-col items-center">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                steps.indexOf(step) >= index
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
-              }`}
-            >
-              {index + 1}
-            </div>
-            <span className="text-sm mt-1 capitalize">{s}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  
 
   const renderJobList = () => (
     <div className="space-y-4">
@@ -908,30 +913,28 @@ export default function JobManagement({
           <h1 className="text-2xl font-bold mb-4">
             {editingJobId ? "Edit Job" : "Create New Job"}
           </h1>
-          {renderProgressTracker()}
+          <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
           {renderStep()}
-          <div className="flex justify-between mt-6">
-            {step !== "create" && (
-              <Button onClick={handleBack} variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-            )}
-            {!editingJobId && (
-              <Button onClick={handleSaveDraft} variant="outline">
-                <Save className="mr-2 h-4 w-4" /> Save Draft
-              </Button>
-            )}
-            {step !== "review" ? (
-              <Button onClick={handleNext} className="ml-auto">
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit} className="ml-auto">
-                {editingJobId ? "Update Job" : "Create Job"}{" "}
-                <CheckCircle2 className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          <div className="flex justify-between items-center mt-4">
+        <Button
+          onClick={handleBack}
+          disabled={step === 1}
+          variant="outline"
+        >
+          Previous
+        </Button>
+        <span className="text-lg font-semibold">
+          Step {step} of {steps.length}
+        </span>
+        <Button
+          onClick={step === steps.length ? handleSubmit: handleNext}
+          type={step === steps.length ? "submit" : "button"} 
+
+          // disabled={step === steps.length}
+        >
+          {step === steps.length ? "Complete" : "Next"}
+        </Button>
+      </div>
         </TabsContent>
         <TabsContent value="track">
           <h1 className="text-2xl font-bold mb-4">Job Tracking</h1>
