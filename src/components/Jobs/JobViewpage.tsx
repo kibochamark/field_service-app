@@ -142,7 +142,7 @@ export default function JobManagementSystem({
                     <TableCell className="max-w-xs truncate" title={job?.location?.address || 'N/A'}>
   <span className="flex items-center">
     <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-    {job?.location?.address || 'N/A'}
+    {job?.location?.state || 'N/A'}
   </span>
   <p className="text-sm">
     {job?.location?.city ? `${job?.location.city}, ${job?.location.state}` : 'Location not specified'}
