@@ -117,6 +117,7 @@ export default function JobManagementSystem({
                 <TableRow>
                   <TableHead>Client</TableHead>
                   <TableHead>Service</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Job Type</TableHead>
                   <TableHead>Technician</TableHead>
@@ -131,6 +132,7 @@ export default function JobManagementSystem({
                     {job?.clients?.firstName}, {job?.clients?.lastName}
                     </TableCell>
                     <TableCell>{job.name}</TableCell>
+                    <TableCell>{job.description}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="flex items-center w-fit">
                         {getStatusIcon(job.status)}
