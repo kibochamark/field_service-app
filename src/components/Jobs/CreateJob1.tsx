@@ -389,6 +389,7 @@ const createJob = async () => {
     jobTypeId: updatedJob.jobTypeId,
     clientId: updatedJob.clientId, // Single clientId
     companyId: updatedJob.companyId,
+    dispatcherId: session?.user?.userId
   };
 
   try {
