@@ -357,18 +357,7 @@ const handleSelectClient = (client: { id: string; name: string }) => {
         break;
     }
   };
-  const handleSubmit = async () => {   
-    if (step === 1) {
-      const jobId = await createJob(); // Ensure that createJob returns the created job ID
-      setCreatedJobId(jobId); // Store the job ID in state
-    } else if (step === 2) {
-      if (createdJobId) {
-        await assignJob(createdJobId); 
-}    } else if (step === 3) {
-      if (!validateStep()) return;
-      setStep(4);
-    }
-  };
+
 
 
 const createJob = async () => {
@@ -389,7 +378,7 @@ const createJob = async () => {
     jobTypeId: updatedJob.jobTypeId,
     clientId: updatedJob.clientId, // Single clientId
     companyId: updatedJob.companyId,
-    dispatcherId: session?.user?.userId
+    
   };
 
   try {
@@ -506,6 +495,93 @@ const assignJob = async (jobId: string) => {
   }
 };
 
+const scheduleJob = async (jobId: string) => {
+  if (!validateStep()) return; // Validate the data if necessary
+
+  // Prepare the updated job data based on your current job state
+  const updatedJobData = {
+        
+ 
+  
+  jobSchedule:currentJob.jobSchedule
+  };
+
+  console.log(updatedJobData, "check")
+
+  console.log("Updated Job Data:", updatedJobData);
+
+  try {
+    const endpoint = `${baseUrl}${jobId}/schedulejob`; // Create the URL for the PUT request
+    console.log(`Sending PUT request to ${endpoint}`);
+
+    const response = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user.access_token}`,
+      },
+      body: JSON.stringify(updatedJobData), // Send the updated job data
+    });
+
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.log("Error response:", errorResponse);
+      throw new Error("Failed to update job data");
+    }   
+
+    const result = await response.json();
+    console.log("Job updated successfully:", result);
+    
+
+    toast({
+      title: "Job Updated",
+      description: "The job has been successfully updated.",
+    });
+
+    // Update the jobs state with the updated job
+    setJobs(jobs.map((job) => (job.id === jobId ? result : job)));
+
+    // Reset the form or state as necessary
+    setCurrentJob({
+      id: "",
+      name: "",
+      description: "",
+      type: "",
+      clientId: [],
+      jobSchedule: {
+        startDate: new Date(),
+        endDate: new Date(),
+        recurrence: "None",
+      },
+      technicianId: [],
+      location: { city: "", zip: "", state: ""},
+    });
+    setStep(4); // Move to the next step or as needed
+  } catch (error) {
+    console.error("Error updating job:", error);
+    toast({
+      title: "Update Error",
+      variant: "destructive",
+    });
+  }
+};
+
+  const handleSubmit = async () => {   
+    if (step === 1) {
+      const jobId = await createJob(); // Ensure that createJob returns the created job ID
+      setCreatedJobId(jobId); // Store the job ID in state
+    } else if (step === 2) {
+      if (createdJobId) {
+        await assignJob(createdJobId); 
+     }   
+ } else if (step === 3) {
+        if (createdJobId) {
+    await scheduleJob(createdJobId);
+        }
+  };
+}
   
 
 
