@@ -51,43 +51,6 @@ const mockCreateInvoice = async (invoice: Partial<Invoice>): Promise<Invoice> =>
 
 
 
-const mockFetchInvoices = async (): Promise<Invoice[]> => {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return [
-    {
-      _id: '1',
-      jobId: 'JOB001',
-      clientId: 'CLIENT001',
-      items: [{ description: 'Service', quantity: 1, unitPrice: 100, total: 100 }],
-      subtotal: 100,
-      tax: 10,
-      totalAmount: 110,
-      paymentStatus: 'paid',
-      dueDate: '2023-07-01',
-      issueDate: '2023-06-01',
-      status: 'completed',
-      createdAt: '2023-06-01',
-      updatedAt: '2023-06-01',
-    },
-    {
-      _id: '2',
-      jobId: 'JOB002',
-      clientId: 'CLIENT002',
-      items: [{ description: 'Product', quantity: 2, unitPrice: 50, total: 100 }],
-      subtotal: 100,
-      tax: 10,
-      totalAmount: 110,
-      paymentStatus: 'pending',
-      dueDate: '2023-07-15',
-      issueDate: '2023-06-15',
-      status: 'sent',
-      createdAt: '2023-06-15',
-      updatedAt: '2023-06-15',
-    },
-    // Add more mock invoices as needed
-  ];
-}
 
 const mockFetchDashboardMetrics = async (): Promise<{
   overdueAmount: number;
@@ -131,22 +94,10 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
 
 
   useEffect(() => {
-    fetchInvoices();
     fetchDashboardMetrics();
   }, []);
 
-  const fetchInvoices = async () => {
-    try {
-      const invoices = await mockFetchInvoices();
-      setAllInvoices(invoices);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch invoices. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   const fetchDashboardMetrics = async () => {
     try {

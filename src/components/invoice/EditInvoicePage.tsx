@@ -1,15 +1,33 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
 import { toast } from "react-toastify"; // For displaying success/error notifications
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store/Store";
+
+// Yup validation schema
+const validationSchema = Yup.object().shape({
+  clientId: Yup.string()
+    .email("Invalid email format")
+    .required("Client email is required"),
+  subtotal: Yup.number().required("Subtotal is required"),
+  tax: Yup.number().required("Tax is required"),
+  totalAmount: Yup.number().required("Total amount is required"),
+  paymentStatus: Yup.string().required("Payment status is required"),
+  dueDate: Yup.date().required("Due date is required"),
+  issueDate: Yup.date().required("Issue date is required"),
+  status: Yup.string().required("Status is required"),
+});
 
 const EditInvoicePage = () => {
-  const [invoice, setInvoice] = useState({
+  const [loading, setLoading] = useState(true); // To manage the loading state
+  const router = useRouter();
+  const { id } = useParams();
+
+  const [initialValues, setInitialValues] = useState({
     clientId: "",
     subtotal: 0,
     tax: 0,
@@ -17,60 +35,71 @@ const EditInvoicePage = () => {
     paymentStatus: "",
     dueDate: "",
     issueDate: "",
-    status: "draft", // default status value
+    status: "draft", // Default status value
   });
-
-  const router = useRouter();
-  const edit = useSelector((state: RootState) => state.customerForm.isedit);
-  console.log(edit, "data to edit")
-
-  // const { id } = router.query; // Get invoice ID from URL
 
   // Fetch invoice details when page loads
   useEffect(() => {
+    if (id) {
       axios
-        .get(
-          `https://field-service-management.vercel.app/api/v1/invoice/${id}`
-        )
+        .get(`https://field-service-management.vercel.app/api/v1/invoices/${id}`)
         .then((response) => {
-          setInvoice(response.data); // Populate form with existing data
+          const data = response.data;
+
+          // Ensure date fields are formatted properly
+          setInitialValues({
+            clientId: data.clientId || "",
+            subtotal: data.subtotal || 0,
+            tax: data.tax || 0,
+            totalAmount: data.totalAmount || 0,
+            paymentStatus: data.paymentStatus || "",
+            dueDate: data.dueDate
+              ? new Date(data.dueDate).toISOString().split("T")[0]
+              : "",
+            issueDate: data.issueDate
+              ? new Date(data.issueDate).toISOString().split("T")[0]
+              : "",
+            status: data.status || "draft",
+          });
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Error fetching invoice data:", error);
+          setLoading(false);
         });
-    },[]);
+    }
+  }, [id]);
 
-  // Handle form input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setInvoice((prevInvoice) => ({
-      ...prevInvoice,
-      [name]: value,
-    }));
-  };
+  // Formik form handling
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true, // Allows form to update when initialValues change
+    validationSchema,
+    onSubmit: (values) => {
+      axios
+        .put(
+          `https://field-service-management.vercel.app/api/v1/invoice/${id}`,
+          values
+        )
+        .then(() => {
+          toast.success("Invoice updated successfully!");
+          router.push("/invoices");
+        })
+        .catch((error) => {
+          toast.error("Error updating invoice.");
+          console.error("Error updating invoice:", error);
+        });
+    },
+  });
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    axios
-      .put(
-        `https://field-service-management.vercel.app/api/v1/invoice/`,
-        invoice
-      )
-      .then(() => {
-        toast.success("Invoice updated successfully!");
-        router.push("/invoices"); // Redirect to invoices page after update
-      })
-      .catch((error) => {
-        toast.error("Error updating invoice.");
-        console.error("Error updating invoice:", error);
-      });
-  };
+  if (loading) {
+    return <div>Loading...</div>; // Show loading indicator while data is fetched
+  }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 bg-white">
       <h1 className="text-2xl font-bold mb-4">Edit Invoice</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
         {/* Client Email */}
         <div>
           <label htmlFor="clientId" className="block font-medium mb-1">
@@ -80,10 +109,14 @@ const EditInvoicePage = () => {
             type="email"
             name="clientId"
             id="clientId"
-            value={invoice.clientId}
-            onChange={handleInputChange}
+            value={formik.values.clientId}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.clientId && formik.errors.clientId ? (
+            <div className="text-red-500">{formik.errors.clientId}</div>
+          ) : null}
         </div>
 
         {/* Subtotal */}
@@ -95,10 +128,14 @@ const EditInvoicePage = () => {
             type="number"
             name="subtotal"
             id="subtotal"
-            value={invoice.subtotal}
-            onChange={handleInputChange}
+            value={formik.values.subtotal}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.subtotal && formik.errors.subtotal ? (
+            <div className="text-red-500">{formik.errors.subtotal}</div>
+          ) : null}
         </div>
 
         {/* Tax */}
@@ -110,10 +147,14 @@ const EditInvoicePage = () => {
             type="number"
             name="tax"
             id="tax"
-            value={invoice.tax}
-            onChange={handleInputChange}
+            value={formik.values.tax}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.tax && formik.errors.tax ? (
+            <div className="text-red-500">{formik.errors.tax}</div>
+          ) : null}
         </div>
 
         {/* Total Amount */}
@@ -125,10 +166,14 @@ const EditInvoicePage = () => {
             type="number"
             name="totalAmount"
             id="totalAmount"
-            value={invoice.totalAmount}
-            onChange={handleInputChange}
+            value={formik.values.totalAmount}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.totalAmount && formik.errors.totalAmount ? (
+            <div className="text-red-500">{formik.errors.totalAmount}</div>
+          ) : null}
         </div>
 
         {/* Payment Status */}
@@ -140,10 +185,14 @@ const EditInvoicePage = () => {
             type="text"
             name="paymentStatus"
             id="paymentStatus"
-            value={invoice.paymentStatus}
-            onChange={handleInputChange}
+            value={formik.values.paymentStatus}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.paymentStatus && formik.errors.paymentStatus ? (
+            <div className="text-red-500">{formik.errors.paymentStatus}</div>
+          ) : null}
         </div>
 
         {/* Due Date */}
@@ -155,10 +204,14 @@ const EditInvoicePage = () => {
             type="date"
             name="dueDate"
             id="dueDate"
-            value={new Date(invoice.dueDate).toISOString().split("T")[0]} // Format date for input field
-            onChange={handleInputChange}
+            value={formik.values.dueDate}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.dueDate && formik.errors.dueDate ? (
+            <div className="text-red-500">{formik.errors.dueDate}</div>
+          ) : null}
         </div>
 
         {/* Issue Date */}
@@ -170,10 +223,14 @@ const EditInvoicePage = () => {
             type="date"
             name="issueDate"
             id="issueDate"
-            value={new Date(invoice.issueDate).toISOString().split("T")[0]} // Format date for input field
-            onChange={handleInputChange}
+            value={formik.values.issueDate}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.issueDate && formik.errors.issueDate ? (
+            <div className="text-red-500">{formik.errors.issueDate}</div>
+          ) : null}
         </div>
 
         {/* Status */}
@@ -185,10 +242,14 @@ const EditInvoicePage = () => {
             type="text"
             name="status"
             id="status"
-            value={invoice.status}
-            onChange={handleInputChange}
+            value={formik.values.status}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             required
           />
+          {formik.touched.status && formik.errors.status ? (
+            <div className="text-red-500">{formik.errors.status}</div>
+          ) : null}
         </div>
 
         {/* Submit Button */}

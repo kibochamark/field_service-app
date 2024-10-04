@@ -151,7 +151,7 @@ const Action = ({ row }: { row: any }) => {
     setDeleting(true);
     try {
       // Perform the delete request to the API
-      await axios.delete(baseUrl + `/invoice/${id}`);
+      await axios.delete(baseUrl + `/invoices/${id}`);
       // You can add a notification or UI update here, like refetching data
       console.log("Invoice deleted successfully.");
       setShowModal(false);
