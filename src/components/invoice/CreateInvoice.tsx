@@ -49,19 +49,31 @@ import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { getClints } from "./ServerActions";
 import { searchNumbers } from "libphonenumber-js";
+import toast from "react-hot-toast";
 
 interface Client {
-  id:string;
-  client: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  };
-}
-interface Job {
   id: string;
-  clients: Client[];
+  firstName: string;
+  lastName: string;
+  email:string;
 }
+
+interface Data {
+  id: string; // Top-level ID
+  clients: Client;
+}
+// interface Client {
+//   id:string;
+//   client: {
+//     id: string;
+//     firstName: string;
+//     lastName: string;
+//   };
+// }
+// interface Job {
+//   id: string;
+//   clients: Client[];
+// }
 
 // Mock client data
 // const clients = [
@@ -99,30 +111,30 @@ const invoiceSchema = Yup.object().shape({
   dueDate: Yup.date().required("Due date is required"),
 });
 // ClientSearch component
+
 const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
+  const [topLevelId, setTopLevelId] = useState<string | null>(null); // State to store top-level ID
 
+  // Fetch clients on component mount
   useEffect(() => {
     const fetchCustomers = async () => {
       const customerdetails = await getClints();
-      console.log(customerdetails, "customerinfo22 retrieved");
-      // setClients(customerdetails);
-      const allClients = customerdetails.flatMap((job: Job) => job.clients);
-      setClients(allClients); // Flattened clients array
-      console.log(allClients, "allClients");
-
+      if (customerdetails && customerdetails.clients) {
+        setClients([customerdetails.clients]); // Assuming `clients` is a single object, convert it to an array
+      }
     };
     fetchCustomers();
   }, []);
 
+  // Filter clients based on the search term
   const filteredClients = clients.filter(
     (client) =>
-      client.id?.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-      client.client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.client.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.client.id.toLowerCase().includes(searchTerm.toLowerCase())
+      client.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -142,11 +154,12 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
           <Search className="h-4 w-4" />
         </Button>
       </div>
+
       {isDropdownOpen && (
         <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
           {filteredClients.map((client) => (
             <div
-              key={client.client.id}
+              key={client.id}
               className="p-2 hover:bg-accent cursor-pointer"
               onClick={() => {
                 onSelectClient(client);
@@ -154,13 +167,10 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
                 setSearchTerm("");
               }}
             >
-              <div className="font-medium">{client.client.firstName} {client.client.lastName}{client.id}</div>
-              <div className="text-sm text-muted-foreground">
-                {client.client.lastName}
+              <div className="font-medium">
+                {client.firstName} {client.lastName}
               </div>
-              <div className="text-sm text-muted-foreground">
-                {client.id}
-              </div>
+              <div className="text-sm text-muted-foreground">{client.id}</div>
             </div>
           ))}
         </div>
@@ -169,14 +179,14 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
   );
 };
 
-// ClientInfo component
-const ClientInfo = ({ client }: { client: any }) => {
+// ClientInfo Component
+const ClientInfo = ({ client }: { client: Client | null }) => {
   if (!client) return null;
 
   return (
     <div className="p-2 bg-muted rounded-md">
-      <div className="font-medium">{client.clientfirstName}</div>
-      <div className="text-sm text-muted-foreground">{client.client.lastName}</div>
+      <div className="font-medium">{client.firstName}</div>
+      <div className="text-sm text-muted-foreground">{client.lastName}</div>
       <div className="text-sm text-muted-foreground">{client.id}</div>
     </div>
   );
@@ -215,7 +225,6 @@ const Stepper = ({
     </div>
   );
 };
-
 // Step 1: Select or search client
 const SelectClientStep = ({
   onNext,
@@ -364,7 +373,9 @@ const CreateInvoiceStep = ({
                 }
               />
               {formik.errors.tax && formik.touched.tax ? (
-                <div className="text-red-500 text-sm">{formik.errors.tax as string}</div>
+                <div className="text-red-500 text-sm">
+                  {formik.errors.tax as string}
+                </div>
               ) : null}
             </div>
             <div>
@@ -649,7 +660,7 @@ export default function InvoiceCreationPage() {
     subTotal: "",
     id: "",
     notes: "",
-    jobId:""
+    jobId: "",
   });
   const totalSteps = 4;
 
@@ -667,62 +678,64 @@ export default function InvoiceCreationPage() {
       subTotal: "",
       tax: "",
       dueDate: "",
-      clientId:"",
-      jobId:"",
+      clientId: "",
+      jobId: "",
     });
     setCurrentStep(2); // Go back to create invoice step
   };
   const { data: session } = useSession();
-  const handleSubmit = async () => {
-    try {
-      // Gather necessary data to submit
-      const data = {
-        clientId: selectedClient?.client?.id,
-        companyId: session?.user?.companyId,
-        createdBy: session?.user?.userId,
-        totalAmount: invoice.amount,
-        subTotal: invoice.subTotal || invoice.amount,
-        tax: invoice.tax || 0,
-        dueDate: invoice.dueDate,
-        notes: invoice.notes || "No additional notes.",
-        jobId: invoice.id
-      };
-  
-      // Basic validation
-      if (!data.companyId || !data.totalAmount || !data.dueDate) {
-        alert("Please fill in all required fields.");
-        return;
-      }
-  
-      console.log(data, "sending data api");
-  
-      // Send the POST request to the API endpoint
-      // const response = await fetch(baseUrl + "invoice", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${session?.user?.access_token}`,
-      //   },
-      //   body: JSON.stringify(data),
-      // });
-  
-      if (response.ok) {
-        const result = await response.json();
-        alert("Invoice sent successfully!");
-        
-        // Optionally handle result data
-      } else {
-        const errorData = await response.json();
-        console.error("Error response data:", errorData); // Log for debugging
-        const errorMessages = Array.isArray(errorData.error) ? errorData.error.join(", ") : "Unknown error occurred.";
-        alert(`Failed to send invoice: ${errorMessages}`);
-      }
-    } catch (error) {
-      console.error("Error submitting invoice:", error);
-      alert("An error occurred while sending the invoice.");
+const handleSubmit = async () => {
+  try {
+    // Gather necessary data to submit
+    const data = {
+      clientId: selectedClient?.id,
+      companyId: session?.user?.companyId,
+      createdBy: session?.user?.userId,
+      totalAmount: invoice.amount,
+      subTotal: invoice.subTotal || invoice.amount,
+      tax: invoice.tax || 0,
+      dueDate: invoice.dueDate,
+      notes: invoice.notes || "No additional notes.",
+      jobId: invoice.id,
+    };
+
+    // Basic validation
+    if (!data.companyId || !data.totalAmount || !data.dueDate) {
+      toast.error("Please fill in all required fields."); // Use toast for error
+      return;
     }
-  };
-  
+
+    console.log(data, "sending data api");
+
+    // Send the POST request to the API endpoint
+    const response = await fetch(baseUrl + "invoice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user?.access_token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      toast.success("Invoice sent successfully!"); // Success toast
+
+      // Optionally handle result data
+    } else {
+      const errorData = await response.json();
+      console.error("Error response data:", errorData); // Log for debugging
+      const errorMessages = Array.isArray(errorData.error)
+        ? errorData.error.join(", ")
+        : "Unknown error occurred.";
+      toast.error(`Failed to send invoice: ${errorMessages}`); // Use toast for error
+    }
+  } catch (error) {
+    console.error("Error submitting invoice:", error);
+    toast.error("An error occurred while sending the invoice."); // Use toast for error
+  }
+};
+
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">Create Invoice</h1>
