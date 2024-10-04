@@ -35,13 +35,15 @@ export default function JobManagementSystem({
     (filterStatus === "All" || job.status === filterStatus)
   )
 
+  console.log(filteredJobs, "jobs")
+
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "Scheduled": return <Calendar className="h-4 w-4 text-blue-500" />
-      case "In Progress": return <Clock className="h-4 w-4 text-yellow-500" />
-      case "Completed": return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "Cancelled": return <XCircle className="h-4 w-4 text-red-500" />
-      case "Pending": return <AlertTriangle className="h-4 w-4 text-orange-500" />
+      case "ASSIGNED": return <Calendar className="h-4 w-4 text-blue-500" />
+      case "ONGOING": return <Clock className="h-4 w-4 text-yellow-500" />
+      case "COMPLETED": return <CheckCircle className="h-4 w-4 text-green-500" />
+      case "CANCELLED": return <XCircle className="h-4 w-4 text-red-500" />
+      case "CREATED": return <AlertTriangle className="h-4 w-4 text-orange-500" />
       default: return null
     }
   }
@@ -64,7 +66,7 @@ export default function JobManagementSystem({
       </div>
       
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-6">
-        {["All", "Scheduled", "In Progress", "Completed", "Cancelled", "Pending"].map((status) => (
+        {["All", "ASSIGNED", "ONGOING", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
           <Card key={status} className={`${filterStatus === status ? 'bg-blue-100 border-blue-300' : 'bg-white'}`}>
             <CardHeader className="p-4">
               <CardTitle className="text-lg font-semibold flex items-center justify-between">
@@ -103,7 +105,7 @@ export default function JobManagementSystem({
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                {["All", "Scheduled", "In Progress", "Completed", "Cancelled", "Pending"].map((status) => (
+                {["All", "ASSIGNED", "ONGOING", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
                   <SelectItem key={status} value={status}>{status}</SelectItem>
                 ))}
               </SelectContent>
@@ -115,6 +117,7 @@ export default function JobManagementSystem({
                 <TableRow>
                   <TableHead>Client</TableHead>
                   <TableHead>Service</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Job Type</TableHead>
                   <TableHead>Technician</TableHead>
@@ -126,9 +129,10 @@ export default function JobManagementSystem({
                 {filteredJobs.map((job: any) => (
                   <TableRow key={job.id}>
                     <TableCell className="font-medium">
-                    {job?.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}
+                    {job?.clients?.firstName}, {job?.clients?.lastName}
                     </TableCell>
                     <TableCell>{job.name}</TableCell>
+                    <TableCell>{job.description}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="flex items-center w-fit">
                         {getStatusIcon(job.status)}
@@ -140,7 +144,7 @@ export default function JobManagementSystem({
                     <TableCell className="max-w-xs truncate" title={job?.location?.address || 'N/A'}>
   <span className="flex items-center">
     <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-    {job?.location?.address || 'N/A'}
+    {job?.location?.state || 'N/A'}
   </span>
   <p className="text-sm">
     {job?.location?.city ? `${job?.location.city}, ${job?.location.state}` : 'Location not specified'}
