@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/ui/table"
 import { Badge } from "@/shadcn/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/ui/avatar"
-import { Calendar, Clock, AlertTriangle, CheckCircle, XCircle, Search, Filter, MoreVertical, Plus, MapPin } from 'lucide-react'
+import { Calendar, Clock, AlertTriangle, CheckCircle, XCircle, Search, Filter, MoreVertical, Plus, MapPin, PenIcon } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select"
 import { useSession } from 'next-auth/react'
 
@@ -44,7 +44,7 @@ export default function JobManagementSystem({
       case "ONGOING": return <Clock className="h-4 w-4 text-yellow-500" />
       case "COMPLETED": return <CheckCircle className="h-4 w-4 text-green-500" />
       case "CANCELLED": return <XCircle className="h-4 w-4 text-red-500" />
-      case "CREATED": return <AlertTriangle className="h-4 w-4 text-orange-500" />
+      case "CREATED": return <PenIcon className="h-4 w-4 text-green-500" />
       default: return null
     }
   }
