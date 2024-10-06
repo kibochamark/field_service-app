@@ -107,6 +107,7 @@ export default {
             token.hascompany = (user as any)?.hascompany;
             token.companyId = (user as any)?.companyId;
             token.role = (user as any)?.role;
+            token.isSubscribed = (user as any)?.isSubscribed;
 
           }
 
@@ -128,6 +129,7 @@ export default {
               token.companyId = res.data?.data?.token?.companyId;
               token.role = res.data?.data?.token?.role;
               token.userId = res.data?.data?.token?.userId;
+              token.isSubscribed = res.data?.data?.token?.isSubscribed;
             }else{
               return null
             }
@@ -153,7 +155,8 @@ export default {
           hascompany: token?.hascompany!,
           companyId: token?.companyId!,
           role:token?.role,
-          userId:token?.userId
+          userId:token?.userId,
+          isSubscribed:token?.isSubscribed
         }
       }
     },

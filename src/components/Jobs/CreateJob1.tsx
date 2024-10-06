@@ -378,6 +378,7 @@ const createJob = async () => {
     jobTypeId: updatedJob.jobTypeId,
     clientId: updatedJob.clientId, // Single clientId
     companyId: updatedJob.companyId,
+    dispatcherId:session?.user?.userId
     
   };
 
@@ -569,6 +570,7 @@ const scheduleJob = async (jobId: string) => {
 };
 
   const handleSubmit = async () => {   
+    console.log("tsdt")
     if (step === 1) {
       const jobId = await createJob(); // Ensure that createJob returns the created job ID
       setCreatedJobId(jobId); // Store the job ID in state

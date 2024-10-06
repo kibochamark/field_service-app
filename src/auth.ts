@@ -13,6 +13,7 @@ declare module "next-auth" {
       companyId: string;
       role:string;
       userId: string;
+      isSubscribed:boolean;
     } & DefaultSession["user"];
   }
 
@@ -22,6 +23,7 @@ declare module "next-auth" {
     companyId: string;
     hascompany: boolean;
     userId: string;
+    isSubscribed:boolean;
   }
 
   interface Token {
@@ -30,6 +32,7 @@ declare module "next-auth" {
     hascompany: boolean;
     companyId: string;
     userId: string;
+    isSubscribed:boolean;
   }
 }
 
@@ -41,6 +44,7 @@ declare module "next-auth/jwt" {
     hascompany?: boolean;
     companyId?: string;
     userId: string;
+    isSubscribed:boolean;
   }
 }
 
