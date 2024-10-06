@@ -86,7 +86,7 @@ export default function Subscribe({ plans }: { plans: any }) {
 
       if (Object.values(data).length > 0) {
         update({ isSubscribed: true })
-        router
+        router.push("/callpro/dashboard")
         toast.success("Subscribed Successfully")
         toast.success("You have One month till your next subscription")
       }else{
