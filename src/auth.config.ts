@@ -8,37 +8,37 @@ import { baseUrl } from "./utils/constants";
 import { signOut } from "./auth";
 
 
-async function refreshAccessToken(token: any) {
-  try {
-    const url = ""
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      method: "POST",
-    })
+// async function refreshAccessToken(token: any) {
+//   try {
+//     const url = ""
+//     const response = await fetch(url, {
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//       },
+//       method: "POST",
+//     })
 
-    const refreshedTokens = await response.json()
+//     const refreshedTokens = await response.json()
 
-    if (!response.ok) {
-      throw refreshedTokens
-    }
+//     if (!response.ok) {
+//       throw refreshedTokens
+//     }
 
-    return {
-      ...token,
-      access_token: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      refresh_token: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-    }
-  } catch (error) {
-    console.log(error)
+//     return {
+//       ...token,
+//       access_token: refreshedTokens.access_token,
+//       accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+//       refresh_token: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
+//     }
+//   } catch (error) {
+//     console.log(error)
 
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    }
-  }
-}
+//     return {
+//       ...token,
+//       error: "RefreshAccessTokenError",
+//     }
+//   }
+// }
 
 
 export default {
