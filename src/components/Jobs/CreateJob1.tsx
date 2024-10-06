@@ -37,6 +37,7 @@ import {
   Edit,
   X,
   Check,
+  PlusCircle,
 } from "lucide-react";
 import {
   Command,
@@ -59,8 +60,12 @@ import { cn } from "@/lib/utils";
 import { baseUrl } from "@/utils/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import AnimatedStepProgression from "./Progressbar";
+import { FileText, Users, Star } from 'lucide-react'
+import { string } from "yup";
 
-type Step = "create" | "schedule" | "assign" | "review";
+
 type JobStatus =
   | "Draft"
   | "Not Assigned"
@@ -84,6 +89,7 @@ interface Job {
     city: string;
     state: string;
     zip: string;
+  
   };
 }
 
@@ -91,6 +97,20 @@ interface Client {
   id: string;
   name: string;
 }
+
+interface Step {
+  id: number
+  title: string
+  icon: React.ReactNode
+}
+
+
+const steps: Step[] = [
+  { id: 1, title: "Create", icon: <FileText className="w-6 h-6" /> },
+  { id: 2, title: "Assign", icon: <Users className="w-6 h-6" /> },
+  { id: 3, title: "Schedule", icon: <Calendar className="w-6 h-6" /> },
+  { id: 4, title: "Review", icon: <Star className="w-6 h-6" /> },
+]
 
 const recurrenceOptions = ["DAILY", "WEEKLY", "MONTHLY"];
 
@@ -105,7 +125,7 @@ export default function JobManagement({
   jobtype: any;
   alljobs: any;
 }) {
-  const [step, setStep] = useState<Step>("create");
+  const [step, setStep] = useState<number>(1);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [currentJob, setCurrentJob] = useState<Job>({
     id: "",
@@ -117,7 +137,7 @@ export default function JobManagement({
     location: {
       city: "",
       state: "",
-      zip: "",
+      zip: ""      
     },
     jobSchedule: {
       startDate: new Date(),
@@ -125,6 +145,8 @@ export default function JobManagement({
       recurrence: "None",
     },
   });
+
+  
 
   const router=useRouter()
 
@@ -135,26 +157,34 @@ export default function JobManagement({
 
   const [openClientSearch, setOpenClientSearch] = React.useState(false);
   const [clientSearch, setClientSearch] = React.useState("");
-  const [selectedClients, setSelectedClients] = React.useState<Client[]>([]);
+  // const [selectedClients, setSelectedClients] = React.useState<Client[]>([]);
 
-  const handleSelectClient = (client: { id: string; name: string }) => {
-    setSelectedClients((prev) => {
-      const isSelected = prev.some((c) => c.id === client.id);
-      if (isSelected) {
-        return prev.filter((c) => c.id !== client.id);
-      } else {
-        return [...prev, client];
-      }
-    });
-  };
+  // const handleSelectClient = (client: { id: string; name: string }) => {
+  //   setSelectedClients((prev) => {
+  //     const isSelected = prev.some((c) => c.id === client.id);
+  //     if (isSelected) {
+  //       return prev.filter((c) => c.id !== client.id);
+  //     } else {
+  //       return [...prev, client];
+  //     }
+  //   });
+  // };
+
+  const [selectedClient, setSelectedClient] = React.useState<string>("");
+
+// Handle selecting a single client
+const handleSelectClient = (client: { id: string; name: string }) => {
+  setSelectedClient(client.id); // Store the selected client's name
+};
+
   const { data: session } = useSession();
 
-  console.log(session, "session");
+ 
 
-  const removeClient = (clientId: string) => {
-    setSelectedClients((prev) => prev.filter((c) => c.id !== clientId));
-  };
-
+  // const removeClient = (clientId: string) => {
+  //   setSelectedClients((prev) => prev.filter((c) => c.id !== clientId));
+  // };
+  const [createdJobId, setCreatedJobId] = useState<string | null>(null);
   const [openTechnicianSearch, setOpenTechnicianSearch] = React.useState(false);
   const [technicianSearch, setTechnicianSearch] = React.useState("");
   const [selectedTechnicians, setSelectedTechnicians] = React.useState<
@@ -172,6 +202,45 @@ export default function JobManagement({
     });
   };
 
+//   const assignJob = async () => {
+//   const { city, zip, state } = currentJob.location; // Extract location fields
+//   const technicianIds = selectedTechnicians.map((tech) => tech.id); // Extract technician IDs
+
+//   // Prepare the data to be sent in the request body
+//   const jobData = {
+//     location: {
+//       city,
+//       zip,
+//       state,
+//       otherinfo: currentJob.location.otherInfo || "", // Optional field
+//     },
+//     technicianIds, // Array of technician IDs
+//     jobSchedule: currentJob.jobSchedule, // Dates and recurrence
+//   };
+
+//   // Make the PUT request to update the job
+//   try {
+//     const response = await fetch(`/assign/${jobId}`, {
+//       method: "PUT",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${session?.user.access_token}`, 
+//       },
+//       body: JSON.stringify(jobData), 
+//     });
+
+//     if (!response.ok) {
+//       throw new Error("Failed to update job.");
+//     }
+
+//     const result = await response.json();
+//     console.log("Job updated successfully:", result);
+//     setStep(3);
+//   } catch (error) {
+//     console.error("Error updating job:", error);
+//   }
+// };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -188,40 +257,64 @@ export default function JobManagement({
   const handleSelectChange = (value: string, field: keyof Job) => {
     setCurrentJob({ ...currentJob, [field]: value });
   };
+  const handleCreateNewClient = () => {
+    router.push('/callpro/createcustomer') 
+  }
 
   const handleDateChange = (date: any, field: "startDate" | "endDate") => {
-    setCurrentJob({
-      ...currentJob,
-      jobSchedule: {
-        ...currentJob.jobSchedule,
-        [field]: date,
-      },
-    });
-
+    // Validate that end date is not earlier than start date
+    if (field === "startDate" && currentJob.jobSchedule.endDate && date > currentJob.jobSchedule.endDate) {
+      // If the new startDate is later than the current endDate, set both dates to the new startDate
+      setCurrentJob({
+        ...currentJob,
+        jobSchedule: {
+          ...currentJob.jobSchedule,
+          startDate: date,
+          endDate: date, // Adjust endDate to match startDate
+        },
+      });
+    } else if (field === "endDate" && currentJob.jobSchedule.startDate && date < currentJob.jobSchedule.startDate) {
+      // If the new endDate is earlier than the startDate, do not allow it
+      alert("End date cannot be earlier than the start date.");
+    } else {
+      // Otherwise, just set the selected date
+      setCurrentJob({
+        ...currentJob,
+        jobSchedule: {
+          ...currentJob.jobSchedule,
+          [field]: date,
+        },
+      });
+    }
+  
     // Optional: Hide the calendar after selecting a date
     if (field === "startDate") setShowStartCalendar(false);
     else setShowEndCalendar(false);
   };
+  
+  
 
   const validateStep = () => {
     switch (step) {
-      case "create":
+      case 1:
         return (
           currentJob.name &&
           currentJob.description &&
           currentJob.type &&
           currentJob.clientId
         );
-      case "schedule":
-        return (
-          currentJob.jobSchedule.startDate &&
-          currentJob.jobSchedule.endDate &&
-          currentJob.jobSchedule.recurrence
-        );
-      case "assign":
+     
+      case 2:
         return currentJob.technicianId;
       default:
         return true;
+
+     case 3:
+          return (
+            currentJob.jobSchedule.startDate &&
+            currentJob.jobSchedule.endDate &&
+            currentJob.jobSchedule.recurrence
+          );
     }
   };
 
@@ -236,131 +329,265 @@ export default function JobManagement({
     }
 
     switch (step) {
-      case "create":
-        setStep("schedule");
+      case 1:
+        setStep(2);
         break;
-      case "schedule":
-        setStep("assign");
+      
+      case 2:
+        setStep(3);
         break;
-      case "assign":
-        setStep("review");
-        break;
+
+      case 3:
+          setStep(4);
+          break;
     }
   };
 
   const handleBack = () => {
     switch (step) {
-      case "schedule":
-        setStep("create");
+      
+      case 2:
+        setStep(1);
         break;
-      case "assign":
-        setStep("schedule");
-        break;
-      case "review":
-        setStep("assign");
+      case 3:
+          setStep(2);
+          break;
+      case 4:
+        setStep(3);
         break;
     }
   };
-  const handleSubmit = async () => {
-    if (!validateStep()) return;
 
-    let updatedJob = {
-      ...currentJob,
-      clientId: selectedClients.map((client) => client.id),
-      technicianId: selectedTechnicians.map((tech) => tech.id),
-      jobTypeId: currentJob.type,
-      companyId: session?.user.companyId,
-      dispatcherId: session?.user.userId,
-    };
-    console.log(updatedJob, "updates");
 
-    let dataToSend = {
-      name: updatedJob.name,
-      description: updatedJob.description,
-      jobTypeId: updatedJob.jobTypeId,
-      location: updatedJob.location,
-      clientId: updatedJob.clientId,
-      companyId: updatedJob.companyId,
-      dispatcherId: updatedJob.dispatcherId,
-      technicianId: updatedJob.technicianId,
-    };
 
-    console.log(session?.user?.userId, "user")
-    console.log(dataToSend, "send this data");
+const createJob = async () => {
+  if (!validateStep()) return; // Validate the step before proceeding
 
-    console.log("Submitting Job:", updatedJob);
-
-    try {
-      const method = editingJobId ? "PUT" : "POST";
-      const endpoint = baseUrl + "job";
-
-      console.log(`Sending request to ${endpoint} with method ${method}`); // Log endpoint and method
-
-      const response = await fetch(endpoint, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user.access_token}`,
-        },
-        body: JSON.stringify(dataToSend),
-      });
-
-      console.log("Response status:", response.status); // Log response status
-
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        console.log("Error response:", errorResponse); // Log the error response
-        throw new Error("Failed to submit job data");
-      }
-
-      const result = await response.json();
-      console.log("Successful result:", result); // Log the successful result
-
-      toast({
-        title: editingJobId ? "Job Updated" : "Job Created",
-        description: editingJobId
-          ? "The job has been successfully updated."
-          : "The new job has been successfully created and assigned.",
-      });
-
-      setJobs(
-        editingJobId
-          ? jobs.map((job) => (job.id === editingJobId ? result : job))
-          : [...jobs, result]
-      );
-      setEditingJobId(null);
-      setCurrentJob({
-        id: "",
-        name: "",
-        description: "",
-        type: "",
-        clientId: [],
-        jobSchedule: {
-          startDate: new Date(),
-          endDate: new Date(),
-          recurrence: "None",
-        },
-        technicianId: [],
-        location: { city: "", zip: "", state: "" },
-      });
-      setStep("create");
-    } catch (error) {
-      console.error("Error submitting job:", error); // Log the caught error
-      toast({
-        title: "Submission Error",
-        variant: "destructive",
-      });
-    }
+  // Update the job data to only use one client ID
+  let updatedJob = {
+    ...currentJob,
+    clientId: selectedClient, // Directly use selectedClient (string), not an array
+    jobTypeId: currentJob.type,
+    companyId: session?.user.companyId,
   };
 
-  const handleSaveDraft = () => {
-    localStorage.setItem("jobDraft", JSON.stringify(currentJob));
-    toast({
-      title: "Draft Saved",
-      description:
-        "Your job draft has been saved. You can continue editing later.",
+  // Create the data to send with the single client ID
+  let dataToSend = {
+    name: updatedJob.name,
+    description: updatedJob.description,
+    jobTypeId: updatedJob.jobTypeId,
+    clientId: updatedJob.clientId, // Single clientId
+    companyId: updatedJob.companyId,
+    dispatcherId:session?.user?.userId
+    
+  };
+
+  try {
+    const method = editingJobId ? "PUT" : "POST";
+    const endpoint = baseUrl + "job";
+
+    const response = await fetch(endpoint, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user.access_token}`,
+      },
+      body: JSON.stringify(dataToSend),
     });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      throw new Error("Failed to submit job data");
+    }
+
+    const result = await response.json();
+
+    // Log the full response for debugging
+    console.log("API response:", result);
+
+    // Ensure that result.data.id exists and is a string
+    if (result.data && result.data.id && typeof result.data.id === 'string') {
+      setCreatedJobId(result.data.id); // Set the job ID in state
+      setStep(2); // Move to the next step after creating the job
+      return result.data.id; // Return the created job ID
+    } else {
+      throw new Error("Job ID not returned from create job API");
+    }
+  } catch (error) {
+    console.error("Error submitting job:", error);
+    toast({
+      title: "Submission Error",
+      variant: "destructive",
+    });
+    return null; // Return null if there's an error
+  }
+};
+  
+
+const assignJob = async (jobId: string) => {
+  if (!validateStep()) return; // Validate the data if necessary
+
+  // Prepare the updated job data based on your current job state
+  const updatedJobData = {
+        
+    technicianIds: selectedTechnicians.map(technician => technician.id), 
+    location: currentJob.location || {},
   };
+
+  console.log(updatedJobData, "check")
+
+  console.log("Updated Job Data:", updatedJobData);
+
+  try {
+    const endpoint = `${baseUrl}assign/${jobId}`; // Create the URL for the PUT request
+    console.log(`Sending PUT request to ${endpoint}`);
+
+    const response = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user.access_token}`,
+      },
+      body: JSON.stringify(updatedJobData), // Send the updated job data
+    });
+
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.log("Error response:", errorResponse);
+      throw new Error("Failed to update job data");
+    }   
+
+    const result = await response.json();
+    console.log("Job updated successfully:", result);
+    
+
+    toast({
+      title: "Job Updated",
+      description: "The job has been successfully updated.",
+    });
+
+    // Update the jobs state with the updated job
+    setJobs(jobs.map((job) => (job.id === jobId ? result : job)));
+
+    // Reset the form or state as necessary
+    setCurrentJob({
+      id: "",
+      name: "",
+      description: "",
+      type: "",
+      clientId: [],
+      jobSchedule: {
+        startDate: new Date(),
+        endDate: new Date(),
+        recurrence: "None",
+      },
+      technicianId: [],
+      location: { city: "", zip: "", state: ""},
+    });
+    setStep(3); // Move to the next step or as needed
+  } catch (error) {
+    console.error("Error updating job:", error);
+    toast({
+      title: "Update Error",
+      variant: "destructive",
+    });
+  }
+};
+
+const scheduleJob = async (jobId: string) => {
+  if (!validateStep()) return; // Validate the data if necessary
+
+  // Prepare the updated job data based on your current job state
+  const updatedJobData = {
+        
+ 
+  
+  jobSchedule:currentJob.jobSchedule
+  };
+
+  console.log(updatedJobData, "check")
+
+  console.log("Updated Job Data:", updatedJobData);
+
+  try {
+    const endpoint = `${baseUrl}${jobId}/schedulejob`; // Create the URL for the PUT request
+    console.log(`Sending PUT request to ${endpoint}`);
+
+    const response = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.user.access_token}`,
+      },
+      body: JSON.stringify(updatedJobData), // Send the updated job data
+    });
+
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.log("Error response:", errorResponse);
+      throw new Error("Failed to update job data");
+    }   
+
+    const result = await response.json();
+    console.log("Job updated successfully:", result);
+    
+
+    toast({
+      title: "Job Updated",
+      description: "The job has been successfully updated.",
+    });
+
+    // Update the jobs state with the updated job
+    setJobs(jobs.map((job) => (job.id === jobId ? result : job)));
+
+    // Reset the form or state as necessary
+    setCurrentJob({
+      id: "",
+      name: "",
+      description: "",
+      type: "",
+      clientId: [],
+      jobSchedule: {
+        startDate: new Date(),
+        endDate: new Date(),
+        recurrence: "None",
+      },
+      technicianId: [],
+      location: { city: "", zip: "", state: ""},
+    });
+    setStep(4); // Move to the next step or as needed
+  } catch (error) {
+    console.error("Error updating job:", error);
+    toast({
+      title: "Update Error",
+      variant: "destructive",
+    });
+  }
+};
+
+  const handleSubmit = async () => {   
+    console.log("tsdt")
+    if (step === 1) {
+      const jobId = await createJob(); // Ensure that createJob returns the created job ID
+      setCreatedJobId(jobId); // Store the job ID in state
+    } else if (step === 2) {
+      if (createdJobId) {
+        await assignJob(createdJobId); 
+     }   
+ } else if (step === 3) {
+        if (createdJobId) {
+    await scheduleJob(createdJobId);
+        }
+  };
+}
+  
+
+
+
 
   const handleEditJob = (job: string) => {
     
@@ -375,7 +602,7 @@ export default function JobManagement({
 
   const renderStep = () => {
     switch (step) {
-      case "create":
+      case 1:
         return (
           <div className="space-y-4">
             <div>
@@ -416,208 +643,65 @@ export default function JobManagement({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
-              <Label htmlFor="clients">Clients</Label>
-              <Popover
-                open={openClientSearch}
-                onOpenChange={setOpenClientSearch}
+  <Label htmlFor="clients">Clients</Label>
+  <Popover open={openClientSearch} onOpenChange={setOpenClientSearch}>
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={openClientSearch}
+        className="w-full justify-between"
+      >
+        {selectedClient ? customers.find((client: { id: string; name: string }) =>
+      client.id === selectedClient)?.name
+   : "Select client..."} 
+        <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-[300px] p-0">
+      <Command>
+        <CommandInput
+          placeholder="Search clients..."
+          onValueChange={setClientSearch}
+        />
+        <CommandList>
+          <CommandEmpty>No client found.</CommandEmpty>
+          <CommandGroup>
+            {filteredClients.map((client: Client) => (
+              <CommandItem
+                key={client.id}
+                onSelect={() => handleSelectClient(client)}
+                className="flex items-center justify-between"
               >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openClientSearch}
-                    className="w-full justify-between"
-                  >
-                    {selectedClients.length > 0
-                      ? `${selectedClients.length} selected`
-                      : "Select clients..."}
-                    <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search clients..."
-                      onValueChange={setClientSearch}
-                    />
-                    <CommandList>
-                      <CommandEmpty>No client found.</CommandEmpty>
-                      <CommandGroup>
-                        {filteredClients.map(
-                          (client: { id: string; name: string }) => (
-                            <CommandItem
-                              key={client.id}
-                              onSelect={() => handleSelectClient(client)}
-                              className="flex items-center justify-between"
-                            >
-                              <span>{client.name}</span>
-                              {selectedClients.some(
-                                (c) => c.id === client.id
-                              ) && <Check className="h-4 w-4" />}
-                            </CommandItem>
-                          )
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {selectedClients.map((client) => (
-                  <Badge
-                    key={client.id}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {client.name}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0"
-                      onClick={() => removeClient(client.id)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove {client.name}</span>
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                name="city"
-                value={currentJob.location.city}
-                onChange={handleLocationChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="zip">Zip Code</Label>
-              <Input
-                id="zip"
-                name="zip"
-                value={currentJob.location.zip}
-                onChange={handleLocationChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                name="state"
-                value={currentJob.location.state}
-                onChange={handleLocationChange}
-                required
-              />
-            </div>
-            {/* <div>
-              <Label htmlFor="otherinfo">Other Info (optional)</Label>
-              <Input id="otherinfo" name="otherinfo" value={currentJob.location.otherInfo} onChange={handleLocationChange} />
-            </div> */}
+                <span>{client.name}</span>
+                {selectedClient === client.name && <Check className="h-4 w-4" />}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <Separator className="my-2" />
+          <CommandItem
+            onSelect={handleCreateNewClient}
+            className="justify-center text-primary"
+          >
+            <PlusCircle className="mr-2 h-4 w-4 mb-2" />
+            Create new client
+          </CommandItem>
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
+  <div className="mt-2">
+    {selectedClient ? customers.find((client: { id: string; name: string }) =>
+      client.id === selectedClient)?.name : "No client selected."}
+  </div>
+</div>
+
+
           </div>
         );
-      case "schedule":
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Start Date */}
-              <div>
-                <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !currentJob.jobSchedule.startDate &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currentJob.jobSchedule.startDate ? (
-                        format(currentJob.jobSchedule.startDate, "PPP")
-                      ) : (
-                        <span>Pick a start date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={currentJob.jobSchedule.startDate as Date}
-                      onSelect={(date) => handleDateChange(date, "startDate")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* End Date */}
-              <div>
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !currentJob.jobSchedule.endDate &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currentJob.jobSchedule.endDate ? (
-                        format(currentJob.jobSchedule.endDate, "PPP")
-                      ) : (
-                        <span>Pick an end date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={currentJob.jobSchedule.endDate as Date}
-                      onSelect={(date) => handleDateChange(date, "endDate")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="recurrence">Recurrence</Label>
-              <Select
-                value={currentJob.jobSchedule?.recurrence}
-                onValueChange={(value) =>
-                  setCurrentJob({
-                    ...currentJob,
-                    jobSchedule: {
-                      ...currentJob.jobSchedule,
-                      recurrence: value,
-                    },
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recurrence" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recurrenceOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        );
-      case "assign":
+     
+      case 2:
         return (
           <div className="space-y-4">
             <div>
@@ -692,9 +776,139 @@ export default function JobManagement({
                 ))}
               </div>
             </div>
+                        <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                name="city"
+                value={currentJob.location.city}
+                onChange={handleLocationChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="zip">Zip Code</Label>
+              <Input
+                id="zip"
+                name="zip"
+                value={currentJob.location.zip}
+                onChange={handleLocationChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                name="state"
+                value={currentJob.location.state}
+                onChange={handleLocationChange}
+                required
+              />
+            </div>
+            {/* <div>
+              <Label htmlFor="otherinfo">Other Info (optional)</Label>
+              <Input id="otherinfo" name="otherinfo" value={currentJob.location.otherInfo} onChange={handleLocationChange} />
+            </div> */}
           </div>
         );
-      case "review":
+        case 3:
+          return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Start Date */}
+                <div>
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !currentJob.jobSchedule.startDate &&
+                            "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentJob.jobSchedule.startDate ? (
+                          format(currentJob.jobSchedule.startDate, "PPP")
+                        ) : (
+                          <span>Pick a start date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={currentJob.jobSchedule.startDate as Date}
+                        onSelect={(date) => handleDateChange(date, "startDate")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+  
+                {/* End Date */}
+                <div>
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-[280px] justify-start text-left font-normal",
+                          !currentJob.jobSchedule.endDate &&
+                            "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentJob.jobSchedule.endDate ? (
+                          format(currentJob.jobSchedule.endDate, "PPP")
+                        ) : (
+                          <span>Pick an end date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={currentJob.jobSchedule.endDate as Date}
+                        onSelect={(date) => handleDateChange(date, "endDate")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="recurrence">Recurrence</Label>
+                <Select
+                  value={currentJob.jobSchedule?.recurrence}
+                  onValueChange={(value) =>
+                    setCurrentJob({
+                      ...currentJob,
+                      jobSchedule: {
+                        ...currentJob.jobSchedule,
+                        recurrence: value,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select recurrence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {recurrenceOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          );
+      case 4:
         return (
           <Card>
             <CardHeader>
@@ -712,18 +926,15 @@ export default function JobManagement({
     {jobtype.find((type: any) => type.id === currentJob.type)?.name || 'No job type selected'}
   </p>
 </div>
-                <div>
+<div>
   <p className="font-semibold">Client</p>
-  {selectedClients.length > 0 ? (
-    <ul>
-      {selectedClients.map((client, index) => (
-        <li key={index}>{client.name}</li> 
-      ))}
-    </ul>
+  {selectedClient ? (  // Check if a client is selected
+    <p>{customers.find((client: { id: string; name: string }) =>client.id == selectedClient)?.name}</p>  // Render the selected client's name
   ) : (
-    <p>No clients assigned</p>
+    <p>No client assigned</p>  // If no client is selected
   )}
 </div>
+
 
 
 <div>
@@ -769,29 +980,10 @@ export default function JobManagement({
           </Card>
         );
     }
-  };
+  }; 
+  <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
 
-  const renderProgressTracker = () => {
-    const steps: Step[] = ["create", "schedule", "assign", "review"];
-    return (
-      <div className="flex justify-between mb-8">
-        {steps.map((s, index) => (
-          <div key={s} className="flex flex-col items-center">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                steps.indexOf(step) >= index
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
-              }`}
-            >
-              {index + 1}
-            </div>
-            <span className="text-sm mt-1 capitalize">{s}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  
 
   const renderJobList = () => (
     <div className="space-y-4">
@@ -835,7 +1027,7 @@ export default function JobManagement({
               <div>
                 <p className="font-semibold">Clients</p>
                 {/* Display client names */}
-                <p>{job?.clients.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</p>
+                <p>{job?.clients?.firstName}, {job?.clients?.lastName}</p>
               </div>
               <div>
                 <p className="font-semibold">Technicians</p>
@@ -856,7 +1048,7 @@ export default function JobManagement({
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Client</Label>
-                    <span className="col-span-3">{job?.clients?.map((client: any) => `${client?.client?.firstName} ${client?.client?.lastName}`).join(', ') || 'No clients'}</span>
+                    <span className="col-span-3">{job?.clients?.firstName}, {job?.clients?.lastName}</span>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label className="text-right">Technician</Label>
@@ -908,30 +1100,26 @@ export default function JobManagement({
           <h1 className="text-2xl font-bold mb-4">
             {editingJobId ? "Edit Job" : "Create New Job"}
           </h1>
-          {renderProgressTracker()}
+          <AnimatedStepProgression next={handleNext} back={handleBack} step={step} setstep={setStep}/>
           {renderStep()}
-          <div className="flex justify-between mt-6">
-            {step !== "create" && (
-              <Button onClick={handleBack} variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-            )}
-            {!editingJobId && (
-              <Button onClick={handleSaveDraft} variant="outline">
-                <Save className="mr-2 h-4 w-4" /> Save Draft
-              </Button>
-            )}
-            {step !== "review" ? (
-              <Button onClick={handleNext} className="ml-auto">
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit} className="ml-auto">
-                {editingJobId ? "Update Job" : "Create Job"}{" "}
-                <CheckCircle2 className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          <div className="flex justify-between items-center mt-4">
+        <Button
+          onClick={handleBack}
+          disabled={step === 1}
+          variant="outline"
+        >
+          Previous
+        </Button>
+        <span className="text-lg font-semibold">
+          Step {step} of {steps.length}
+        </span>
+        <Button
+  onClick={handleSubmit}
+  type={"submit"}
+>
+  {step === steps.length ? "Complete" : "Next"}
+</Button>
+      </div>
         </TabsContent>
         <TabsContent value="track">
           <h1 className="text-2xl font-bold mb-4">Job Tracking</h1>
