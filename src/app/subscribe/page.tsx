@@ -7,6 +7,9 @@ import { Loader } from 'lucide-react'
 import { getPlans } from './actions'
 import Subscribe from '@/components/subscription/PageView'
 
+export const dynamic = "force-dynamic"
+
+
 const page = async () => {
   const plans = await getPlans() || []
  
