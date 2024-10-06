@@ -581,8 +581,13 @@ const scheduleJob = async (jobId: string) => {
  } else if (step === 3) {
         if (createdJobId) {
     await scheduleJob(createdJobId);
-        }
-  };
+        }    
+  }
+  else if (step === 4) {
+    if (createdJobId) {
+      router.push("/callpro/jobs")
+    }   
+};
 }
   
 

@@ -36,10 +36,11 @@ export default function JobManagementSystem({
   )
 
   console.log(filteredJobs, "jobs")
+ 
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "ASSIGNED": return <Calendar className="h-4 w-4 text-blue-500" />
+      case "SCHEDULED": return <Calendar className="h-4 w-4 text-blue-500" />
       case "ONGOING": return <Clock className="h-4 w-4 text-yellow-500" />
       case "COMPLETED": return <CheckCircle className="h-4 w-4 text-green-500" />
       case "CANCELLED": return <XCircle className="h-4 w-4 text-red-500" />
@@ -66,7 +67,7 @@ export default function JobManagementSystem({
       </div>
       
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-6">
-        {["All", "ASSIGNED", "ONGOING", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
+        {["All", "SCHEDULED", "ONGOING", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
           <Card key={status} className={`${filterStatus === status ? 'bg-blue-100 border-blue-300' : 'bg-white'}`}>
             <CardHeader className="p-4">
               <CardTitle className="text-lg font-semibold flex items-center justify-between">
