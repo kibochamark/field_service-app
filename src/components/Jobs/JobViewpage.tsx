@@ -35,7 +35,7 @@ export default function JobManagementSystem({
     (filterStatus === "All" || job.status === filterStatus)
   )
 
-  console.log(filteredJobs, "jobs")
+
  
 
   const getStatusIcon = (status: string) => {
