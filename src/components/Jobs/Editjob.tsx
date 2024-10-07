@@ -146,16 +146,53 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
               </div>
   
               <div className="space-y-2">
-                <Label>Status</Label>
-                {/* Display status as plain text */}
-                <div className="border p-2 rounded">{values.status || 'Loading...'}</div>
-              </div>
+  <Label htmlFor="status">Status</Label>
+  <Select 
+    onValueChange={(value) => setFieldValue('status', value)} 
+    value={values.status} // Set the current value
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select a status" />
+    </SelectTrigger>
+    <SelectContent>
+      {/* List of statuses */}
+      {['CREATED', 'ASSIGNED', 'SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'].map((status) => (
+        <SelectItem key={status} value={status}>
+          {status}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+  {/* Display the selected status below the Select component */}
+  <div className="border p-2 rounded">
+    {values.status || 'No status selected'}
+  </div>
+</div>
+
   
               <div className="space-y-2">
-              <Label>Job Type</Label>
-              {/* Display job type name */}
-              <div className="border p-2 rounded">{jobTypes.find(jobType => jobType.id === values.jobType)?.name || 'Loading...'}</div>
-            </div>
+  <Label htmlFor="jobType">Job Type</Label>
+  <Select 
+    onValueChange={(value) => setFieldValue('jobType', value)} 
+    value={values.jobType} // Set the current value
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select a job type" />
+    </SelectTrigger>
+    <SelectContent>
+      {jobTypes.map((jobType) => (
+        <SelectItem key={jobType.id} value={jobType.id}>
+          {jobType.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+  {/* Display the selected job type name below the Select component */}
+  <div className="border p-2 rounded">
+    {jobTypes.find(jobType => jobType.id === values.jobType)?.name || 'No job type selected'}
+  </div>
+</div>
+
   
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
@@ -212,12 +249,13 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
               </div>
             </CardContent>
             <CardFooter className="flex justify-end space-x-2">
+            <Button variant="ghost" onClick={() => router.push('/callpro/jobs')}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button variant="ghost" onClick={() => router.push('/callpro/jobs')}>
-                Cancel
-              </Button>
+              
             </CardFooter>
           </Form>
         )}
