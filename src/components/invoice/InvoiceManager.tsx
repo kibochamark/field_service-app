@@ -238,7 +238,6 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
         </CardContent>
       </Card>
 
-      {/* Selected Invoice Details */}
      
     </div>
   )

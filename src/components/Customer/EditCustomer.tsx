@@ -39,7 +39,8 @@ const EditCustomer = ({ customerId }: { customerId: string }) => {
   const router = useRouter();
 
   const edit = useSelector((state: RootState) => state.customerForm.isedit);
-
+  console.log(edit, "customer");
+  
   useEffect(() => {
     const fetchCustomerDetails = async () => {
       try {

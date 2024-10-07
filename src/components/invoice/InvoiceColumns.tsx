@@ -140,6 +140,7 @@ import { useState } from "react";
 import axios from "axios";
 import ConfirmationModal from "./ConfirmationModal";
 import { baseUrl } from "@/utils/constants";
+import { toast } from "react-toastify";
 
 const Action = ({ row }: { row: any }) => {
   const router = useRouter();
@@ -150,10 +151,15 @@ const Action = ({ row }: { row: any }) => {
   const handleDelete = async (id: any) => {
     setDeleting(true);
     try {
-      // Perform the delete request to the API
-      await axios.delete(baseUrl + `/invoices/${id}`);
+      // Perform the delete request to the API with authorization headers
+      await axios.delete(`${baseUrl}${id}/invoice`, {
+        headers: {
+          Authorization: "Bearer " + session?.user?.access_token,
+        },
+      });
       // You can add a notification or UI update here, like refetching data
       console.log("Invoice deleted successfully.");
+      toast.success("Invoice deleted successfully.");
       setShowModal(false);
       router.refresh(); // Refresh the page or re-fetch the data
     } catch (error) {
@@ -162,6 +168,7 @@ const Action = ({ row }: { row: any }) => {
       setDeleting(false);
     }
   };
+  
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -190,7 +197,6 @@ const Action = ({ row }: { row: any }) => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Confirmation Modal */}
           <ConfirmationModal
             show={showModal}
             onClose={closeModal}

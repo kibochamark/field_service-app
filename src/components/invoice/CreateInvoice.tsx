@@ -50,53 +50,22 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { getClints } from "./ServerActions";
 import { searchNumbers } from "libphonenumber-js";
 import toast from "react-hot-toast";
+import { useRouter } from 'next/navigation';
+import { revalidateTag } from "next/cache";
 
 interface Client {
   id: string;
   firstName: string;
   lastName: string;
   email:string;
+  topLevelId:string;
 }
 
 interface Data {
   id: string; // Top-level ID
   clients: Client;
 }
-// interface Client {
-//   id:string;
-//   client: {
-//     id: string;
-//     firstName: string;
-//     lastName: string;
-//   };
-// }
-// interface Job {
-//   id: string;
-//   clients: Client[];
-// }
 
-// Mock client data
-// const clients = [
-//   {
-//     id: "1",
-//     name: "John Doe",
-//     email: "john@example.com",
-//     company: "ABC Corp",
-//   },
-//   {
-//     id: "2",
-//     name: "Jane Smith",
-//     email: "jane@example.com",
-//     company: "XYZ Inc",
-//   },
-//   {
-//     id: "3",
-//     name: "Bob Johnson",
-//     email: "bob@example.com",
-//     company: "123 LLC",
-//   },
-// ];
-// const customerdetails =  getCustomers() || ;
 
 // Validation schema using Yup
 const invoiceSchema = Yup.object().shape({
@@ -115,15 +84,30 @@ const invoiceSchema = Yup.object().shape({
 const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [topLevelId, setTopLevelId] = useState<string | null>(null); // State to store top-level ID
+  const [clients, setClients] = useState<
+    { client: Client; topLevelId: string }[]
+  >([]);
 
   // Fetch clients on component mount
   useEffect(() => {
     const fetchCustomers = async () => {
-      const customerdetails = await getClints();
-      if (customerdetails && customerdetails.clients) {
-        setClients([customerdetails.clients]); // Assuming `clients` is a single object, convert it to an array
+      try {
+        const response = await getClints(); // Assuming this fetches the API response
+        console.log(response, "API response");
+
+        // Check if response is an array and has valid client objects
+        if (Array.isArray(response) && response.length > 0) {
+          // Map through response and extract the clients and top-level id
+          const clientData = response.map((item: any) => ({
+            client: item.clients,
+            topLevelId: item.id,
+          }));
+          setClients(clientData);
+        } else {
+          console.error("Invalid response format: ", response);
+        }
+      } catch (error) {
+        console.error("Error fetching clients: ", error);
       }
     };
     fetchCustomers();
@@ -131,7 +115,7 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
 
   // Filter clients based on the search term
   const filteredClients = clients.filter(
-    (client) =>
+    ({ client }) =>
       client.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -157,12 +141,12 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
 
       {isDropdownOpen && (
         <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
-          {filteredClients.map((client) => (
+          {filteredClients.map(({ client, topLevelId }) => (
             <div
               key={client.id}
               className="p-2 hover:bg-accent cursor-pointer"
               onClick={() => {
-                onSelectClient(client);
+                onSelectClient({ ...client, topLevelId }); // Pass both client and topLevelId
                 setIsDropdownOpen(false);
                 setSearchTerm("");
               }}
@@ -170,7 +154,12 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
               <div className="font-medium">
                 {client.firstName} {client.lastName}
               </div>
-              <div className="text-sm text-muted-foreground">{client.id}</div>
+              {/* <div className="text-sm text-muted-foreground">
+                Client ID: {client.id} | Job ID: {topLevelId}
+              </div> */}
+              <div className="text-sm text-muted-foreground">
+                Email: {client.email}
+              </div>
             </div>
           ))}
         </div>
@@ -178,6 +167,9 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
     </div>
   );
 };
+
+  
+
 
 // ClientInfo Component
 const ClientInfo = ({ client }: { client: Client | null }) => {
@@ -187,7 +179,7 @@ const ClientInfo = ({ client }: { client: Client | null }) => {
     <div className="p-2 bg-muted rounded-md">
       <div className="font-medium">{client.firstName}</div>
       <div className="text-sm text-muted-foreground">{client.lastName}</div>
-      <div className="text-sm text-muted-foreground">{client.id}</div>
+      {/* <div className="text-sm text-muted-foreground">{client.id}</div> */}
     </div>
   );
 };
@@ -201,28 +193,30 @@ const Stepper = ({
   totalSteps: any;
 }) => {
   return (
-    <div className="flex justify-between mb-8">
-      {Array.from({ length: totalSteps }, (_, i) => (
-        <div key={i} className="flex items-center">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              i < currentStep
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {i < currentStep ? <Check className="w-5 h-5" /> : i + 1}
-          </div>
-          {i < totalSteps - 1 && (
-            <div
-              className={`h-1 w-full ${
-                i < currentStep - 1 ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          )}
+    <div className="flex items-center mb-8 px-4"> {/* Added horizontal padding */}
+    {Array.from({ length: totalSteps }, (_, i) => (
+      <div key={i} className="flex items-center">
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            i < currentStep
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {i < currentStep ? <Check className="w-5 h-5" /> : i + 1}
         </div>
-      ))}
-    </div>
+        {i < totalSteps - 1 && (
+          <div
+            className={`h-1 w-10 ${ 
+              i < currentStep - 1 ? "bg-primary" : "bg-muted"
+            }`}
+          />
+        )}
+      </div>
+    ))}
+  </div>
+  
+
   );
 };
 // Step 1: Select or search client
@@ -650,6 +644,7 @@ export default function InvoiceCreationPage() {
   const [currentStep, setCurrentStep] = useState(1);
   // const [selectedClient, setSelectedClient] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const router = useRouter();
 
   const [invoice, setInvoice] = useState({
     description: "",
@@ -660,7 +655,6 @@ export default function InvoiceCreationPage() {
     subTotal: "",
     id: "",
     notes: "",
-    jobId: "",
   });
   const totalSteps = 4;
 
@@ -679,7 +673,6 @@ export default function InvoiceCreationPage() {
       tax: "",
       dueDate: "",
       clientId: "",
-      jobId: "",
     });
     setCurrentStep(2); // Go back to create invoice step
   };
@@ -696,7 +689,7 @@ const handleSubmit = async () => {
       tax: invoice.tax || 0,
       dueDate: invoice.dueDate,
       notes: invoice.notes || "No additional notes.",
-      jobId: invoice.id,
+      jobId: selectedClient?.topLevelId, // Use topLevelId as jobId
     };
 
     // Basic validation
@@ -708,7 +701,7 @@ const handleSubmit = async () => {
     console.log(data, "sending data api");
 
     // Send the POST request to the API endpoint
-    const response = await fetch(baseUrl + "invoice", {
+    const response = await fetch(baseUrl + `invoice`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -720,6 +713,8 @@ const handleSubmit = async () => {
     if (response.ok) {
       const result = await response.json();
       toast.success("Invoice sent successfully!"); // Success toast
+      router.push('/callpro/invoice'); // Adjust the path as needed
+      revalidateTag("getclient");
 
       // Optionally handle result data
     } else {

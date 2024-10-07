@@ -8,7 +8,7 @@ export async function getClints() {
     try {
         const session = await auth();
 
-        const res = await fetch(baseUrl + `/66fd2b51ee7385e251b5f093/retrievejob/`, {
+        const res = await fetch(baseUrl + `/66f2bb6c6bce4eb548d409c1/retrievejobs/`, {
             method: "GET",
             headers: {
                 Authorization: "Bearer " + session?.user?.access_token
@@ -49,7 +49,7 @@ export async function getInvoiceDetails() {
             headers: {
                 Authorization: "Bearer " + session?.user?.access_token // Pass token for auth
             },
-            next: { tags: ["getinvoice"] }  // Invalidate and refresh caching if needed (Next.js)
+            next: { tags: ["getclient"] }  // Invalidate and refresh caching if needed (Next.js)
         });
 
         // Check if the response is OK (status code 200-299)
