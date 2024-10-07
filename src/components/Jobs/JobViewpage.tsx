@@ -1,16 +1,17 @@
-"use client"
-import { useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Button } from "@/shadcn/ui/button"
-import { Input } from "@/shadcn/ui/input"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/shadcn/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/ui/table"
-import { Badge } from "@/shadcn/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/ui/avatar"
-import { Calendar, Clock, AlertTriangle, CheckCircle, XCircle, Search, Filter, MoreVertical, Plus, MapPin, PenIcon } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select"
-import { useSession } from 'next-auth/react'
+"use client";
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Button } from "@/shadcn/ui/button";
+import { Input } from "@/shadcn/ui/input";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shadcn/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/ui/table";
+import { Badge } from "@/shadcn/ui/badge";
+import { Calendar, Clock, CheckCircle, XCircle, Search, MapPin, PenIcon, Trash, MoreVertical } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select";
+import { useSession } from 'next-auth/react';
+import { baseUrl } from '@/utils/constants';
+
 
 export default function JobManagementSystem({
   customers,
@@ -23,35 +24,56 @@ export default function JobManagementSystem({
   jobtype: any;
   alljobs: any;
 }) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterStatus, setFilterStatus] = useState("All")
+  const [jobs, setJobs] = useState(alljobs);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
   const { data: session } = useSession();
 
-  // Filter jobs based on search term and status
-  const filteredJobs = alljobs.filter((job:any) => 
+  const handleDelete = async (jobId: string) => {
+    try {
+      const response = await fetch(`${baseUrl}${jobId}/deletejob`, {
+        method: 'DELETE',
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user.access_token}`,
+        },
+      });
+
+      if (response.ok) {
+        // Remove the job from the state
+        setJobs(jobs.filter((job: any) => job.id !== jobId));
+        alert('Job deleted successfully');
+      } else {
+        const data = await response.json();
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      alert('An error occurred while trying to delete the job.');
+    }
+  };
+
+  const filteredJobs = jobs.filter((job: any) => 
     job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customers.find((client: any) => client.id === job.clientId)?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.find((emp: any) => emp.id === job.technicianId)?.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterStatus === "All" || job.status === filterStatus)
-  )
-
-
- 
+  );
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "SCHEDULED": return <Calendar className="h-4 w-4 text-blue-500" />
-      case "ONGOING": return <Clock className="h-4 w-4 text-yellow-500" />
-      case "COMPLETED": return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "CANCELLED": return <XCircle className="h-4 w-4 text-red-500" />
-      case "CREATED": return <PenIcon className="h-4 w-4 text-green-500" />
-      default: return null
+      case "SCHEDULED": return <Calendar className="h-4 w-4 text-blue-500" />;
+      case "ONGOING": return <Clock className="h-4 w-4 text-yellow-500" />;
+      case "COMPLETED": return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "CANCELLED": return <XCircle className="h-4 w-4 text-red-500" />;
+      case "CREATED": return <PenIcon className="h-4 w-4 text-green-500" />;
+      default: return null;
     }
-  }
+  };
 
   const canCreateJob = session?.user.role === "business owner" || 
                        session?.user.role === "business admin" || 
-                       session?.user.role === "dispatcher"
+                       session?.user.role === "dispatcher";
 
   return (
     <div className="container mx-auto p-4 bg-gray-100 min-h-screen">
@@ -78,8 +100,8 @@ export default function JobManagementSystem({
             <CardContent>
               <p className="text-2xl font-bold">
                 {status === "All" 
-                  ? alljobs.length 
-                  : alljobs.filter((job:any) => job.status === status).length}
+                  ? jobs.length 
+                  : jobs.filter((job: any) => job.status === status).length}
               </p>
             </CardContent>
           </Card>
@@ -130,7 +152,7 @@ export default function JobManagementSystem({
                 {filteredJobs.map((job: any) => (
                   <TableRow key={job.id}>
                     <TableCell className="font-medium">
-                    {job?.clients?.firstName}, {job?.clients?.lastName}
+                      {job?.clients?.firstName}, {job?.clients?.lastName}
                     </TableCell>
                     <TableCell>{job.name}</TableCell>
                     <TableCell>{job.description}</TableCell>
@@ -143,18 +165,21 @@ export default function JobManagementSystem({
                     <TableCell>{job?.jobType?.name || 'Unknown'}</TableCell>
                     <TableCell>{job?.technicians.map((tech: any) => `${tech?.technician?.firstName} ${tech?.technician?.lastName}`).join(', ') || 'No technicians'}</TableCell>
                     <TableCell className="max-w-xs truncate" title={job?.location?.address || 'N/A'}>
-  <span className="flex items-center">
-    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-    {job?.location?.state || 'N/A'}
-  </span>
-  <p className="text-sm">
-    {job?.location?.city ? `${job?.location.city}, ${job?.location.state}` : 'Location not specified'}
-    {job?.location?.zip ? ` - ${job?.location.zip}` : ''}
-    {job?.location?.otherinfo ? ` (${job?.location.otherinfo})` : ''}
-  </p>
-</TableCell>
+                      <span className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                        {job?.location?.state || 'N/A'}
+                      </span>
+                      <p className="text-sm">
+                        {job?.location?.city ? `${job?.location.city}, ${job?.location.state}` : 'Location not specified'}
+                        {job?.location?.zip ? ` - ${job?.location.zip}` : ''}  
+                        {job?.location?.otherinfo ? ` (${job?.location.otherinfo})` : ''}
+                      </p>
+                    </TableCell>
                     <TableCell>
-                    <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(job.id)}>
+                        <Trash className="h-4 w-4 text-red-600" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </TableCell>
