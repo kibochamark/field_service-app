@@ -1,6 +1,6 @@
 import { getCustomers } from '@/components/Customer/CustomerActions';
 import { getJobsByCompanyId, getJobTypes, getTechnicians } from '@/components/Jobs/jobactions';
-import { Jobview } from '@/components/Jobs/Jobview'
+
 import JobManagementSystem from '@/components/Jobs/JobViewpage'
 import React from 'react'
 
@@ -25,6 +25,8 @@ const page = async() => {
     id: technician.id,
     name: `${technician.firstName} ${technician.lastName}`,
   }));
+
+
   
   return (
     <div>      

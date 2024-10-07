@@ -95,9 +95,11 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
       fetchJobData();
     }
   }, [params.id, session]);
-
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
+      // Debugging: Log the values being submitted
+      console.debug('Submitting job update with values:', values);
+  
       const payload = {
         name: values.name,
         description: values.description,
@@ -111,20 +113,42 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         clients: values.clients.map((clientId: string) => ({ id: clientId })),
         technicians: values.technicians.map((techId: string) => ({ id: techId })),
       };
-
-      await axios.put(`${baseUrl}${params.id}/updatejob`, payload, {
+  
+      // Debugging: Log the payload being sent to the server
+      console.debug('Payload for API request:', payload);
+  
+      const response = await axios.put(`${baseUrl}${params.id}/editjob`, payload, {
         headers: { Authorization: `Bearer ${session?.user?.access_token}` },
       });
-
+  
+      // Debugging: Log the server response
+      console.debug('Response from server:', response.data);
+  
       toast.success('Job updated successfully');
       router.push('/callpro/jobs');
     } catch (error) {
+      // Debugging: Log the error object
       console.error('Failed to update job details:', error);
+  
+      // Check if error is an Axios error and log response if available
+      if (axios.isAxiosError(error)) {
+        console.error('Error response from server:', error.response);
+        if (error.response) {
+          // Log the response status and data for additional context
+          console.error('Error status:', error.response.status);
+          console.error('Error data:', error.response.data);
+        }
+      } else {
+        console.error('Unexpected error:', error);
+      }
+  
       toast.error('Failed to update job details.');
     } finally {
       setSubmitting(false);
     }
   };
+  
+  
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
