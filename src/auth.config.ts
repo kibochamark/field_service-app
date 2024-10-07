@@ -95,8 +95,16 @@ export default {
   callbacks: {
     jwt: async ({ token, user, profile, session, account, trigger }) => {
       if (trigger === "update") {
-        token.hascompany = session?.hascompany
-        token.companyId = session?.company;
+        if (session?.hascompany) {
+          token.hascompany = session?.hascompany
+
+        } else if (session?.company) {
+          token.companyId = session?.company;
+
+        } else if (session?.isSubscribed) {
+          token.isSubscribed = session?.isSubscribed
+        }
+
 
       } else {
         if (!profile) {
@@ -130,10 +138,10 @@ export default {
               token.role = res.data?.data?.token?.role;
               token.userId = res.data?.data?.token?.userId;
               token.isSubscribed = res.data?.data?.token?.isSubscribed;
-            }else{
+            } else {
               return null
             }
-            
+
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
             return null
@@ -154,9 +162,9 @@ export default {
           refresh_token: token?.refresh_token!,
           hascompany: token?.hascompany!,
           companyId: token?.companyId!,
-          role:token?.role,
-          userId:token?.userId,
-          isSubscribed:token?.isSubscribed
+          role: token?.role,
+          userId: token?.userId,
+          isSubscribed: token?.isSubscribed
         }
       }
     },

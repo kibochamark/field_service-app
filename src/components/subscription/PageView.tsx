@@ -86,13 +86,29 @@ export default function Subscribe({ plans }: { plans: any }) {
 
       if (Object.values(data).length > 0) {
         update({ isSubscribed: true })
-        router.push("/callpro/dashboard")
-        toast.success("Subscribed Successfully")
-        toast.success("You have One month till your next subscription")
-      }else{
+
+        
+        setTimeout(() => {
+
+          toast.success("Subscribed Successfully")
+        }, 1000)
+        setTimeout(() => {
+
+          toast.success("You will be directly shortly")
+        }, 1000)
+       
+        setTimeout(() => {
+
+          router.push("/callpro/dashboard")
+        }, 4000)
+
+      } else {
         toast.error("Failed to create subscription, please try again")
       }
-      
+
+ 
+
+
     },
     onError(error, variables, context) {
       console.log(error, "error")

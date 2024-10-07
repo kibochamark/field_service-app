@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic"
 
 
 const page = async () => {
-  const plans = await getPlans() || []
+  const plans = await getPlans() ?? []
  
   return (
     <div>
