@@ -1,162 +1,441 @@
-"use client"
-import { CheckCircle2, Send, FileText, CreditCard, Check } from "lucide-react"
-import { useState } from "react"
+"use client";
 
-type Status = "DRAFT" | "SENT" | "APPROVED" | "PAID"
+import { useState, useMemo } from "react";
+import {
+  CheckCircle2,
+  Send,
+  FileText,
+  CreditCard,
+  Check,
+  Search,
+  SortAsc,
+  SortDesc,
+} from "lucide-react";
+import { Button } from "@/shadcn/ui/button";
+import { Input } from "@/shadcn/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/ui/select";
+
+type Status = "DRAFT" | "SENT" | "APPROVED" | "PAID";
 
 interface WorkflowStep {
-  status: Status
-  description: string
-  date: string
-  color: string
+  status: Status;
+  description: string;
+  date: string;
+  color: string;
 }
 
 interface Workflow {
-  id: string
-  name: string
-  currentStatus: Status
-  steps: WorkflowStep[]
+  id: string;
+  name: string;
+  currentStatus: Status;
+  steps: WorkflowStep[];
 }
 
 const getIcon = (status: Status) => {
   switch (status) {
     case "DRAFT":
-      return FileText
+      return FileText;
     case "SENT":
-      return Send
+      return Send;
     case "APPROVED":
-      return CheckCircle2
+      return CheckCircle2;
     case "PAID":
-      return CreditCard
+      return CreditCard;
   }
-}
+};
 
 const WorkflowComponent = ({ workflow }: { workflow: Workflow }) => {
-  const currentStepIndex = workflow.steps.findIndex(step => step.status === workflow.currentStatus)
+  const currentStepIndex = workflow.steps.findIndex(
+    (step) => step.status === workflow.currentStatus
+  );
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md mb-8">
-      <h2 className="text-2xl font-bold mb-4">{workflow.name}</h2>
-      <div className="relative">
-        <div className="absolute left-4 sm:left-5 top-0 bottom-0 w-0.5 bg-gray-200" aria-hidden="true" />
-        <div 
-          className={`absolute left-4 sm:left-5 top-0 w-0.5 bg-gradient-to-b ${workflow.steps[currentStepIndex].color}`} 
-          style={{height: `calc(${(currentStepIndex + 1) * 25}% - 2rem)`}}
-          aria-hidden="true"
-        />
+    <div className="p-4 bg-white rounded-lg shadow-md mb-4 w-full">
+      <h2 className="text-xl font-bold mb-2">{workflow.name}</h2>
+      <div className="flex flex-wrap items-center justify-between relative">
+        {workflow.steps.map((step, index) => {
+          const Icon = getIcon(step.status);
+          const isActive = workflow.currentStatus === step.status;
+          const isPast = currentStepIndex >= index;
+          const isCompleted = currentStepIndex > index;
 
-        <div className="space-y-8 sm:space-y-12 relative">
-          {workflow.steps.map((step, index) => {
-            const Icon = getIcon(step.status)
-            const isActive = workflow.currentStatus === step.status
-            const isPast = currentStepIndex >= index
-            const isCompleted = currentStepIndex > index
-
-            return (
-              <div key={step.status} className="relative flex items-start">
-                <div className="flex items-center absolute left-0 mt-1.5">
-                  <div className={`w-9 h-9 rounded-full ${isPast ? step.color : 'bg-gray-200'} flex items-center justify-center`}>
-                    {isCompleted ? (
-                      <Check className="w-6 h-6 text-white" />
-                    ) : (
-                      <div className={`w-3 h-3 rounded-full ${isPast ? 'bg-white' : 'bg-gray-400'}`} />
-                    )}
-                  </div>
+          return (
+            <div
+              key={step.status}
+              className="flex flex-col items-center flex-1 relative mb-4"
+            >
+              <div className="relative flex items-center">
+                <div
+                  className={`w-8 h-8 rounded-full ${
+                    isPast ? step.color : "bg-gray-200"
+                  } flex items-center justify-center z-10`}
+                >
+                  {isCompleted ? (
+                    <Check className="w-5 h-5 text-white" />
+                  ) : (
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        isPast ? "bg-white " : "bg-gray-400"
+                      }`}
+                    />
+                  )}
                 </div>
-                <div className="ml-14 sm:ml-16">
+
+                {index < workflow.steps.length - 1 && (
                   <div
-                    className={`${
-                      step.color
-                    } inline-flex rounded-full p-2 sm:p-3 ${
-                      isActive ? 'ring-4 ring-opacity-50' : ''
-                    } ${isPast ? 'opacity-100' : 'opacity-40'}`}
-                  >
-                    <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${isPast ? 'text-white' : 'text-gray-500'}`} />
-                  </div>
-                  <div className="mt-3">
-                    <h3
-                      className={`text-lg sm:text-xl font-bold ${
-                        isPast ? 'text-gray-900' : 'text-gray-500'
-                      }`}
-                    >
-                      {step.status}
-                    </h3>
-                    <p
-                      className={`text-sm sm:text-base mt-1 ${
-                        isPast ? 'text-gray-600' : 'text-gray-400'
-                      }`}
-                    >
-                      {step.description}
-                    </p>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-1">{step.date}</p>
-                  </div>
-                </div>
+                    className={`h-1 w-full sm:w-64 ${
+                      isCompleted ? "bg-green-500" : "bg-gray-200"
+                    } absolute top-1/2 left-full transform -translate-y-1/2`}
+                  />
+                )}
               </div>
-            )
-          })}
-        </div>
+
+              <div className="mt-2 text-center">
+                <div className={`inline-flex rounded-full p-2 ${step.color}`}>
+                  <Icon className="w-5 h-5 text-white" />
+                </div>
+                <h3
+                  className={`text-lg font-bold ${
+                    isPast ? "text-gray-900" : "text-gray-500"
+                  }`}
+                >
+                  {step.status}
+                </h3>
+                <p
+                  className={`text-sm mt-1 ${
+                    isPast ? "text-gray-600" : "text-gray-400"
+                  }`}
+                >
+                  {step.description}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{step.date}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default function MultipleWorkFlow() {
+export default function WorkflowPage() {
   const [workflows] = useState<Workflow[]>([
     {
       id: "1",
       name: "Job Application",
-      currentStatus: "DRAFT",
+      currentStatus: "PAID",
       steps: [
-        { status: "DRAFT", description: "Application created", date: "2023-05-01", color: "bg-yellow-500" },
-        { status: "SENT", description: "Application sent to employer", date: "2023-05-03", color: "bg-blue-500" },
-        { status: "APPROVED", description: "Application approved", date: "2023-05-07", color: "bg-green-500" },
-        { status: "PAID", description: "First paycheck received", date: "2023-05-15", color: "bg-purple-500" },
-      ]
+        {
+          status: "DRAFT",
+          description: "Application created",
+          date: "2023-05-01",
+          color: "bg-yellow-500",
+        },
+        {
+          status: "SENT",
+          description: "Application sent to employer",
+          date: "2023-05-03",
+          color: "bg-blue-500",
+        },
+        {
+          status: "APPROVED",
+          description: "Application approved",
+          date: "2023-05-07",
+          color: "bg-green-500",
+        },
+        {
+          status: "PAID",
+          description: "First paycheck received",
+          date: "2023-05-15",
+          color: "bg-purple-500",
+        },
+      ],
     },
     {
       id: "2",
-      name: "Product Order",
+      name: "Project Completion",
       currentStatus: "APPROVED",
       steps: [
-        { status: "DRAFT", description: "Order created", date: "2023-05-10", color: "bg-yellow-500" },
-        { status: "SENT", description: "Order placed", date: "2023-05-11", color: "bg-blue-500" },
-        { status: "APPROVED", description: "Order approved", date: "2023-05-12", color: "bg-green-500" },
-        { status: "PAID", description: "Payment processed", date: "2023-05-13", color: "bg-purple-500" },
-      ]
-    }
-  ])
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null)
+        {
+          status: "DRAFT",
+          description: "Project outline drafted",
+          date: "2023-05-01",
+          color: "bg-yellow-500",
+        },
+        {
+          status: "SENT",
+          description: "Project proposal sent",
+          date: "2023-05-03",
+          color: "bg-blue-500",
+        },
+        {
+          status: "APPROVED",
+          description: "Project approved",
+          date: "2023-05-07",
+          color: "bg-green-500",
+        },
+        {
+          status: "PAID",
+          description: "Final payment received",
+          date: "2023-05-15",
+          color: "bg-purple-500",
+        },
+      ],
+    },
+    {
+      id: "1",
+      name: "Job ",
+      currentStatus: "PAID",
+      steps: [
+        {
+          status: "DRAFT",
+          description: "Application created",
+          date: "2023-05-01",
+          color: "bg-yellow-500",
+        },
+        {
+          status: "SENT",
+          description: "Application sent to employer",
+          date: "2023-05-03",
+          color: "bg-blue-500",
+        },
+        {
+          status: "APPROVED",
+          description: "Application approved",
+          date: "2023-05-07",
+          color: "bg-green-500",
+        },
+        {
+          status: "PAID",
+          description: "First paycheck received",
+          date: "2023-05-15",
+          color: "bg-purple-500",
+        },
+      ],
+    },
+    {
+      id: "2",
+      name: "Project ",
+      currentStatus: "APPROVED",
+      steps: [
+        {
+          status: "DRAFT",
+          description: "Project outline drafted",
+          date: "2023-05-01",
+          color: "bg-yellow-500",
+        },
+        {
+          status: "SENT",
+          description: "Project proposal sent",
+          date: "2023-05-03",
+          color: "bg-blue-500",
+        },
+        {
+          status: "APPROVED",
+          description: "Project approved",
+          date: "2023-05-07",
+          color: "bg-green-500",
+        },
+        {
+          status: "PAID",
+          description: "Final payment received",
+          date: "2023-05-15",
+          color: "bg-purple-500",
+        },
+      ],
+    },
+    {
+      id: "1",
+      name: "Job Appli",
+      currentStatus: "SENT",
+      steps: [
+        {
+          status: "DRAFT",
+          description: "Application created",
+          date: "2023-05-01",
+          color: "bg-yellow-500",
+        },
+        {
+          status: "SENT",
+          description: "Application sent to employer",
+          date: "2023-05-03",
+          color: "bg-blue-500",
+        },
+        {
+          status: "APPROVED",
+          description: "Application approved",
+          date: "2023-05-07",
+          color: "bg-green-500",
+        },
+        {
+          status: "PAID",
+          description: "First paycheck received",
+          date: "2023-05-15",
+          color: "bg-purple-500",
+        },
+      ],
+    },
+    {
+      id: "2",
+      name: "Project Completion",
+      currentStatus: "DRAFT",
+      steps: [
+        {
+          status: "DRAFT",
+          description: "Project outline drafted",
+          date: "2023-05-01",
+          color: "bg-yellow-500",
+        },
+        {
+          status: "SENT",
+          description: "Project proposal sent",
+          date: "2023-05-03",
+          color: "bg-blue-500",
+        },
+        {
+          status: "APPROVED",
+          description: "Project approved",
+          date: "2023-05-07",
+          color: "bg-green-500",
+        },
+        {
+          status: "PAID",
+          description: "Final payment received",
+          date: "2023-05-15",
+          color: "bg-purple-500",
+        },
+      ],
+    },
+    // Additional workflows can be added here...
+  ]);
 
-  const handleSelectWorkflow = (workflowId: string) => {
-    setSelectedWorkflowId(prevId => (prevId === workflowId ? null : workflowId))
-  }
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [filterStatus, setFilterStatus] = useState<Status | "ALL">("ALL");
+  
+  // Pagination state
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filteredAndSortedWorkflows = useMemo(() => {
+    return workflows
+      .filter(
+        (workflow) =>
+          workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          (filterStatus === "ALL" || workflow.currentStatus === filterStatus)
+      )
+      .sort((a, b) => {
+        if (sortOrder === "asc") {
+          return a.name.localeCompare(b.name);
+        } else {
+          return b.name.localeCompare(a.name);
+        }
+      });
+  }, [workflows, searchTerm, sortOrder, filterStatus]);
+
+  // Paginated workflows
+  const indexOfLastWorkflow = currentPage * itemsPerPage;
+  const indexOfFirstWorkflow = indexOfLastWorkflow - itemsPerPage;
+  const currentWorkflows = filteredAndSortedWorkflows.slice(
+    indexOfFirstWorkflow,
+    indexOfLastWorkflow
+  );
+
+  // Total number of pages
+  const totalPages = Math.ceil(filteredAndSortedWorkflows.length / itemsPerPage);
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Jobs List</h1>
-      <div className="flex gap-4 flex-wrap justify-center">
-        {workflows.map(workflow => (
-          <button
-            key={workflow.id}
-            className={`px-4 py-2 rounded-full font-semibold text-white ${
-              selectedWorkflowId === workflow.id ? 'bg-blue-500' : 'bg-gray-500'
-            }`}
-            onClick={() => handleSelectWorkflow(workflow.id)}
-          >
-            {workflow.name}
-          </button>
-        ))}
-      </div>
-
-      {selectedWorkflowId && (
-        <div className="mt-8">
-          {workflows
-            .filter(workflow => workflow.id === selectedWorkflowId)
-            .map(workflow => (
-              <WorkflowComponent key={workflow.id} workflow={workflow} />
-            ))}
+    <div className="w-full max-w-6xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6 text-center">Job Tracking</h1>
+      <div className="mb-4 flex flex-wrap space-y-2 sm:space-y-0 sm:space-x-2">
+        <div className="relative flex-grow">
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search for a job..."
+            className="pl-10 w-full sm:w-72"
+          />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
         </div>
-      )}
+        <Select
+          value={filterStatus}
+          onValueChange={(value) => setFilterStatus(value as Status | "ALL")}
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Statuses</SelectItem>
+            <SelectItem value="DRAFT">Draft</SelectItem>
+            <SelectItem value="SENT">Sent</SelectItem>
+            <SelectItem value="APPROVED">Approved</SelectItem>
+            <SelectItem value="PAID">Paid</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="flex items-center space-x-2"
+        >
+          {sortOrder === "asc" ? <SortAsc /> : <SortDesc />}
+          <span>Sort</span>
+        </Button>
+      </div>
+      
+      {/* Render current workflows */}
+      {currentWorkflows.map((workflow) => (
+        <WorkflowComponent key={workflow.id} workflow={workflow} />
+      ))}
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-6 bg-white p-3">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="itemsPerPage" className="text-sm">
+            Items per page:
+          </label>
+          <Select
+            value={itemsPerPage.toString()}
+            onValueChange={(value) => setItemsPerPage(Number(value))}
+          >
+            <SelectTrigger className="w-[70px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="15">15</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+          >
+            Previous
+          </Button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
