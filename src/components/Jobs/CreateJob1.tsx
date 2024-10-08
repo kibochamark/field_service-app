@@ -65,14 +65,6 @@ import AnimatedStepProgression from "./Progressbar";
 import { FileText, Users, Star } from 'lucide-react'
 import { string } from "yup";
 
-
-type JobStatus =
-  | "Draft"
-  | "Not Assigned"
-  | "Assigned"
-  | "In Progress"
-  | "Completed";
-
 interface Job {
   id: string;
   name: string;
@@ -201,45 +193,6 @@ const handleSelectClient = (client: { id: string; name: string }) => {
       }
     });
   };
-
-//   const assignJob = async () => {
-//   const { city, zip, state } = currentJob.location; // Extract location fields
-//   const technicianIds = selectedTechnicians.map((tech) => tech.id); // Extract technician IDs
-
-//   // Prepare the data to be sent in the request body
-//   const jobData = {
-//     location: {
-//       city,
-//       zip,
-//       state,
-//       otherinfo: currentJob.location.otherInfo || "", // Optional field
-//     },
-//     technicianIds, // Array of technician IDs
-//     jobSchedule: currentJob.jobSchedule, // Dates and recurrence
-//   };
-
-//   // Make the PUT request to update the job
-//   try {
-//     const response = await fetch(`/assign/${jobId}`, {
-//       method: "PUT",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${session?.user.access_token}`, 
-//       },
-//       body: JSON.stringify(jobData), 
-//     });
-
-//     if (!response.ok) {
-//       throw new Error("Failed to update job.");
-//     }
-
-//     const result = await response.json();
-//     console.log("Job updated successfully:", result);
-//     setStep(3);
-//   } catch (error) {
-//     console.error("Error updating job:", error);
-//   }
-// };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
