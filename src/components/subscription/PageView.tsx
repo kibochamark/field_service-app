@@ -131,7 +131,7 @@ export default function Subscribe({ plans }: { plans: any }) {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Timeline Plans */}
           <div className="w-full lg:w-1/2 space-y-8">
-            {plans?.map((plan: any, index: number) => (
+            {plans.length > 0 && plans?.map((plan: any, index: number) => (
               <div key={plan.name} className={`relative pl-8 pb-8 border-l-2 border-blue-500`}>
                 <div className={`absolute left-0 top-0 w-4 h-4 rounded-full -translate-x-1/2 bg-blue-500`} />
                 <Card className="w-full">
