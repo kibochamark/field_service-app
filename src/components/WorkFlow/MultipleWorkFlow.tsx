@@ -44,6 +44,7 @@ const WorkflowComponent = ({ workflow }: { workflow: Workflow }) => {
           style={{height: `calc(${(currentStepIndex + 1) * 25}% - 2rem)`}}
           aria-hidden="true"
         />
+
         <div className="space-y-8 sm:space-y-12 relative">
           {workflow.steps.map((step, index) => {
             const Icon = getIcon(step.status)
@@ -66,17 +67,25 @@ const WorkflowComponent = ({ workflow }: { workflow: Workflow }) => {
                   <div
                     className={`${
                       step.color
-                    } inline-flex rounded-full p-2 sm:p-3 ${isActive ? 'ring-4 ring-opacity-50' : ''} ${isPast ? 'opacity-100' : 'opacity-40'}`}
+                    } inline-flex rounded-full p-2 sm:p-3 ${
+                      isActive ? 'ring-4 ring-opacity-50' : ''
+                    } ${isPast ? 'opacity-100' : 'opacity-40'}`}
                   >
                     <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${isPast ? 'text-white' : 'text-gray-500'}`} />
                   </div>
                   <div className="mt-3">
                     <h3
-                      className={`text-lg sm:text-xl font-bold ${isPast ? 'text-gray-900' : 'text-gray-500'}`}
+                      className={`text-lg sm:text-xl font-bold ${
+                        isPast ? 'text-gray-900' : 'text-gray-500'
+                      }`}
                     >
                       {step.status}
                     </h3>
-                    <p className={`text-sm sm:text-base mt-1 ${isPast ? 'text-gray-600' : 'text-gray-400'}`}>
+                    <p
+                      className={`text-sm sm:text-base mt-1 ${
+                        isPast ? 'text-gray-600' : 'text-gray-400'
+                      }`}
+                    >
                       {step.description}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-400 mt-1">{step.date}</p>
@@ -92,11 +101,11 @@ const WorkflowComponent = ({ workflow }: { workflow: Workflow }) => {
 }
 
 export default function MultipleWorkFlow() {
-  const [workflows, setWorkflows] = useState<Workflow[]>([
+  const [workflows] = useState<Workflow[]>([
     {
       id: "1",
       name: "Job Application",
-      currentStatus: "SENT",
+      currentStatus: "DRAFT",
       steps: [
         { status: "DRAFT", description: "Application created", date: "2023-05-01", color: "bg-yellow-500" },
         { status: "SENT", description: "Application sent to employer", date: "2023-05-03", color: "bg-blue-500" },
@@ -116,28 +125,38 @@ export default function MultipleWorkFlow() {
       ]
     }
   ])
-
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null)
 
-  const handleWorkflowClick = (workflowId: string) => {
+  const handleSelectWorkflow = (workflowId: string) => {
     setSelectedWorkflowId(prevId => (prevId === workflowId ? null : workflowId))
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Multiple Workflows</h1>
-      {workflows.map(workflow => (
-        <div key={workflow.id}>
+      <h1 className="text-3xl font-bold mb-8 text-center">Jobs List</h1>
+      <div className="flex gap-4 flex-wrap justify-center">
+        {workflows.map(workflow => (
           <button
-            onClick={() => handleWorkflowClick(workflow.id)}
-            className="w-full text-left p-4 bg-gray-100 rounded-lg mb-4 hover:bg-gray-200"
+            key={workflow.id}
+            className={`px-4 py-2 rounded-full font-semibold text-white ${
+              selectedWorkflowId === workflow.id ? 'bg-blue-500' : 'bg-gray-500'
+            }`}
+            onClick={() => handleSelectWorkflow(workflow.id)}
           >
-            <h2 className="text-xl font-bold">{workflow.name}</h2>
-            <p className="text-gray-500">Current Status: {workflow.currentStatus}</p>
+            {workflow.name}
           </button>
-          {selectedWorkflowId === workflow.id && <WorkflowComponent workflow={workflow} />}
+        ))}
+      </div>
+
+      {selectedWorkflowId && (
+        <div className="mt-8">
+          {workflows
+            .filter(workflow => workflow.id === selectedWorkflowId)
+            .map(workflow => (
+              <WorkflowComponent key={workflow.id} workflow={workflow} />
+            ))}
         </div>
-      ))}
+      )}
     </div>
   )
 }

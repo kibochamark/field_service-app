@@ -8,7 +8,7 @@ export async function getClints() {
     try {
         const session = await auth();
 
-        const res = await fetch(baseUrl + `/66f2bb6c6bce4eb548d409c1/retrievejobs/`, {
+        const res = await fetch(baseUrl + `/${session?.user?.companyId}/retrievejobs/`, {
             method: "GET",
             headers: {
                 Authorization: "Bearer " + session?.user?.access_token
@@ -18,11 +18,11 @@ export async function getClints() {
         
 
         const data = await res.json();
-        console.log(data, "------11111111111111-------------------------data for clients-------------------------------------");
+        // console.log(data, "------11111111111111-------------------------data for clients-------------------------------------");
 
 
         if (res.status == 200) {
-            console.log(data, "-------------------------------data for clients-------------------------------------");
+            // console.log(data, "-------------------------------data for clients-------------------------------------");
             return data?.data;
             
             // return data;
@@ -44,7 +44,7 @@ export async function getInvoiceDetails() {
         const session = await auth();  // Ensure user is authenticated
 
         // Perform the API request
-        const res = await fetch(baseUrl + `/66f2bb6c6bce4eb548d409c1/invoices/`, {
+        const res = await fetch(baseUrl + `/${session?.user?.companyId}/invoices/`, {
             method: "GET",
             headers: {
                 Authorization: "Bearer " + session?.user?.access_token // Pass token for auth

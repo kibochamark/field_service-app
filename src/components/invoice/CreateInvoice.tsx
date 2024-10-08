@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FileText, UserPlus} from "lucide-react";
 import { Button } from "@/shadcn/ui/button";
 import {
   Card,
@@ -192,29 +193,53 @@ const Stepper = ({
   currentStep: any;
   totalSteps: any;
 }) => {
+  const stepIcons = [
+    { icon: <UserPlus className="w-5 h-5" />, label: "Select Client" },
+    { icon: <FileText className="w-5 h-5" />, label: "Create Invoice" },
+    { icon: <Edit className="w-5 h-5" />, label: "View" },
+    { icon: <Send className="w-5 h-5" />, label: "Send Invoice" },
+  ];
   return (
-    <div className="flex items-center mb-8 px-4"> {/* Added horizontal padding */}
-    {Array.from({ length: totalSteps }, (_, i) => (
-      <div key={i} className="flex items-center">
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            i < currentStep
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {i < currentStep ? <Check className="w-5 h-5" /> : i + 1}
+    <div className="w-full flex items-center justify-between mb-8 px-4 bg-white">
+      {Array.from({ length: totalSteps }, (_, i) => (
+        <div key={i} className="flex items-center w-full">
+          {/* Icon and Text next to each other */}
+          <div className="flex items-center space-x-2">
+            {/* Icon */}
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                i <= currentStep
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : "bg-muted border-muted text-muted-foreground"
+              }`}
+            >
+              {i < currentStep ? (
+                <Check className="w-6 h-6" />
+              ) : (
+                stepIcons[i].icon
+              )}
+            </div>
+            {/* Text Label */}
+            <p
+              className={`text-black ${
+                i <= currentStep ? "font-semibold text-black" : "font-normal text-black"
+              }`}
+            >
+              {stepIcons[i].label}
+            </p>
+          </div>
+
+          {/* Line between icons */}
+          {i < totalSteps - 1 && (
+            <div
+              className={`flex-grow h-[2px] mx-4 ${
+                i < currentStep - 1 ? "bg-primary" : "bg-muted"
+              }`}
+            />
+          )}
         </div>
-        {i < totalSteps - 1 && (
-          <div
-            className={`h-1 w-10 ${ 
-              i < currentStep - 1 ? "bg-primary" : "bg-muted"
-            }`}
-          />
-        )}
-      </div>
-    ))}
-  </div>
+      ))}
+    </div>
   
 
   );
@@ -282,7 +307,7 @@ const CreateInvoiceStep = ({
   });
   return (
     <form onSubmit={formik.handleSubmit}>
-      <Card>
+      <Card className="">
         <CardHeader>
           <CardTitle>Create Invoice</CardTitle>
         </CardHeader>
@@ -732,8 +757,8 @@ const handleSubmit = async () => {
 };
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Create Invoice</h1>
+    <div className="container mx-auto py-10 bg-white">
+      <h1 className="text-3xl font-bold mb-6 pl-20px">Create Invoice</h1>
       <Stepper currentStep={currentStep} totalSteps={totalSteps} />
       {currentStep === 1 && (
         <SelectClientStep
