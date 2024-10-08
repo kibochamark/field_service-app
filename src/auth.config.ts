@@ -8,37 +8,37 @@ import { baseUrl } from "./utils/constants";
 import { signOut } from "./auth";
 
 
-async function refreshAccessToken(token: any) {
-  try {
-    const url = ""
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      method: "POST",
-    })
+// async function refreshAccessToken(token: any) {
+//   try {
+//     const url = ""
+//     const response = await fetch(url, {
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//       },
+//       method: "POST",
+//     })
 
-    const refreshedTokens = await response.json()
+//     const refreshedTokens = await response.json()
 
-    if (!response.ok) {
-      throw refreshedTokens
-    }
+//     if (!response.ok) {
+//       throw refreshedTokens
+//     }
 
-    return {
-      ...token,
-      access_token: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      refresh_token: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-    }
-  } catch (error) {
-    console.log(error)
+//     return {
+//       ...token,
+//       access_token: refreshedTokens.access_token,
+//       accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+//       refresh_token: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
+//     }
+//   } catch (error) {
+//     console.log(error)
 
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    }
-  }
-}
+//     return {
+//       ...token,
+//       error: "RefreshAccessTokenError",
+//     }
+//   }
+// }
 
 
 export default {
@@ -95,8 +95,16 @@ export default {
   callbacks: {
     jwt: async ({ token, user, profile, session, account, trigger }) => {
       if (trigger === "update") {
-        token.hascompany = session?.hascompany
-        token.companyId = session?.company;
+        if (session?.hascompany) {
+          token.hascompany = session?.hascompany
+
+        } else if (session?.company) {
+          token.companyId = session?.company;
+
+        } else if (session?.isSubscribed) {
+          token.isSubscribed = session?.isSubscribed
+        }
+
 
       } else {
         if (!profile) {
@@ -107,6 +115,7 @@ export default {
             token.hascompany = (user as any)?.hascompany;
             token.companyId = (user as any)?.companyId;
             token.role = (user as any)?.role;
+            token.isSubscribed = (user as any)?.isSubscribed;
 
           }
 
@@ -128,10 +137,11 @@ export default {
               token.companyId = res.data?.data?.token?.companyId;
               token.role = res.data?.data?.token?.role;
               token.userId = res.data?.data?.token?.userId;
-            }else{
+              token.isSubscribed = res.data?.data?.token?.isSubscribed;
+            } else {
               return null
             }
-            
+
           } catch (error) {
             console.error("Error fetching tokens from your API:", error);
             return null
@@ -152,8 +162,9 @@ export default {
           refresh_token: token?.refresh_token!,
           hascompany: token?.hascompany!,
           companyId: token?.companyId!,
-          role:token?.role,
-          userId:token?.userId
+          role: token?.role,
+          userId: token?.userId,
+          isSubscribed: token?.isSubscribed
         }
       }
     },

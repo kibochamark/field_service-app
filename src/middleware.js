@@ -53,9 +53,20 @@ export default auth(async(req) => {
     return Response.redirect(new URL("/callpro/dashboard", nextUrl))
   }
 
+  if(!(req?.auth?.user?.isSubscribed)){
+    if(nextUrl.pathname === "/subscribe"){
+      return null
+    }
+    return Response.redirect(new URL("/subscribe", nextUrl));
+  }
+
+  if (nextUrl.pathname === "/subscribe") {
+    return Response.redirect(new URL("/callpro/dashboard", nextUrl))
+  }
+
   return null;
 });
 
 export const config = {
-  matcher: ["/(api|trpc)(.*)", "/", "/company", "/callpro/:path*", "/login", "/signup"],
+  matcher: ["/(api|trpc)(.*)", "/", "/subscribe", "/company", "/callpro/:path*", "/login", "/signup"],
 };
