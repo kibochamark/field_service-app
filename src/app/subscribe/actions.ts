@@ -8,7 +8,7 @@ import { baseUrl } from "@/utils/constants"
 
 export async function getPlans(){
     try{
-        let plans
+        
         const session = await auth()
 
         if(session){
@@ -21,10 +21,13 @@ export async function getPlans(){
             })
 
             const data= await res.json()
+            if(res.status == 200){
 
-            plans = data
+                return data?.data
+            }
+
         }
-        return plans?.data
+        return []
 
     }catch(e:any){
         return e.message
