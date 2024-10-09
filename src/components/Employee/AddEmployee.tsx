@@ -176,7 +176,7 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
           password: "",
           confirmPassword: "",
           roleId: "",
-          companyId: (session?.user?.companyId as string) || "",
+          companyId: (session?.user?.companyId as string),
           permissions: [],
         }}
         validationSchema={SignupSchema}
