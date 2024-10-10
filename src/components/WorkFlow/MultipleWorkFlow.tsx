@@ -191,7 +191,7 @@ export default function WorkflowPage() {
     {
       id: "1",
       name: "Job ",
-      currentStatus: "PAID",
+      currentStatus: "DRAFT",
       steps: [
         {
           status: "DRAFT",

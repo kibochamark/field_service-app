@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, UserPlus} from "lucide-react";
+import { FileText, UserPlus } from "lucide-react";
 import { Button } from "@/shadcn/ui/button";
 import {
   Card,
@@ -51,22 +51,23 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { getClints } from "./ServerActions";
 import { searchNumbers } from "libphonenumber-js";
 import toast from "react-hot-toast";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { revalidateTag } from "next/cache";
 
 interface Client {
   id: string;
   firstName: string;
   lastName: string;
-  email:string;
-  topLevelId:string;
+  email: string;
+  topLevelId: string;
+  name: string;
+  description: string;
 }
 
 interface Data {
   id: string; // Top-level ID
   clients: Client;
 }
-
 
 // Validation schema using Yup
 const invoiceSchema = Yup.object().shape({
@@ -86,7 +87,7 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [clients, setClients] = useState<
-    { client: Client; topLevelId: string }[]
+    { client: Client; topLevelId: string; name: string; description: string }[]
   >([]);
 
   // Fetch clients on component mount
@@ -102,6 +103,8 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
           const clientData = response.map((item: any) => ({
             client: item.clients,
             topLevelId: item.id,
+            name: item.name,
+            description: item.description,
           }));
           setClients(clientData);
         } else {
@@ -119,14 +122,17 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
     ({ client }) =>
       client.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
+      client.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="relative">
+    <div className="relative w-4/12">
       <div className="flex items-center space-x-2">
         <Input
           type="text"
+          className="w-5/6"
           placeholder="Search clients..."
           value={searchTerm}
           onChange={(e) => {
@@ -135,19 +141,19 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
           }}
           onFocus={() => setIsDropdownOpen(true)}
         />
-        <Button size="icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+        {/* <Button size="icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
           <Search className="h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
 
       {isDropdownOpen && (
         <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
-          {filteredClients.map(({ client, topLevelId }) => (
+          {filteredClients.map(({ client, topLevelId, name, description }) => (
             <div
               key={client.id}
               className="p-2 hover:bg-accent cursor-pointer"
               onClick={() => {
-                onSelectClient({ ...client, topLevelId }); // Pass both client and topLevelId
+                onSelectClient({ ...client, topLevelId, name, description }); // Pass both client and topLevelId
                 setIsDropdownOpen(false);
                 setSearchTerm("");
               }}
@@ -161,6 +167,12 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
               <div className="text-sm text-muted-foreground">
                 Email: {client.email}
               </div>
+              <div className="text-sm text-muted-foreground">
+                Job Name: {name}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Job Description {description}
+              </div>
             </div>
           ))}
         </div>
@@ -169,17 +181,18 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
   );
 };
 
-  
-
-
 // ClientInfo Component
-const ClientInfo = ({ client }: { client: Client | null }) => {
+const ClientInfo = ({ client,name, description }: { client: Client | null; description:string; name:string; }) => {
   if (!client) return null;
 
   return (
     <div className="p-2 bg-muted rounded-md">
       <div className="font-medium">{client.firstName}</div>
       <div className="text-sm text-muted-foreground">{client.lastName}</div>
+      <div className="text-sm text-muted-foreground">Job Name: {client.name}</div>
+      <div className="text-sm text-muted-foreground">
+        Job Description {client.description}
+      </div>
       {/* <div className="text-sm text-muted-foreground">{client.id}</div> */}
     </div>
   );
@@ -222,7 +235,9 @@ const Stepper = ({
             {/* Text Label */}
             <p
               className={`text-black ${
-                i <= currentStep ? "font-semibold text-black" : "font-normal text-black"
+                i <= currentStep
+                  ? "font-semibold text-black"
+                  : "font-normal text-black"
               }`}
             >
               {stepIcons[i].label}
@@ -240,8 +255,6 @@ const Stepper = ({
         </div>
       ))}
     </div>
-  
-
   );
 };
 // Step 1: Select or search client
@@ -264,7 +277,7 @@ const SelectClientStep = ({
         {selectedClient && (
           <div className="mt-4">
             <h3 className="text-sm font-medium mb-2">Selected Client:</h3>
-            <ClientInfo client={selectedClient} />
+            <ClientInfo client={selectedClient} description={""} name={""} />
           </div>
         )}
       </CardContent>
@@ -461,7 +474,7 @@ const ViewEditInvoiceStep = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <ClientInfo client={selectedClient} />
+          <ClientInfo client={selectedClient} description={""} name={""} />
           {isEditing ? (
             <>
               <div>
@@ -627,6 +640,7 @@ const SendInvoiceStep = ({
   invoice: any;
   handleSubmit: any;
 }) => {
+  const [message, setMessage]= useState("")
   return (
     <Card>
       <CardHeader>
@@ -634,7 +648,7 @@ const SendInvoiceStep = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <ClientInfo client={selectedClient} />
+          <ClientInfo client={selectedClient} description={""} name={""} />
           <div>
             <Label htmlFor="email">Client Email</Label>
             <Input
@@ -647,6 +661,9 @@ const SendInvoiceStep = ({
             <Label htmlFor="message">Message</Label>
             <Textarea
               id="message"
+              defaultValue={invoice.description}
+
+              onChange={(e)=>setMessage(e.target.value)}
               placeholder="Enter a message for your client..."
             />
           </div>
@@ -702,59 +719,59 @@ export default function InvoiceCreationPage() {
     setCurrentStep(2); // Go back to create invoice step
   };
   const { data: session } = useSession();
-const handleSubmit = async () => {
-  try {
-    // Gather necessary data to submit
-    const data = {
-      clientId: selectedClient?.id,
-      companyId: session?.user?.companyId,
-      createdBy: session?.user?.userId,
-      totalAmount: invoice.amount,
-      subTotal: invoice.subTotal || invoice.amount,
-      tax: invoice.tax || 0,
-      dueDate: invoice.dueDate,
-      notes: invoice.notes || "No additional notes.",
-      jobId: selectedClient?.topLevelId, // Use topLevelId as jobId
-    };
+  const handleSubmit = async () => {
+    try {
+      // Gather necessary data to submit
+      const data = {
+        clientId: selectedClient?.id,
+        companyId: session?.user?.companyId,
+        createdBy: session?.user?.userId,
+        totalAmount: invoice.amount,
+        subTotal: invoice.subTotal || invoice.amount,
+        tax: invoice.tax || 0,
+        dueDate: invoice.dueDate,
+        notes: invoice.description || "No additional notes.",
+        jobId: selectedClient?.topLevelId, // Use topLevelId as jobId
+      };
 
-    // Basic validation
-    if (!data.companyId || !data.totalAmount || !data.dueDate) {
-      toast.error("Please fill in all required fields."); // Use toast for error
-      return;
+      // Basic validation
+      if (!data.companyId || !data.totalAmount || !data.dueDate) {
+        toast.error("Please fill in all required fields."); // Use toast for error
+        return;
+      }
+
+      console.log(data, "sending data api");
+
+      // Send the POST request to the API endpoint
+      const response = await fetch(baseUrl + `invoice`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast.success("Invoice sent successfully!"); // Success toast
+        router.push("/callpro/invoice"); // Adjust the path as needed
+        revalidateTag("getclient");
+
+        // Optionally handle result data
+      } else {
+        const errorData = await response.json();
+        console.error("Error response data:", errorData); // Log for debugging
+        const errorMessages = Array.isArray(errorData.error)
+          ? errorData.error.join(", ")
+          : "Unknown error occurred.";
+        toast.error(`Failed to send invoice: ${errorMessages}`); // Use toast for error
+      }
+    } catch (error) {
+      console.error("Error submitting invoice:", error);
+      toast.error("An error occurred while sending the invoice."); // Use toast for error
     }
-
-    console.log(data, "sending data api");
-
-    // Send the POST request to the API endpoint
-    const response = await fetch(baseUrl + `invoice`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.user?.access_token}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      toast.success("Invoice sent successfully!"); // Success toast
-      router.push('/callpro/invoice'); // Adjust the path as needed
-      revalidateTag("getclient");
-
-      // Optionally handle result data
-    } else {
-      const errorData = await response.json();
-      console.error("Error response data:", errorData); // Log for debugging
-      const errorMessages = Array.isArray(errorData.error)
-        ? errorData.error.join(", ")
-        : "Unknown error occurred.";
-      toast.error(`Failed to send invoice: ${errorMessages}`); // Use toast for error
-    }
-  } catch (error) {
-    console.error("Error submitting invoice:", error);
-    toast.error("An error occurred while sending the invoice."); // Use toast for error
-  }
-};
+  };
 
   return (
     <div className="container mx-auto py-10 bg-white">

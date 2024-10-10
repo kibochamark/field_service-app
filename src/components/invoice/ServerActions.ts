@@ -18,11 +18,11 @@ export async function getClints() {
         
 
         const data = await res.json();
-        // console.log(data, "------11111111111111-------------------------data for clients-------------------------------------");
+        console.log(data, "------11111111111111-------------------------data for clients-------------------------------------");
 
 
         if (res.status == 200) {
-            // console.log(data, "-------------------------------data for clients-------------------------------------");
+            console.log(data, "-------------------------------data for clients-------------------------------------");
             return data?.data;
             
             // return data;

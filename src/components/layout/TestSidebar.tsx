@@ -74,12 +74,17 @@ const TestSidebar = () => {
         href: "/callpro/invoice",
     },
     {
-      label: "jobTracking",
-      name: "Job Tracking",
+      label: "workflow",
+      name: "Work Flow",
       icon: <Workflow  className=""  />,
-
       href: "/callpro/workflow",
   },
+  {
+    label: "workflow",
+    name: "Technician",
+    icon: <Workflow  className=""  />,
+    href: "/callpro/technician",
+},
 
     // {
     //     label: "Library",

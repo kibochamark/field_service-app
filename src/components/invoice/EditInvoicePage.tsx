@@ -148,7 +148,7 @@ const EditInvoicePage = ({ invoiceId }: { invoiceId: string }) => {
           ) : null}
         </div>
 
-        <div>
+        {/* <div>
           <label htmlFor="subtotal" className="block font-medium mb-1">
             Subtotal
           </label>
@@ -164,10 +164,10 @@ const EditInvoicePage = ({ invoiceId }: { invoiceId: string }) => {
           {formik.touched.subTotal && formik.errors.subTotal ? (
             <div className="text-red-500">{formik.errors.subTotal}</div>
           ) : null}
-        </div>
+        </div> */}
 
         {/* Tax */}
-        <div>
+        {/* <div>
           <label htmlFor="tax" className="block font-medium mb-1">
             Tax
           </label>
@@ -183,7 +183,7 @@ const EditInvoicePage = ({ invoiceId }: { invoiceId: string }) => {
           {formik.touched.tax && formik.errors.tax ? (
             <div className="text-red-500">{formik.errors.tax}</div>
           ) : null}
-        </div>
+        </div> */}
 
         {/* Total Amount */}
         <div>
