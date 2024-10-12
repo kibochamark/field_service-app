@@ -4,19 +4,13 @@ import {
   ChevronDownIcon,
   Clipboard,
   Home,
-  ListVideo,
-  Loader,
-  Menu,
-  Mic2,
-  Music,
   NotebookPen,
-  Play,
-  RadioIcon,
-  SquareStack,
-  User,
-  UserPen,
   Users,
   Workflow,
+  List,
+  CheckSquare,
+  Loader,
+  UserPen,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,7 +24,7 @@ type Menu = {
   name: string;
   icon: React.ReactNode;
   submenu?: Submenu[];
-  href: string;
+  href?: string;
 };
 
 type Submenu = {
@@ -38,8 +32,8 @@ type Submenu = {
   icon: React.ReactNode;
   href: string;
 };
+
 const TestSidebar = () => {
-  // get pathname
   const pathname = usePathname();
   const menus: Menu[] = [
     {
@@ -64,22 +58,37 @@ const TestSidebar = () => {
       label: "Job",
       name: "Job Management",
       icon: <Clipboard size={24} className="" />,
-      href: "/callpro/jobs",
+      submenu: [
+        {
+          name: "Jobs",
+          icon: <List size={18} className="mr-2" />,
+          href: "/callpro/jobs",
+        },
+        {
+          name: "Workflow",
+          icon: <CheckSquare size={18} className="mr-2" />,
+          href: "/callpro/jobworkflow",
+        },
+      ],
     },
     {
-        label: "invoice",
-        name: "Invoices",
-        icon: <NotebookPen className=""  />,
-
-        href: "/callpro/invoice",
+      label: "invoice",
+      name: "Invoices",
+      icon: <NotebookPen className="" />,
+      href: "/callpro/invoice",
     },
     {
       label: "workflow",
-      name: "Workflow",
-      icon: <Workflow  className=""  />,
-
+      name: "Work Flow",
+      icon: <Workflow className="" />,
       href: "/callpro/workflow",
-  },
+    },
+    {
+      label: "workflow",
+      name: "Technician",
+      icon: <Workflow className="" />,
+      href: "/callpro/technician",
+    },
 
     // {
     //     label: "Library",
@@ -99,16 +108,16 @@ const TestSidebar = () => {
     //     icon: <Mic2 size={15} className="mr-2" />,
     //     href: "/home/",
     // },
+    // {
+    //   name: "Workflow",
+    //   icon: <Workflow className="" />,
+    //   href: "/callpro/workflow",
+    // }
   ];
 
-  // retrieve user session
-
   const { data: session } = useSession();
-
-  // retrieve sidebar state to handle small screen navigation
   const isopen = useSelector((state: RootState) => state.sidebar.isopen);
   const dispatch = useDispatch();
-
   const uniqueLabels = Array.from(new Set(menus.map((menu) => menu.label)));
 
   return (
@@ -116,34 +125,21 @@ const TestSidebar = () => {
       <div className="flex h-screen flex-col w-full justify-between md:border-e bg-white">
         <div className="md:px-4 lg:py-20">
           <ul className="mt-6 space-y-4">
-            {uniqueLabels.map((label, index) =>
+            {uniqueLabels.map((label) =>
               menus
                 .filter((menu) => menu.label === label)
                 .map((menu) =>
                   menu.submenu && menu.submenu.length > 0 ? (
                     <li key={menu.name}>
-                      <details className="group [&_summary::-webkit-details-marker]:hidden">
+                      <details className="group [&_summary::-webkit-details-marker]:hidden" open={menu.submenu.some(sub => pathname.includes(sub.href))}>
                         <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                           <span className="text-sm text-gray-700 font-medium flex items-center justify-center gap-4">
-                            {menu.icon} {menu.name}{" "}
+                            {menu.icon} {menu.name}
                           </span>
-
                           <span className="shrink-0 transition duration-300 group-open:-rotate-180">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="size-5"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
+                            <ChevronDownIcon size={16} />
                           </span>
                         </summary>
-
                         <ul className="mt-2 space-y-1 px-4">
                           {menu.submenu.map((submenu, idx) => (
                             <li key={idx}>
@@ -152,11 +148,10 @@ const TestSidebar = () => {
                                 onClick={() => {
                                   isopen && dispatch(handleOpen());
                                 }}
-                                className={`rounded-lg flex items-start gap-4 justify-start hover:bg-gray-100 transition-all duration-500  px-4 py-2 text-sm font-medium ${
-                                  pathname.includes(menu.href)
+                                className={`rounded-lg flex items-start gap-4 justify-start hover:bg-gray-100 transition-all duration-500 px-4 py-2 text-sm font-medium ${pathname.includes(submenu.href)
                                     ? "bg-primary500 hover:bg-primary400 text-white"
                                     : ""
-                                }`}
+                                  }`}
                               >
                                 {submenu.icon} {submenu.name}
                               </Link>
@@ -166,17 +161,16 @@ const TestSidebar = () => {
                       </details>
                     </li>
                   ) : (
-                    <li>
+                    <li key={menu.name}>
                       <Link
-                        href={menu.href}
+                        href={menu.href ? menu.href : ""}
                         onClick={() => {
                           isopen && dispatch(handleOpen());
                         }}
-                        className={`rounded-lg flex items-center gap-4 justify-start hover:bg-gray-100 transition-all duration-500  px-4 py-2 text-sm font-medium ${
-                          pathname.includes(menu.href)
+                        className={`rounded-lg flex items-center gap-4 justify-start hover:bg-gray-100 transition-all duration-500 px-4 py-2 text-sm font-medium ${pathname.includes(menu.href ?? "")
                             ? "bg-primary500 hover:bg-primary400 text-white"
                             : ""
-                        }`}
+                          }`}
                       >
                         {menu.icon} {menu.name}
                       </Link>
@@ -189,9 +183,7 @@ const TestSidebar = () => {
 
         <div className="sticky inset-x-0 bottom-0 border-t border-gray-100">
           <Suspense
-            fallback={
-              <Loader className="animate animate-spin text-primary600" />
-            }
+            fallback={<Loader className="animate animate-spin text-primary600" />}
           >
             <div className="flex items-center gap-2 bg-white p-4 hover:bg-gray-50">
               <img
@@ -205,8 +197,7 @@ const TestSidebar = () => {
                   <strong className="block font-medium">
                     {session?.user?.name}
                   </strong>
-
-                  <span> {session?.user?.email} </span>
+                  <span>{session?.user?.email}</span>
                 </p>
               </div>
             </div>

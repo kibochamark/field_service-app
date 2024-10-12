@@ -179,9 +179,9 @@ export default function JobManagementSystem({
                       <Button variant="ghost" size="icon" onClick={() => handleDelete(job.id)}>
                         <Trash className="h-4 w-4 text-red-600" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      {/* <Button variant="ghost" size="icon">
                         <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
                     </TableCell>
                   </TableRow>
                 ))}

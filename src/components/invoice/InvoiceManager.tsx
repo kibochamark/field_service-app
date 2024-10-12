@@ -15,31 +15,27 @@ import { useRouter } from 'next/navigation'
 import { DataTable } from './data-table'
 import InvoiceColumns from './InvoiceColumns'
 import { useSession } from 'next-auth/react'
-
-interface InvoiceItem {
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
+interface Client {
+  firstName: string;
+  lastName: string;
 }
 
 interface Invoice {
-  _id: string;
-  jobId: string;
-  clientId: string;
-  technicianId?: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  tax: number;
-  totalAmount: number;
-  paymentStatus: string;
-  dueDate: string;
-  issueDate: string;
+  id: string;
+  client: Client;
+  job: string | null; // Assuming job can be a string or null
+  type: string;
   status: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  dueDate: string; // Consider using Date if you want to work with dates in a more structured way
+  issueDate: string; // Same as above
+  totalAmount: number;
 }
+
+interface InvoicesResponse {
+  message: string;
+  invoices: Invoice[];
+}
+
 
 // Mock functions for backend operations
 const mockCreateInvoice = async (invoice: Partial<Invoice>): Promise<Invoice> => {
@@ -55,43 +51,6 @@ const mockCreateInvoice = async (invoice: Partial<Invoice>): Promise<Invoice> =>
 
 
 
-const mockFetchInvoices = async (): Promise<Invoice[]> => {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return [
-    {
-      _id: '1',
-      jobId: 'JOB001',
-      clientId: 'CLIENT001',
-      items: [{ description: 'Service', quantity: 1, unitPrice: 100, total: 100 }],
-      subtotal: 100,
-      tax: 10,
-      totalAmount: 110,
-      paymentStatus: 'paid',
-      dueDate: '2023-07-01',
-      issueDate: '2023-06-01',
-      status: 'completed',
-      createdAt: '2023-06-01',
-      updatedAt: '2023-06-01',
-    },
-    {
-      _id: '2',
-      jobId: 'JOB002',
-      clientId: 'CLIENT002',
-      items: [{ description: 'Product', quantity: 2, unitPrice: 50, total: 100 }],
-      subtotal: 100,
-      tax: 10,
-      totalAmount: 110,
-      paymentStatus: 'pending',
-      dueDate: '2023-07-15',
-      issueDate: '2023-06-15',
-      status: 'sent',
-      createdAt: '2023-06-15',
-      updatedAt: '2023-06-15',
-    },
-    // Add more mock invoices as needed
-  ];
-}
 
 const mockFetchDashboardMetrics = async (): Promise<{
   overdueAmount: number;
@@ -111,7 +70,7 @@ const mockFetchDashboardMetrics = async (): Promise<{
   };
 }
 
-export default function EnhancedInvoiceManager() {
+export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -127,27 +86,18 @@ export default function EnhancedInvoiceManager() {
 
   const router = useRouter();
 
+  // console.log(getInvoice, "----------------getInvoice server page client-----------------------");
+  
+
   //session
   const { data: session } = useSession()
 
 
   useEffect(() => {
-    fetchInvoices();
     fetchDashboardMetrics();
   }, []);
 
-  const fetchInvoices = async () => {
-    try {
-      const invoices = await mockFetchInvoices();
-      setAllInvoices(invoices);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch invoices. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   const fetchDashboardMetrics = async () => {
     try {
@@ -162,7 +112,6 @@ export default function EnhancedInvoiceManager() {
     }
   };
 
-  // const handleCreate = async () => {
   //   setIsCreating(true);
   //   try {
   //     const newInvoice = await mockCreateInvoice({
@@ -284,43 +233,11 @@ export default function EnhancedInvoiceManager() {
           <CardTitle>All Invoices</CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable columns={InvoiceColumns} data={allInvoices} />
-          {/* <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Invoice ID</TableHead>
-                <TableHead>Client ID</TableHead>
-                <TableHead>Total Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allInvoices.map((inv) => (
-                <TableRow key={inv._id}>
-                  <TableCell>{inv._id}</TableCell>
-                  <TableCell>{inv.clientId}</TableCell>
-                  <TableCell>${inv.totalAmount.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant={inv.status === 'completed' ? 'default' : 'secondary'}>
-                      {inv.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{format(new Date(inv.dueDate), 'PP')}</TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => setInvoice(inv)}>
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table> */}
+          <DataTable columns={InvoiceColumns} data={getInvoice?.invoices || []} />
+          
         </CardContent>
       </Card>
 
-      {/* Selected Invoice Details */}
      
     </div>
   )
