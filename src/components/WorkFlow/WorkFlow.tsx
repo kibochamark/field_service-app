@@ -157,11 +157,8 @@ export default function WorkFlow() {
             </TabsTrigger>
           ))}
         </TabsList>
-        {jobs.map((job) => (
-          <TabsContent key={job.id} value={job.id}>
-            <DataTable data={job.steps} columns={WorkFlowColumn} />
-          </TabsContent>
-        ))}
+        {/* <JobWorkflow currentStatus={"DRAFT"}/> */}
+        
       </Tabs>
     </div>
   );
