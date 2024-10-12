@@ -77,7 +77,7 @@ export default function JobWorkflow({ jobWorkflowData }: { jobWorkflowData: JobW
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center">Job Workflow Dashboard</h1>
+        <h1 className="flex justify-start text-4xl font-bold mb-8 text-center">Job Workflow Dashboard</h1>
         
         <div className="mb-6">
           <Select
