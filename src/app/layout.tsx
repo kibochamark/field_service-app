@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat } from "next/font/google";
+import { IBM_Plex_Serif, Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 
 import { cn } from "@/lib/utils";
@@ -10,13 +10,18 @@ import { AutoLogoutProvider } from "@/utils/AutoLogout";
 import NextAuthProvider from "./NexAuthProvider";
 import ReactReduxProvider from "./ReactReduxProvider";
 
-const inter = Inter({ subsets: ["latin"] });
-const montserrat = Montserrat({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable:'--font-inter' });
 
 export const metadata: Metadata = {
   title: "Field Service Management",
   description: "Field Service Management",
 };
+
+const ibmPlexSerif = IBM_Plex_Serif({
+  subsets:["latin"],
+  weight:['400', '700'],
+  variable:'--font-ibm-plex-serif'
+})
 
 export default function RootLayout({
   children,
@@ -24,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={montserrat.className}>
+    <html lang="en" className={`${inter.variable} ${ibmPlexSerif.variable} antialiased`} suppressHydrationWarning>
       <body className={cn("min-h-screen")}>
         <main className="text-bodyLarge">
 
