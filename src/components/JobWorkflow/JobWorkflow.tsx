@@ -9,47 +9,39 @@ import { CheckCircle2, Circle, Clock, FileCheck, FileClock, FileEdit, XCircle, C
 
 type JobStatus = "CREATED" | "ASSIGNED" | "SCHEDULED" | "ONGOING" | "COMPLETED" | "CANCELED"
 
-interface TimelineItem {
+interface Step {
+  id: string
+  workflowId: string
   status: JobStatus
-  timestamp: string
-  description: string
-  assignee?: string
-  notes?: string[]
+  createdAt: string
+  updatedAt: string
 }
 
-const jobTimeline: TimelineItem[] = [
-  { 
-    status: "CREATED", 
-    timestamp: "2023-05-01 09:00", 
-    description: "Job request submitted",
-    notes: ["Client requested urgent service", "Initial budget approved"]
-  },
-  { 
-    status: "ASSIGNED", 
-    timestamp: "2023-05-01 10:30", 
-    description: "Assigned to John Doe",
-    assignee: "John Doe",
-    notes: ["John Doe accepted the assignment", "Preliminary materials sent to John"]
-  },
-  { 
-    status: "SCHEDULED", 
-    timestamp: "2023-05-02 14:00", 
-    description: "Scheduled for May 5th",
-    notes: ["Client confirmed availability", "Resources allocated for the job"]
-  },
-  { 
-    status: "ONGOING", 
-    timestamp: "2023-05-05 09:00", 
-    description: "Work in progress",
-    notes: ["Phase 1 completed", "Encountered minor setback, resolved within an hour"]
-  },
-  { 
-    status: "COMPLETED", 
-    timestamp: "2023-05-05 17:00", 
-    description: "All tasks finished",
-    notes: ["Final inspection passed", "Client signed off on deliverables"]
-  },
-]
+interface Technician {
+  id: string
+  firstName: string
+  lastName: string
+}
+
+interface Job {
+  id: string
+  name: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  technicians: { technician: Technician }[]
+}
+
+interface JobWorkflowData {
+  id: string
+  type: string
+  jobId: string
+  subscriptionId: string | null
+  createdAt: string
+  updatedAt: string
+  Steps: Step[]
+  job: Job
+}
 
 const statusIcons: Record<JobStatus, React.ReactNode> = {
   CREATED: <FileEdit className="h-6 w-6" />,
@@ -69,21 +61,45 @@ const statusColors: Record<JobStatus, string> = {
   CANCELED: "bg-red-500",
 }
 
-export default function JobWorkflow() {
-  const [currentStatusIndex, setCurrentStatusIndex] = useState(3) // Assuming "ONGOING" is the current status
+export default function JobWorkflow({ jobWorkflowData }: { jobWorkflowData: JobWorkflowData[] }) {
+  const [selectedWorkflowIndex, setSelectedWorkflowIndex] = useState(0)
+  const [currentStatusIndex, setCurrentStatusIndex] = useState(0)
+
+  const selectedWorkflow = jobWorkflowData[selectedWorkflowIndex]
+  const currentStep = selectedWorkflow.Steps[currentStatusIndex]
 
   const handlePrevStatus = () => {
     setCurrentStatusIndex((prev) => Math.max(0, prev - 1))
   }
 
   const handleNextStatus = () => {
-    setCurrentStatusIndex((prev) => Math.min(jobTimeline.length - 1, prev + 1))
+    setCurrentStatusIndex((prev) => Math.min(selectedWorkflow.Steps.length - 1, prev + 1))
+  }
+
+  const handleWorkflowChange = (index: number) => {
+    setSelectedWorkflowIndex(index)
+    setCurrentStatusIndex(0)
   }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">Job Workflow Dashboard</h1>
+        
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold mb-4">Select Job Workflow</h2>
+          <div className="flex flex-wrap gap-4">
+            {jobWorkflowData.map((workflow, index) => (
+              <Button
+                key={workflow.id}
+                variant={selectedWorkflowIndex === index ? "default" : "outline"}
+                onClick={() => handleWorkflowChange(index)}
+              >
+                {workflow.job.name}
+              </Button>
+            ))}
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
@@ -95,11 +111,11 @@ export default function JobWorkflow() {
                 <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2" />
                 <div
                   className="absolute top-1/2 left-0 h-1 bg-blue-500 -translate-y-1/2 transition-all duration-500 ease-in-out"
-                  style={{ width: `${((currentStatusIndex + 1) / jobTimeline.length) * 100}%` }}
+                  style={{ width: `${((currentStatusIndex + 1) / selectedWorkflow.Steps.length) * 100}%` }}
                 />
                 <div className="relative flex justify-between">
-                  {jobTimeline.map((item, index) => (
-                    <TooltipProvider key={index}>
+                  {selectedWorkflow.Steps.map((step, index) => (
+                    <TooltipProvider key={step.id}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div
@@ -109,12 +125,12 @@ export default function JobWorkflow() {
                           >
                             <div
                               className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                statusColors[item.status]
+                                statusColors[step.status]
                               } ${index <= currentStatusIndex ? "ring-4 ring-offset-2 ring-blue-300" : ""}`}
                             >
-                              {statusIcons[item.status]}
+                              {statusIcons[step.status]}
                             </div>
-                            <div className="mt-2 text-sm font-medium">{item.status}</div>
+                            <div className="mt-2 text-sm font-medium">{step.status}</div>
                             {index === currentStatusIndex && (
                               <Badge variant="outline" className="mt-1">
                                 Current
@@ -123,8 +139,8 @@ export default function JobWorkflow() {
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{item.description}</p>
-                          <p className="text-xs text-gray-500">{item.timestamp}</p>
+                          <p>{step.status}</p>
+                          <p className="text-xs text-gray-500">{new Date(step.createdAt).toLocaleString()}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -135,7 +151,7 @@ export default function JobWorkflow() {
                 <Button variant="outline" onClick={handlePrevStatus} disabled={currentStatusIndex === 0}>
                   <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                 </Button>
-                <Button variant="outline" onClick={handleNextStatus} disabled={currentStatusIndex === jobTimeline.length - 1}>
+                <Button variant="outline" onClick={handleNextStatus} disabled={currentStatusIndex === selectedWorkflow.Steps.length - 1}>
                   Next <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -149,24 +165,28 @@ export default function JobWorkflow() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${statusColors[jobTimeline[currentStatusIndex].status]}`}>
-                    {statusIcons[jobTimeline[currentStatusIndex].status]}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${statusColors[currentStep.status]}`}>
+                    {statusIcons[currentStep.status]}
                   </div>
                   <div>
-                    <h3 className="font-semibold">{jobTimeline[currentStatusIndex].status}</h3>
-                    <p className="text-sm text-gray-500">{jobTimeline[currentStatusIndex].timestamp}</p>
+                    <h3 className="font-semibold">{currentStep.status}</h3>
+                    <p className="text-sm text-gray-500">{new Date(currentStep.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
-                <p>{jobTimeline[currentStatusIndex].description}</p>
-                {jobTimeline[currentStatusIndex].assignee && (
+                <p>{selectedWorkflow.job.description}</p>
+                {selectedWorkflow.job.technicians.length > 0 && (
                   <div className="flex items-center space-x-2">
                     <User className="h-5 w-5 text-gray-500" />
-                    <span>{jobTimeline[currentStatusIndex].assignee}</span>
+                    <span>
+                      {selectedWorkflow.job.technicians.map(({ technician }) => 
+                        `${technician.firstName} ${technician.lastName}`
+                      ).join(", ")}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-5 w-5 text-gray-500" />
-                  <span>Due: May 10, 2023</span>
+                  <span>Created: {new Date(selectedWorkflow.job.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </CardContent>
@@ -177,27 +197,44 @@ export default function JobWorkflow() {
               <CardTitle>Job Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="notes">
+              <Tabs defaultValue="timeline">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="notes">Notes</TabsTrigger>
-                  <TabsTrigger value="documents">Documents</TabsTrigger>
-                  <TabsTrigger value="communication">Communication</TabsTrigger>
+                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                  <TabsTrigger value="technicians">Technicians</TabsTrigger>
+                  <TabsTrigger value="details">Details</TabsTrigger>
                 </TabsList>
-                <TabsContent value="notes">
+                <TabsContent value="timeline">
                   <div className="space-y-4">
-                    {jobTimeline[currentStatusIndex].notes?.map((note, index) => (
-                      <div key={index} className="flex items-start space-x-2">
-                        <MessageSquare className="h-5 w-5 text-gray-500 mt-1" />
-                        <p>{note}</p>
+                    {selectedWorkflow.Steps.map((step, index) => (
+                      <div key={step.id} className="flex items-start space-x-2">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${statusColors[step.status]}`}>
+                          {statusIcons[step.status]}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{step.status}</p>
+                          <p className="text-sm text-gray-500">{new Date(step.createdAt).toLocaleString()}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </TabsContent>
-                <TabsContent value="documents">
-                  <p>Relevant documents will be displayed here.</p>
+                <TabsContent value="technicians">
+                  <div className="space-y-4">
+                    {selectedWorkflow.job.technicians.map(({ technician }) => (
+                      <div key={technician.id} className="flex items-center space-x-2">
+                        <User className="h-5 w-5 text-gray-500" />
+                        <span>{technician.firstName} {technician.lastName}</span>
+                      </div>
+                    ))}
+                  </div>
                 </TabsContent>
-                <TabsContent value="communication">
-                  <p>Communication history will be shown here.</p>
+                <TabsContent value="details">
+                  <div className="space-y-2">
+                    <p><strong>Job Name:</strong> {selectedWorkflow.job.name}</p>
+                    <p><strong>Description:</strong> {selectedWorkflow.job.description}</p>
+                    <p><strong>Created:</strong> {new Date(selectedWorkflow.job.createdAt).toLocaleString()}</p>
+                    <p><strong>Last Updated:</strong> {new Date(selectedWorkflow.job.updatedAt).toLocaleString()}</p>
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
