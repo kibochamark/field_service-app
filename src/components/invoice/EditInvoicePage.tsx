@@ -59,7 +59,7 @@ const EditInvoicePage = ({ invoiceId }: { invoiceId: string }) => {
             },
           });
           const data = response.data.invoice[0];
-          console.log(data, "Invoice data");
+          //console.log(data, "Invoice data");
 
           // Ensure date fields are formatted properly
           setInitialValues({

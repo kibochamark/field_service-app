@@ -219,8 +219,8 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
 
       {/* Create New Invoice Button */}
       {session?.user.role === "business owner" ||  session?.user.role === "business admin" ?(
-        <div className="mb-6">
-        <Button onClick={handleCreate} disabled={isCreating}>
+        <div className=" flex justify-end mb-6">
+        <Button onClick={handleCreate} disabled={isCreating} className='bg-primary800'>
           <Plus className="mr-2 h-4 w-4" /> Create New Invoice
         </Button>
       </div>
