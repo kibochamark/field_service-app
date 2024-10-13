@@ -67,24 +67,37 @@ const TestSidebar = () => {
       href: "/callpro/jobs",
     },
     {
-        label: "invoice",
-        name: "Invoices",
-        icon: <NotebookPen className=""  />,
-
-        href: "/callpro/invoice",
+      label: "invoice",
+      name: "Invoices",
+      icon: <NotebookPen className="" />,
+      href: "/callpro/invoice",
+      // submenu: [
+      //   {
+      //     name: "Work Flow",
+      //     icon: <Workflow className="" />,
+      //     href: "/callpro/workflow",
+      //   },
+      // ],
     },
     {
       label: "workflow",
-      name: "Work Flow",
-      icon: <Workflow  className=""  />,
+      name: " Invoice Work Flow",
+      icon: <Workflow className="" />,
       href: "/callpro/workflow",
-  },
-  {
-    label: "workflow",
-    name: "Technician",
-    icon: <Workflow  className=""  />,
-    href: "/callpro/technician",
-},
+    },
+    {
+      label: "technicianworkflow",
+      name: "Workflow Technician",
+      icon: <Workflow className="" />,
+      href: "/callpro/technician/technicianworkflow",
+    },    
+
+    {
+      label: "technician",
+      name: "Technician",
+      icon: <Workflow className="" />,
+      href: "/callpro/technician",
+    },
 
     // {
     //     label: "Library",
