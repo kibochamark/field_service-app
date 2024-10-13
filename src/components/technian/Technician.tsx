@@ -76,7 +76,7 @@ export default function Technician() {
 
   const acceptJob = async (jobId: string) => {
     try {
-      const response = await fetch(`${baseUrl}${jobId}/updatejobstatus`, {
+      const response = await fetch(baseUrl + `/${jobId}/updatejobstatus`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export default function Technician() {
 
   const updateJobStatus = async (jobId: string, newStatus: string) => {
     try {
-      const response = await fetch(`${baseUrl}${jobId}/updatejobstatus`, {
+      const response = await fetch(baseUrl + `/${jobId}/updatejobstatus`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
