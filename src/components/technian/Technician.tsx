@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MapPinIcon, ClockIcon, CheckCircleIcon, CircleIcon } from "lucide-react";
 import { getTechicianJob } from "./ServerAction";
 import { useSession } from "next-auth/react";
+import { baseUrl } from "@/utils/constants";
 
 interface Job {
   id: string;
@@ -75,7 +76,7 @@ export default function Technician() {
 
   const acceptJob = async (jobId: string) => {
     try {
-      const response = await fetch(`https://field-service-management.vercel.app/api/v1/${jobId}/updatejobstatus`, {
+      const response = await fetch(`${baseUrl}${jobId}/updatejobstatus`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +102,7 @@ export default function Technician() {
 
   const updateJobStatus = async (jobId: string, newStatus: string) => {
     try {
-      const response = await fetch(`https://field-service-management.vercel.app/api/v1/${jobId}/updatejobstatus`, {
+      const response = await fetch(`${baseUrl}${jobId}/updatejobstatus`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
