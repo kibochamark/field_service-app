@@ -80,22 +80,27 @@ export default function JobWorkflow({ jobWorkflowData }: { jobWorkflowData: JobW
         <h1 className="flex justify-start text-4xl font-bold mb-8 text-center">Job Workflow Dashboard</h1>
         
         <div className="mb-6">
-          <Select
-            value={selectedWorkflowId}
-            onValueChange={(value) => setSelectedWorkflowId(value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a job" />
-            </SelectTrigger>
-            <SelectContent>
-              {jobWorkflowData.map((workflow) => (
-                <SelectItem key={workflow.id} value={workflow.id}>
-                  {workflow.job.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+  <label id="job-select-label" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+    Select a job to view its workflow
+  </label>
+  <Select
+    value={selectedWorkflowId}
+    onValueChange={(value) => setSelectedWorkflowId(value)}
+    aria-labelledby="job-select-label"
+  >
+    <SelectTrigger className="w-full">
+      <SelectValue placeholder="Select a job" />
+    </SelectTrigger>
+    <SelectContent>
+      {jobWorkflowData.map((workflow) => (
+        <SelectItem key={workflow.id} value={workflow.id}>
+          {workflow.job.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
+
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
