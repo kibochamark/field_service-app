@@ -1,13 +1,13 @@
 import { getJobWorkflow } from "@/components/JobWorkflow/JobWorkActions";
 import JobWorkflow from "@/components/JobWorkflow/JobWorkflow";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const JobWorkflowPage = async () => {
-  const jobWorkflowData = await getJobWorkflow(); 
-  console.log(jobWorkflowData, "jobWorkflowData"); // Log the data received
+  const jobWorkflowData = await getJobWorkflow();
+  console.log(jobWorkflowData, "jobWorkflowData");
 
   return (
-    <div>      
+    <div>
       <JobWorkflow jobWorkflowData={jobWorkflowData} />
     </div>
   );

@@ -46,6 +46,8 @@ interface JobWorkflowData {
 
 const allSteps: JobStatus[] = ["CREATED", "ASSIGNED", "SCHEDULED", "ONGOING", "COMPLETED", "CANCELED"]
 
+
+
 const statusIcons: Record<JobStatus, React.ReactNode> = {
   CREATED: <FileEdit className="h-6 w-6" />,
   ASSIGNED: <FileClock className="h-6 w-6" />,
@@ -65,14 +67,25 @@ const statusColors: Record<JobStatus, string> = {
 }
 
 export default function JobWorkflow({ jobWorkflowData }: { jobWorkflowData: JobWorkflowData[] }) {
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState(jobWorkflowData[0]?.id || "")
+  if (!jobWorkflowData || jobWorkflowData.length === 0) {
+    return <div>No job workflows available</div>; // Handle the case where no data is available
+  }
 
-  const selectedWorkflow = useMemo(() => 
-    jobWorkflowData.find(workflow => workflow.id === selectedWorkflowId) || jobWorkflowData[0],
-  [selectedWorkflowId, jobWorkflowData])
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState(jobWorkflowData[0]?.id || "");
 
-  const currentStep = selectedWorkflow.Steps[selectedWorkflow.Steps.length - 1]
-  const currentStepIndex = allSteps.indexOf(currentStep.status)
+  const selectedWorkflow = useMemo(
+    () => jobWorkflowData.find((workflow) => workflow.id === selectedWorkflowId) || jobWorkflowData[0],
+    [selectedWorkflowId, jobWorkflowData]
+  );
+
+  // Add fallback for cases where job or Steps might be undefined
+  const currentStep = selectedWorkflow?.Steps?.[selectedWorkflow?.Steps?.length - 1] || {
+    status: 'CREATED',
+    createdAt: new Date().toISOString(),
+  };
+
+  const currentStepIndex = allSteps.indexOf(currentStep.status);
+  
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
