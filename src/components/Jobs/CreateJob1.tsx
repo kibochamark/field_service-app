@@ -136,6 +136,7 @@ export default function JobManagement({
     },
   });
 
+
   const router = useRouter();
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
@@ -574,13 +575,18 @@ export default function JobManagement({
                 <SelectTrigger>
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
-                <SelectContent>
-                  {jobtype.map((type: any) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+             <SelectContent>
+  {Array.isArray(jobtype) ? (
+    jobtype.map((type: any) => (
+      <SelectItem key={type.id} value={type.id}>
+        {type.name}
+      </SelectItem>
+    ))
+  ) : (
+    <div>No job types available</div> // Fallback in case jobtype is not an array or is empty
+  )}
+</SelectContent>
+
               </Select>
             </div>
             <div>
