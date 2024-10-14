@@ -63,7 +63,7 @@ export default function JobManagementSystem({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "SCHEDULED": return <Calendar className="h-4 w-4 text-blue-500" />;
-      case "ONGOING": return <Clock className="h-4 w-4 text-yellow-500" />;
+      case "INPROGRESS": return <Clock className="h-4 w-4 text-yellow-500" />;
       case "COMPLETED": return <CheckCircle className="h-4 w-4 text-green-500" />;
       case "CANCELLED": return <XCircle className="h-4 w-4 text-red-500" />;
       case "CREATED": return <PenIcon className="h-4 w-4 text-green-500" />;
@@ -89,7 +89,7 @@ export default function JobManagementSystem({
       </div>
       
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-6">
-        {["All", "SCHEDULED", "ONGOING", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
+        {["All", "SCHEDULED", "INPROGRESS", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
           <Card key={status} className={`${filterStatus === status ? 'bg-blue-100 border-blue-300' : 'bg-white'}`}>
             <CardHeader className="p-4">
               <CardTitle className="text-lg font-semibold flex items-center justify-between">
@@ -128,7 +128,7 @@ export default function JobManagementSystem({
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                {["All", "ASSIGNED", "ONGOING", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
+                {["All", "ASSIGNED", "INPROGRESS", "COMPLETED", "CANCELLED", "CREATED"].map((status) => (
                   <SelectItem key={status} value={status}>{status}</SelectItem>
                 ))}
               </SelectContent>
