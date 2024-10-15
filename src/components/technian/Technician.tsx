@@ -1,11 +1,23 @@
-"use client"; 
+"use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shadcn/ui/card";
 import { Button } from "@/shadcn/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/ui/table";
-import { MapPinIcon, ClockIcon, CheckCircleIcon, CircleIcon } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shadcn/ui/table";
+import {
+  MapPinIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  CircleIcon,
+} from "lucide-react";
 import { getTechicianJob } from "./ServerAction";
 import { useSession } from "next-auth/react";
 import { baseUrl } from "@/utils/constants";
@@ -32,7 +44,7 @@ interface Job {
 }
 
 export default function Technician() {
-  const router = useRouter(); 
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("assigned");
   const [jobs, setJobs] = useState<Job[]>([]);
   const { data: session } = useSession();
@@ -48,20 +60,20 @@ export default function Technician() {
             id: job.id,
             name: job.name,
             client: {
-              firstName: job.clients.firstName || 'Unknown First Name', // fallback to 'Unknown First Name' if firstName is undefined or null
-              lastName: job.clients.lastName || 'Unknown Last Name',    // fallback to 'Unknown Last Name' if lastName is undefined or null
-              email: job.clients.email || 'Unknown Email',              // fallback to 'Unknown Email' if email is undefined or null
+              firstName: job.clients.firstName || "Unknown First Name", // fallback to 'Unknown First Name' if firstName is undefined or null
+              lastName: job.clients.lastName || "Unknown Last Name", // fallback to 'Unknown Last Name' if lastName is undefined or null
+              email: job.clients.email || "Unknown Email", // fallback to 'Unknown Email' if email is undefined or null
             },
             location: {
-              city: job.location?.city || 'Unknown City', // fallback to 'Unknown City' if city is undefined or null
-              zip: job.location?.zip || 'Unknown Zip',    // fallback to 'Unknown Zip' if zip is undefined or null
-              state: job.location?.state || 'Unknown State', // fallback to 'Unknown State' if state is undefined or null
+              city: job.location?.city || "Unknown City", // fallback to 'Unknown City' if city is undefined or null
+              zip: job.location?.zip || "Unknown Zip", // fallback to 'Unknown Zip' if zip is undefined or null
+              state: job.location?.state || "Unknown State", // fallback to 'Unknown State' if state is undefined or null
             },
             scheduled: {
-              startDate: job.jobschedule.startDate || 'Unknown Start Date', // fallback to 'Unknown Start Date' if startDate is undefined or null
-              endDate: job.jobschedule.endDate || 'Unknown End Date',         // fallback to 'Unknown End Date' if endDate is undefined or null
+              startDate: job.jobschedule.startDate || "Unknown Start Date", // fallback to 'Unknown Start Date' if startDate is undefined or null
+              endDate: job.jobschedule.endDate || "Unknown End Date", // fallback to 'Unknown End Date' if endDate is undefined or null
             },
-            status: job.status || 'Unknown Status', // fallback to 'Unknown Status' if status is undefined or null
+            status: job.status || "Unknown Status", // fallback to 'Unknown Status' if status is undefined or null
           }));
           setJobs(formattedJobs);
         } else {
@@ -77,17 +89,19 @@ export default function Technician() {
   const acceptJob = async (jobId: string) => {
     try {
       const response = await fetch(baseUrl + `/${jobId}/updatejobstatus`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${session?.user.access_token}`,
         },
-        body: JSON.stringify({ status: 'ACCEPTED' }),
+        body: JSON.stringify({ status: "ACCEPTED" }),
       });
 
       if (response.ok) {
         setJobs((prevJobs) =>
-          prevJobs.map((job) => (job.id === jobId ? { ...job, status: 'ACCEPTED' } : job))
+          prevJobs.map((job) =>
+            job.id === jobId ? { ...job, status: "ACCEPTED" } : job
+          )
         );
 
         // Redirect to the accepted jobs tab
@@ -102,10 +116,10 @@ export default function Technician() {
 
   const updateJobStatus = async (jobId: string, newStatus: string) => {
     try {
-      const response = await fetch(baseUrl + `/${jobId}/updatejobstatus`, {
-        method: 'PATCH',
+      const response = await fetch(baseUrl + `${jobId}/updatejobstatus`, {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${session?.user.access_token}`,
         },
         body: JSON.stringify({ status: newStatus }),
@@ -114,11 +128,17 @@ export default function Technician() {
       if (response.ok) {
         // Update the job status in the state
         setJobs((prevJobs) =>
-          prevJobs.map((job) => (job.id === jobId ? { ...job, status: newStatus } : job))
+          prevJobs.map((job) =>
+            job.id === jobId ? { ...job, status: newStatus } : job
+          )
         );
 
         // Redirect to the technician workflow page
-        if (newStatus === 'COMPLETED' || newStatus === 'ONGOING' || newStatus === 'ACCEPTED') {
+        if (
+          newStatus === "COMPLETED" ||
+          newStatus === "ONGOING" ||
+          newStatus === "ACCEPTED"
+        ) {
           router.push(`/callpro/technician/technicianworkflow/${jobId}`);
         }
       } else {
@@ -130,7 +150,12 @@ export default function Technician() {
   };
 
   const assignedJobs = jobs.filter((job) => job.status === "SCHEDULED");
-  const acceptedJobs = jobs.filter((job) => job.status === "ACCEPTED" || job.status === "ONGOING" || job.status === "COMPLETED");
+  const acceptedJobs = jobs.filter(
+    (job) =>
+      job.status === "ACCEPTED" ||
+      job.status === "ONGOING" ||
+      job.status === "COMPLETED"
+  );
 
   const totalAssigned = assignedJobs.length;
   const inProgress = jobs.filter((job) => job.status === "ONGOING").length;
@@ -143,7 +168,9 @@ export default function Technician() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assigned</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Assigned
+            </CardTitle>
             <CircleIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -185,10 +212,12 @@ export default function Technician() {
                   </CardHeader>
                   <CardContent>
                     <p>
-                      <strong>Client:</strong> {job.client.firstName} {job.client.lastName}
+                      <strong>Client:</strong> {job.client.firstName}{" "}
+                      {job.client.lastName}
                     </p>
                     <p>
-                      <strong>Location:</strong> {job.location.city}, {job.location.state} {job.location.zip}
+                      <strong>Location:</strong> {job.location.city},{" "}
+                      {job.location.state} {job.location.zip}
                       <a
                         href={job.mapLink}
                         target="_blank"
@@ -199,7 +228,8 @@ export default function Technician() {
                       </a>
                     </p>
                     <p>
-                      <strong>Scheduled Time:</strong> {new Date(job.scheduled.startDate).toLocaleString()} -{" "}
+                      <strong>Scheduled Time:</strong>{" "}
+                      {new Date(job.scheduled.startDate).toLocaleString()} -{" "}
                       {new Date(job.scheduled.endDate).toLocaleString()}
                     </p>
                     <Button onClick={() => acceptJob(job.id)} className="mt-2">
@@ -238,26 +268,60 @@ export default function Technician() {
                       {job.client.firstName} {job.client.lastName}
                     </TableCell>
                     <TableCell>
-                      {job.location.city}, {job.location.state} {job.location.zip}
+                      {job.location.city}, {job.location.state}{" "}
+                      {job.location.zip}
                     </TableCell>
                     <TableCell>
                       {new Date(job.scheduled.startDate).toLocaleString()} -{" "}
                       {new Date(job.scheduled.endDate).toLocaleString()}
                     </TableCell>
-                    <TableCell>{job.status}</TableCell>
                     <TableCell>
                       {job.status === "ACCEPTED" && (
-                        <Button onClick={() => updateJobStatus(job.id, 'ONGOING')} className="mt-2">
+                        <div className="flex items-center text-blue-500">
+                          <CheckCircleIcon className="w-4 h-4 mr-2 text-blue-500" />
+                          <span>Accepted</span>
+                        </div>
+                      )}
+                      {job.status === "INPROGRESS" && (
+                        <div className="flex items-center text-yellow-500">
+                          <ClockIcon className="w-4 h-4 mr-2 text-yellow-500" />
+                          <span>Ongoing</span>
+                        </div>
+                      )}
+                      {job.status === "COMPLETED" && (
+                        <div className="flex items-center text-green-500">
+                          <CheckCircleIcon className="w-4 h-4 mr-2 text-green-500" />
+                          <span>Completed</span>
+                        </div>
+                      )}
+                    </TableCell>
+
+                    <TableCell>
+                      {job.status === "ACCEPTED" && (
+                        <Button
+                          onClick={() => updateJobStatus(job.id, "ONGOING")}
+                          className="mt-2 bg-primary700"
+                        >
                           Start Job
                         </Button>
                       )}
                       {job.status === "ONGOING" && (
-                        <Button onClick={() => updateJobStatus(job.id, 'COMPLETED')} className="mt-2">
+                        <Button
+                          onClick={() => updateJobStatus(job.id, "COMPLETED")}
+                          className="mt-2 bg-primary700"
+                        >
                           Complete Job
                         </Button>
                       )}
                       {job.status === "COMPLETED" && (
-                        <Button onClick={() => router.push(`/callpro/technician/technicianworkflow/${job.id}`)} className="mt-2">
+                        <Button
+                          onClick={() =>
+                            router.push(
+                              `/callpro/technician/technicianworkflow/${job.id}`
+                            )
+                          }
+                          className="mt-2 bg-primary700"
+                        >
                           View History
                         </Button>
                       )}
@@ -267,7 +331,7 @@ export default function Technician() {
               </TableBody>
             </Table>
           ) : (
-            <div className="flex w-full">
+            <div className="flex w-full bg-white rounded-md">
               <p className="flex w-full text-center mt-24 justify-center text-gray-800 text-muted-foreground">
                 You Have no Accepted Job
               </p>

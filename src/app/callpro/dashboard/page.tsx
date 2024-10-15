@@ -54,6 +54,7 @@ import {
 } from "@/shadcn/ui/table"
 import { auth } from "@/auth";
 import OwnerAdminDashboard from "@/components/RoleBasedDashboards/OwnerAdminDashboard";
+import { TechnicianDashboard } from "@/components/technian/TechnicianDashboard";
 
 
 const Page = async () => {
@@ -65,13 +66,16 @@ const Page = async () => {
   return (
 
     <div>
-      <Suspense fallback={
-        <div className="fle items-center justify-center">
-          <Loader className="text-primary800 animate animate-spin" />
-        </div>
-      }>
-        {(session?.user?.role === "business owner" || session?.user?.role === "business admin") && (
+
+      <Suspense >
+        {/* {(session?.user?.role === "business owner" || session?.user?.role === "business admin") && (
           <OwnerAdminDashboard />
+        )} */}
+        {session?.user?.role === "business owner" || session?.user?.role === "business admin" ?(
+          <OwnerAdminDashboard />
+        ): (
+          <TechnicianDashboard/>
+
         )}
 
       </Suspense>
