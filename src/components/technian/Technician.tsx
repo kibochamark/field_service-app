@@ -48,20 +48,20 @@ export default function Technician() {
             id: job.id,
             name: job.name,
             client: {
-              firstName: job.clients.firstName,
-              lastName: job.clients.lastName,
-              email: job.clients.email,
+              firstName: job.clients.firstName || 'Unknown First Name', // fallback to 'Unknown First Name' if firstName is undefined or null
+              lastName: job.clients.lastName || 'Unknown Last Name',    // fallback to 'Unknown Last Name' if lastName is undefined or null
+              email: job.clients.email || 'Unknown Email',              // fallback to 'Unknown Email' if email is undefined or null
             },
             location: {
-              city: job.location.city,
-              zip: job.location.zip,
-              state: job.location.state,
+              city: job.location?.city || 'Unknown City', // fallback to 'Unknown City' if city is undefined or null
+              zip: job.location?.zip || 'Unknown Zip',    // fallback to 'Unknown Zip' if zip is undefined or null
+              state: job.location?.state || 'Unknown State', // fallback to 'Unknown State' if state is undefined or null
             },
             scheduled: {
-              startDate: job.jobschedule.startDate,
-              endDate: job.jobschedule.endDate,
+              startDate: job.jobschedule.startDate || 'Unknown Start Date', // fallback to 'Unknown Start Date' if startDate is undefined or null
+              endDate: job.jobschedule.endDate || 'Unknown End Date',         // fallback to 'Unknown End Date' if endDate is undefined or null
             },
-            status: job.status,
+            status: job.status || 'Unknown Status', // fallback to 'Unknown Status' if status is undefined or null
           }));
           setJobs(formattedJobs);
         } else {

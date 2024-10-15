@@ -1,18 +1,18 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { FileText, UserPlus } from "lucide-react";
-import { Button } from "@/shadcn/ui/button";
+import { useEffect, useState } from "react"
+import { FileText, UserPlus } from "lucide-react"
+import { Button } from "@/shadcn/ui/button"
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/shadcn/ui/card";
-import { Input } from "@/shadcn/ui/input";
-import { Label } from "@/shadcn/ui/label";
-import { Textarea } from "@/shadcn/ui/textarea";
+} from "@/shadcn/ui/card"
+import { Input } from "@/shadcn/ui/input"
+import { Label } from "@/shadcn/ui/label"
+import { Textarea } from "@/shadcn/ui/textarea"
 import {
   Check,
   ChevronRight,
@@ -21,7 +21,7 @@ import {
   Edit,
   Send,
   User,
-} from "lucide-react";
+} from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/shadcn/ui/dialog";
+} from "@/shadcn/ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,32 +41,32 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/shadcn/ui/alert-dialog";
-import { baseUrl } from "@/utils/constants";
-import { getCustomers } from "../Customer/CustomerActions";
-import { useSession } from "next-auth/react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import { getClints } from "./ServerActions";
-import { searchNumbers } from "libphonenumber-js";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { revalidateTag } from "next/cache";
+} from "@/shadcn/ui/alert-dialog"
+import { baseUrl } from "@/utils/constants"
+import { getCustomers } from "../Customer/CustomerActions"
+import { useSession } from "next-auth/react"
+import { useFormik } from "formik"
+import * as Yup from "yup"
+import { Formik, Form, Field, ErrorMessage } from "formik"
+import { getClints } from "./ServerActions"
+import { searchNumbers } from "libphonenumber-js"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
+import { revalidateTag } from "next/cache"
 
 interface Client {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  topLevelId: string;
-  name: string;
-  description: string;
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  topLevelId: string
+  name: string
+  description: string
 }
 
 interface Data {
-  id: string; // Top-level ID
-  clients: Client;
+  id: string // Top-level ID
+  clients: Client
 }
 
 // Validation schema using Yup
@@ -80,44 +80,40 @@ const invoiceSchema = Yup.object().shape({
     .required("Subtotal is required"),
   tax: Yup.number().min(0, "Tax must be positive").required("Tax is required"),
   dueDate: Yup.date().required("Due date is required"),
-});
-// ClientSearch component
+})
 
+// ClientSearch component
 const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [clients, setClients] = useState<
     { client: Client; topLevelId: string; name: string; description: string }[]
-  >([]);
+  >([])
 
-  // Fetch clients on component mount
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await getClints(); // Assuming this fetches the API response
-        console.log(response, "API response");
+        const response = await getClints()
+        console.log(response, "API response")
 
-        // Check if response is an array and has valid client objects
         if (Array.isArray(response) && response.length > 0) {
-          // Map through response and extract the clients and top-level id
           const clientData = response.map((item: any) => ({
             client: item.clients,
             topLevelId: item.id,
             name: item.name,
             description: item.description,
-          }));
-          setClients(clientData);
+          }))
+          setClients(clientData)
         } else {
-          console.error("Invalid response format: ", response);
+          console.error("Invalid response format: ", response)
         }
       } catch (error) {
-        console.error("Error fetching clients: ", error);
+        console.error("Error fetching clients: ", error)
       }
-    };
-    fetchCustomers();
-  }, []);
+    }
+    fetchCustomers()
+  }, [])
 
-  // Filter clients based on the search term
   const filteredClients = clients.filter(
     ({ client }) =>
       client.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,25 +121,22 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
       client.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  )
 
   return (
-    <div className="relative w-4/12">
+    <div className="relative w-full md:w-4/12">
       <div className="flex items-center space-x-2">
         <Input
           type="text"
-          className="w-5/6"
+          className="w-full md:w-5/6"
           placeholder="Search clients..."
           value={searchTerm}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setIsDropdownOpen(true);
+            setSearchTerm(e.target.value)
+            setIsDropdownOpen(true)
           }}
           onFocus={() => setIsDropdownOpen(true)}
         />
-        {/* <Button size="icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-          <Search className="h-4 w-4" />
-        </Button> */}
       </div>
 
       {isDropdownOpen && (
@@ -153,17 +146,14 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
               key={client.id}
               className="p-2 hover:bg-accent cursor-pointer"
               onClick={() => {
-                onSelectClient({ ...client, topLevelId, name, description }); // Pass both client and topLevelId
-                setIsDropdownOpen(false);
-                setSearchTerm("");
+                onSelectClient({ ...client, topLevelId, name, description })
+                setIsDropdownOpen(false)
+                setSearchTerm("")
               }}
             >
               <div className="font-medium">
                 {client.firstName} {client.lastName}
               </div>
-              {/* <div className="text-sm text-muted-foreground">
-                Client ID: {client.id} | Job ID: {topLevelId}
-              </div> */}
               <div className="text-sm text-muted-foreground">
                 Email: {client.email}
               </div>
@@ -178,12 +168,12 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 // ClientInfo Component
-const ClientInfo = ({ client,name, description }: { client: Client | null; description:string; name:string; }) => {
-  if (!client) return null;
+const ClientInfo = ({ client, name, description }: { client: Client | null; description: string; name: string }) => {
+  if (!client) return null
 
   return (
     <div className="p-2 bg-muted rounded-md">
@@ -193,32 +183,29 @@ const ClientInfo = ({ client,name, description }: { client: Client | null; descr
       <div className="text-sm text-muted-foreground">
         Job Description {client.description}
       </div>
-      {/* <div className="text-sm text-muted-foreground">{client.id}</div> */}
     </div>
-  );
-};
+  )
+}
 
 // Stepper component
 const Stepper = ({
   currentStep,
   totalSteps,
 }: {
-  currentStep: any;
-  totalSteps: any;
+  currentStep: any
+  totalSteps: any
 }) => {
   const stepIcons = [
     { icon: <UserPlus className="w-5 h-5" />, label: "Select Client" },
     { icon: <FileText className="w-5 h-5" />, label: "Create Invoice" },
     { icon: <Edit className="w-5 h-5" />, label: "View" },
     { icon: <Send className="w-5 h-5" />, label: "Send Invoice" },
-  ];
+  ]
   return (
-    <div className="w-full flex items-center justify-between mb-8 px-4 bg-white">
+    <div className="w-full flex flex-col md:flex-row items-center justify-between mb-8 px-4 bg-white">
       {Array.from({ length: totalSteps }, (_, i) => (
-        <div key={i} className="flex items-center w-full">
-          {/* Icon and Text next to each other */}
+        <div key={i} className="flex items-center w-full mb-4 md:mb-0">
           <div className="flex items-center space-x-2">
-            {/* Icon */}
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                 i <= currentStep
@@ -232,7 +219,6 @@ const Stepper = ({
                 stepIcons[i].icon
               )}
             </div>
-            {/* Text Label */}
             <p
               className={`text-black ${
                 i <= currentStep
@@ -244,10 +230,9 @@ const Stepper = ({
             </p>
           </div>
 
-          {/* Line between icons */}
           {i < totalSteps - 1 && (
             <div
-              className={`flex-grow h-[2px] mx-4 ${
+              className={`hidden md:block flex-grow h-[2px] mx-4 ${
                 i < currentStep - 1 ? "bg-primary" : "bg-muted"
               }`}
             />
@@ -255,20 +240,21 @@ const Stepper = ({
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
+
 // Step 1: Select or search client
 const SelectClientStep = ({
   onNext,
   selectedClient,
   onSelectClient,
 }: {
-  onNext: any;
-  selectedClient: any;
-  onSelectClient: any;
+  onNext: any
+  selectedClient: any
+  onSelectClient: any
 }) => {
   return (
-    <Card>
+    <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Select or Search Client</CardTitle>
       </CardHeader>
@@ -287,8 +273,8 @@ const SelectClientStep = ({
         </Button>
       </CardFooter>
     </Card>
-  );
-};
+  )
+}
 
 // Step 2: Create invoice
 const CreateInvoiceStep = ({
@@ -298,11 +284,11 @@ const CreateInvoiceStep = ({
   invoice,
   setInvoice,
 }: {
-  onNext: any;
-  onPrev: any;
-  selectedClient: any;
-  invoice: any;
-  setInvoice: any;
+  onNext: any
+  onPrev: any
+  selectedClient: any
+  invoice: any
+  setInvoice: any
 }) => {
   const formik = useFormik({
     initialValues: {
@@ -314,13 +300,13 @@ const CreateInvoiceStep = ({
     },
     validationSchema: invoiceSchema,
     onSubmit: (values) => {
-      setInvoice(values);
-      onNext();
+      setInvoice(values)
+      onNext()
     },
-  });
+  })
   return (
     <form onSubmit={formik.handleSubmit}>
-      <Card className="">
+      <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Create Invoice</CardTitle>
         </CardHeader>
@@ -440,8 +426,8 @@ const CreateInvoiceStep = ({
         </CardFooter>
       </Card>
     </form>
-  );
-};
+  )
+}
 
 // Step 3: View and edit invoice
 const ViewEditInvoiceStep = ({
@@ -452,23 +438,23 @@ const ViewEditInvoiceStep = ({
   setInvoice,
   onDelete,
 }: {
-  onNext: any;
-  onPrev: any;
-  selectedClient: any;
-  invoice: any;
-  setInvoice: any;
-  onDelete: any;
+  onNext: any
+  onPrev: any
+  selectedClient: any
+  invoice: any
+  setInvoice: any
+  onDelete: any
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedInvoice, setEditedInvoice] = useState(invoice);
+  const [isEditing, setIsEditing] = useState(false)
+  const  [editedInvoice, setEditedInvoice] = useState(invoice)
 
   const handleSave = () => {
-    setInvoice(editedInvoice);
-    setIsEditing(false);
-  };
+    setInvoice(editedInvoice)
+    setIsEditing(false)
+  }
 
   return (
-    <Card>
+    <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>View and Edit Invoice</CardTitle>
       </CardHeader>
@@ -581,8 +567,8 @@ const ViewEditInvoiceStep = ({
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <div>
+      <CardFooter className="flex flex-col md:flex-row justify-between">
+        <div className="mb-4 md:mb-0">
           <Button variant="outline" className="mr-2" onClick={onPrev}>
             Previous
           </Button>
@@ -625,8 +611,8 @@ const ViewEditInvoiceStep = ({
         </div>
       </CardFooter>
     </Card>
-  );
-};
+  )
+}
 
 // Step 4: Send invoice
 const SendInvoiceStep = ({
@@ -635,14 +621,14 @@ const SendInvoiceStep = ({
   invoice,
   handleSubmit,
 }: {
-  onPrev: any;
-  selectedClient: any;
-  invoice: any;
-  handleSubmit: any;
+  onPrev: any
+  selectedClient: any
+  invoice: any
+  handleSubmit: any
 }) => {
-  const [message, setMessage]= useState("")
+  const [message, setMessage] = useState("")
   return (
-    <Card>
+    <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Send Invoice</CardTitle>
       </CardHeader>
@@ -662,8 +648,7 @@ const SendInvoiceStep = ({
             <Textarea
               id="message"
               defaultValue={invoice.description}
-
-              onChange={(e)=>setMessage(e.target.value)}
+              onChange={(e) => setMessage(e.target.value)}
               placeholder="Enter a message for your client..."
             />
           </div>
@@ -678,15 +663,14 @@ const SendInvoiceStep = ({
         </Button>
       </CardFooter>
     </Card>
-  );
-};
+  )
+}
 
 // Main component
 export default function InvoiceCreationPage() {
-  const [currentStep, setCurrentStep] = useState(1);
-  // const [selectedClient, setSelectedClient] = useState<Client[]>([]);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1)
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const router = useRouter()
 
   const [invoice, setInvoice] = useState({
     description: "",
@@ -697,15 +681,14 @@ export default function InvoiceCreationPage() {
     subTotal: "",
     id: "",
     notes: "",
-  });
-  const totalSteps = 4;
+  })
+  const totalSteps = 4
 
   const nextStep = () =>
-    setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps))
+  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1))
 
   const handleDelete = () => {
-    // In a real application, you would delete the invoice from your backend here
     setInvoice({
       description: "",
       id: "",
@@ -715,13 +698,12 @@ export default function InvoiceCreationPage() {
       tax: "",
       dueDate: "",
       clientId: "",
-    });
-    setCurrentStep(2); // Go back to create invoice step
-  };
-  const { data: session } = useSession();
+    })
+    setCurrentStep(2)
+  }
+  const { data: session } = useSession()
   const handleSubmit = async () => {
     try {
-      // Gather necessary data to submit
       const data = {
         clientId: selectedClient?.id,
         companyId: session?.user?.companyId,
@@ -731,18 +713,16 @@ export default function InvoiceCreationPage() {
         tax: invoice.tax || 0,
         dueDate: invoice.dueDate,
         notes: invoice.description || "No additional notes.",
-        jobId: selectedClient?.topLevelId, // Use topLevelId as jobId
-      };
-
-      // Basic validation
-      if (!data.companyId || !data.totalAmount || !data.dueDate) {
-        toast.error("Please fill in all required fields."); // Use toast for error
-        return;
+        jobId: selectedClient?.topLevelId,
       }
 
-      console.log(data, "sending data api");
+      if (!data.companyId || !data.totalAmount || !data.dueDate) {
+        toast.error("Please fill in all required fields.")
+        return
+      }
 
-      // Send the POST request to the API endpoint
+      console.log(data, "sending data api")
+
       const response = await fetch(baseUrl + `invoice`, {
         method: "POST",
         headers: {
@@ -750,32 +730,30 @@ export default function InvoiceCreationPage() {
           Authorization: `Bearer ${session?.user?.access_token}`,
         },
         body: JSON.stringify(data),
-      });
+      })
 
       if (response.ok) {
-        const result = await response.json();
-        toast.success("Invoice sent successfully!"); // Success toast
-        router.push("/callpro/invoice"); // Adjust the path as needed
-        revalidateTag("getclient");
-
-        // Optionally handle result data
+        const result = await response.json()
+        toast.success("Invoice sent successfully!")
+        router.push("/callpro/invoice")
+        revalidateTag("getclient")
       } else {
-        const errorData = await response.json();
-        console.error("Error response data:", errorData); // Log for debugging
+        const errorData = await response.json()
+        console.error("Error response data:", errorData)
         const errorMessages = Array.isArray(errorData.error)
           ? errorData.error.join(", ")
-          : "Unknown error occurred.";
-        toast.error(`Failed to send invoice: ${errorMessages}`); // Use toast for error
+          : "Unknown error occurred."
+        toast.error(`Failed to send invoice: ${errorMessages}`)
       }
     } catch (error) {
-      console.error("Error submitting invoice:", error);
-      toast.error("An error occurred while sending the invoice."); // Use toast for error
+      console.error("Error submitting invoice:", error)
+      toast.error("An error occurred while sending the invoice.")
     }
-  };
+  }
 
   return (
-    <div className="container mx-auto py-10 bg-white">
-      <h1 className="text-3xl font-bold mb-6 pl-20px">Create Invoice</h1>
+    <div className="container mx-auto py-10 px-4 bg-white">
+      <h1 className="text-3xl font-bold mb-6">Create Invoice</h1>
       <Stepper currentStep={currentStep} totalSteps={totalSteps} />
       {currentStep === 1 && (
         <SelectClientStep
@@ -812,5 +790,5 @@ export default function InvoiceCreationPage() {
         />
       )}
     </div>
-  );
+  )
 }
