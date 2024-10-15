@@ -111,45 +111,85 @@ const AddEmployee: React.FC<AddEmployeeProps> = ({ roles = [] }) => {
 
   const handleSubmit = async (values: FormDataState) => {
     const { confirmPassword, ...dataToSend } = values;
-    console.log(dataToSend, "Data to send");
-
+  
     try {
-      // Log before making the request
-      console.log("Sending request to:", baseUrl + "employee");
-
       const response = await fetch(baseUrl + "employee", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user.access_token}`, // Log token for debugging if undefined
+          Authorization: `Bearer ${session?.user.access_token}`,
         },
         body: JSON.stringify(dataToSend),
       });
-
-      // Log the response status and headers
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
-
+  
       // Check if response is OK
       if (!response.ok) {
         const errorResponse = await response.json();
-        console.log("Error response body:", errorResponse);
-        throw new Error("Failed to add employee");
+  
+        // Extract the error message from the backend response
+        const errorMessage = errorResponse?.message || errorResponse?.error || "Failed to add employee";
+  
+        // Show error notification with specific message from server
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
-
+  
       const result = await response.json();
-      console.log("Response body:", result);
-
       toast.success("Employee Added");
-
+  
       dispatch(handleAdd({ isAdd: false }));
       Revalidate("getemployees");
     } catch (error: any) {
-      // Log the error for better debugging
       console.error("Error adding employee:", error);
-      toast.error(error.message);
+  
+      // Check if the error object contains a message, otherwise show a generic error
+      const errorMessage = error.message || "Something went wrong. Please try again.";
+      toast.error(errorMessage);
     }
   };
+  
+
+  // const handleSubmit = async (values: FormDataState) => {
+  //   const { confirmPassword, ...dataToSend } = values;
+  //   console.log(dataToSend, "Data to send");
+
+  //   try {
+  //     // Log before making the request
+  //     console.log("Sending request to:", baseUrl + "employee");
+
+  //     const response = await fetch(baseUrl + "employee", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${session?.user.access_token}`, // Log token for debugging if undefined
+  //       },
+  //       body: JSON.stringify(dataToSend),
+  //     });
+
+  //     // Log the response status and headers
+  //     console.log("Response status:", response.status);
+  //     console.log("Response headers:", response.headers);
+
+  //     // Check if response is OK
+  //     if (!response.ok) {
+  //       const errorResponse = await response.json();
+  //       console.log("Error response body:", errorResponse);
+  //       throw new Error("Failed to add employee");
+  //     }
+
+  //     const result = await response.json();
+  //     console.log("Response body:", result);
+
+  //     toast.success("Employee Added");
+
+  //     dispatch(handleAdd({ isAdd: false }));
+  //     Revalidate("getemployees");
+  //   } catch (error: any) {
+  //     // Log the error for better debugging
+  //     console.error("Error adding employee:", error);
+  //     toast.error(error.message);
+  //   }
+  // };
 
   const handleCancel = () => {
     dispatch(handleAdd({ isAdd: false }));
