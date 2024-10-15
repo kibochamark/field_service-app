@@ -3,7 +3,7 @@ import React, { Suspense } from "react";
 import { SidebarMenu } from "../../sidebar";
 import NavbarComponent from "../../navbar";
 
-import Link from "next/link"
+import Link from "next/link";
 import {
   Activity,
   ArrowUpRight,
@@ -18,22 +18,22 @@ import {
   SubscriptIcon,
   Users,
   Users2Icon,
-} from "lucide-react"
+} from "lucide-react";
 
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/shadcn/ui/avatar"
-import { Badge } from "@/shadcn/ui/badge"
-import { Button } from "@/shadcn/ui/button"
+} from "@/shadcn/ui/avatar";
+import { Badge } from "@/shadcn/ui/badge";
+import { Button } from "@/shadcn/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shadcn/ui/card"
+} from "@/shadcn/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,9 +41,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shadcn/ui/dropdown-menu"
-import { Input } from "@/shadcn/ui/input"
-import { Sheet, SheetContent, SheetTrigger } from "@/shadcn/ui/sheet"
+} from "@/shadcn/ui/dropdown-menu";
+import { Input } from "@/shadcn/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/shadcn/ui/sheet";
 import {
   Table,
   TableBody,
@@ -51,39 +51,35 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/shadcn/ui/table"
+} from "@/shadcn/ui/table";
 import { auth } from "@/auth";
 import OwnerAdminDashboard from "@/components/RoleBasedDashboards/OwnerAdminDashboard";
 import { TechnicianDashboard } from "@/components/technian/TechnicianDashboard";
 
-
 const Page = async () => {
+  const session = await auth();
 
-  const session = await auth()
-
-  console.log(session)
+  console.log(session);
 
   return (
-
     <div>
-
-      <Suspense >
-        {/* {(session?.user?.role === "business owner" || session?.user?.role === "business admin") && (
+      <Suspense
+        fallback={
+          <div className="fle items-center justify-center">
+            <Loader className="text-primary800 animate animate-spin" />
+          </div>
+        }
+      >
+        {session?.user?.role === "business owner" || session?.user?.role === "business admin" ? (
           <OwnerAdminDashboard />
-        )} */}
-        {session?.user?.role === "business owner" || session?.user?.role === "business admin" ?(
-          <OwnerAdminDashboard />
-        ): (
-          <TechnicianDashboard/>
-
+        ) : session?.user?.role === "technician" ? (
+          <TechnicianDashboard />
+        ) : (
+          <div>No access</div> 
         )}
-
       </Suspense>
     </div>
   );
 };
 
 export default Page;
-
-
-

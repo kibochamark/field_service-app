@@ -21,6 +21,7 @@ import {
 import { getTechicianJob } from "./ServerAction";
 import { useSession } from "next-auth/react";
 import { baseUrl } from "@/utils/constants";
+import { toast } from "react-toastify";
 
 interface Job {
   id: string;
@@ -86,9 +87,47 @@ export default function Technician() {
     technicianJobs();
   }, []);
 
+  // const acceptJob = async (jobId: string) => {
+  //   try {
+  //     const response = await fetch(baseUrl + `${jobId}/updatejobstatus`, {
+  //       method: "PATCH",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${session?.user.access_token}`,
+  //       },
+  //       body: JSON.stringify({ status: "ACCEPTED" }),
+  //     });
+
+  //     if (response.ok) {
+  //       setJobs((prevJobs) =>
+  //         prevJobs.map((job) =>
+  //           job.id === jobId ? { ...job, status: "ACCEPTED" } : job
+  //         )
+  //       );
+
+  //       // Redirect to the accepted jobs tab
+  //       setActiveTab("accepted");
+  //     } else {
+  //       console.error("Failed to accept job:", await response.json());
+  //     }
+  //   } catch (error) {
+  //     console.error("Error accepting job:", error);
+  //   }
+  // };
   const acceptJob = async (jobId: string) => {
+    // Check if there is any job with status ACCEPTED or ONGOING
+    const hasAcceptedOrOngoingJob = jobs.some(
+      (job) => job.status === "ACCEPTED" || job.status === "ONGOING"
+    );
+  
+    if (hasAcceptedOrOngoingJob) {
+      // Prevent accepting a new job if there's already an accepted or ongoing job
+      toast.error("You cannot accept a new job while you have an ongoing or accepted job.");
+      return;
+    }
+  
     try {
-      const response = await fetch(baseUrl + `/${jobId}/updatejobstatus`, {
+      const response = await fetch(baseUrl + `${jobId}/updatejobstatus`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -96,14 +135,14 @@ export default function Technician() {
         },
         body: JSON.stringify({ status: "ACCEPTED" }),
       });
-
+  
       if (response.ok) {
         setJobs((prevJobs) =>
           prevJobs.map((job) =>
             job.id === jobId ? { ...job, status: "ACCEPTED" } : job
           )
         );
-
+  
         // Redirect to the accepted jobs tab
         setActiveTab("accepted");
       } else {
@@ -113,6 +152,7 @@ export default function Technician() {
       console.error("Error accepting job:", error);
     }
   };
+  
 
   const updateJobStatus = async (jobId: string, newStatus: string) => {
     try {
@@ -282,7 +322,7 @@ export default function Technician() {
                           <span>Accepted</span>
                         </div>
                       )}
-                      {job.status === "INPROGRESS" && (
+                      {job.status === "ONGOING" && (
                         <div className="flex items-center text-yellow-500">
                           <ClockIcon className="w-4 h-4 mr-2 text-yellow-500" />
                           <span>Ongoing</span>
@@ -331,7 +371,7 @@ export default function Technician() {
               </TableBody>
             </Table>
           ) : (
-            <div className="flex w-full bg-white rounded-md">
+            <div className="flex w-full">
               <p className="flex w-full text-center mt-24 justify-center text-gray-800 text-muted-foreground">
                 You Have no Accepted Job
               </p>
