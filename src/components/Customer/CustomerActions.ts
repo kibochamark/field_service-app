@@ -6,26 +6,36 @@ import { baseUrl } from "@/utils/constants"
 export async function getCustomers() {
   try {
     const session = await auth();
-    const res = await fetch(baseUrl + `/customers/${session?.user?.companyId}`, {
+
+    // Ensure the session and access token are available
+    if (!session || !session.user?.access_token) {
+      throw new Error("Unauthorized: No access token available.");
+    }
+
+    const res = await fetch(`${baseUrl}/customers/${session.user.companyId}`, {
       method: "GET",
       headers: {
-        Authorization: "Bearer " + session?.user?.access_token
+        Authorization: `Bearer ${session.user.access_token}`,
       },
       next: { tags: ["getcustomers"] }
     });
 
     const data = await res.json();
+    console.log(data, "Customers data"); // Debugging the response
 
-    if(res.status == 200){
-      return data?.data
+    // If response is successful, return the data
+    if (res.ok) {
+      return data?.data || []; // Return the data or an empty array if no data is found
+    } else {
+      console.error(`Error fetching customers: ${res.status} - ${res.statusText}`);
+      return [];
     }
-    
-    return [];
-
   } catch (e: any) {
-    return e?.message;
+    console.error("Failed to fetch customers:", e);
+    return []; // Return an empty array in case of error
   }
 }
+
  
 export async function getCustomersInfo() {
   try {
