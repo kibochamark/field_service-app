@@ -16,13 +16,13 @@ export default function Technician() {
     { id: 3, name: "Maintenance", client: "Bob Johnson", location: "789 Oak St", mapLink: "https://maps.google.com", startTime: "2023-09-27T09:00", endTime: "2023-09-27T11:00", status: "Accepted" },
   ])
 
-  const acceptJob = (jobId) => {
+  const acceptJob = (jobId: number) => {
     setJobs(jobs.map(job => 
       job.id === jobId ? { ...job, status: "Accepted" } : job
     ))
   }
 
-  const updateJobStatus = (jobId, newStatus) => {
+  const updateJobStatus = (jobId: number, newStatus: string) => {
     setJobs(jobs.map(job => 
       job.id === jobId ? { ...job, status: newStatus } : job
     ))
