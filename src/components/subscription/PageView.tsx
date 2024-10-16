@@ -119,7 +119,7 @@ export default function Subscribe({ plans }: { plans: any }) {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {session?.user?.role === "technician" || session?.user?.role === "dispatcher" ? (
+      {session?.user?.role === "technician" || session?.user?.role === "dispatcher" || session?.user?.role === "business admin" ? (
         <NotSubscribed />
       ) : (
 
