@@ -18,10 +18,7 @@ export async function getTechicianJob() {
     }
   );
   
-  console.log(
-    response,
-    "-----------------------------------tech-------------------------------------------"
-  );
+  
 
   if (response.ok) {
     const data = await response.json();

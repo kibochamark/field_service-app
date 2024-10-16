@@ -18,6 +18,8 @@ import { useSession } from "next-auth/react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/Store";
 import { handleOpen } from "../../../store/SidebarSlice";
+import Technician from "../../../public/technician.png";
+import Image from 'next/image';
 
 type Menu = {
   label: string;
@@ -100,7 +102,15 @@ const TestSidebar = () => {
     {
       label: "workflow",
       name: "Technician",
-      icon: <Workflow className="" />,
+      icon: (
+        <Image
+          src={Technician}  // Use the imported image here
+          alt="Technician Icon"
+          width={18}         // Set desired width
+          height={18}        // Set desired height
+          className="mr-2"   // Add className for styling if needed
+        />
+      ),
       href: "/callpro/technician",
     },
 

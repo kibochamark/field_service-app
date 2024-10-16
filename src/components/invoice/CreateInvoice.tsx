@@ -53,6 +53,7 @@ import { searchNumbers } from "libphonenumber-js"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import { revalidateTag } from "next/cache"
+import { Revalidate } from "@/utils/Revalidate"
 
 interface Client {
   id: string
@@ -128,7 +129,7 @@ const ClientSearch = ({ onSelectClient }: { onSelectClient: any }) => {
       <div className="flex items-center space-x-2">
         <Input
           type="text"
-          className="w-full md:w-5/6"
+          className="w-full md:w-30"
           placeholder="Search clients..."
           value={searchTerm}
           onChange={(e) => {
@@ -574,7 +575,7 @@ const ViewEditInvoiceStep = ({
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">
+              <Button variant="destructive" >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
             </AlertDialogTrigger>
@@ -731,12 +732,13 @@ export default function InvoiceCreationPage() {
         },
         body: JSON.stringify(data),
       })
+console.log(response.status, "invoice status");
 
-      if (response.ok) {
+      if (response.status === 201) {
         const result = await response.json()
         toast.success("Invoice sent successfully!")
         router.push("/callpro/invoice")
-        revalidateTag("getclient")
+        Revalidate("getclient")
       } else {
         const errorData = await response.json()
         console.error("Error response data:", errorData)

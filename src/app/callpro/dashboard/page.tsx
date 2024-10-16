@@ -55,11 +55,13 @@ import {
 import { auth } from "@/auth";
 import OwnerAdminDashboard from "@/components/RoleBasedDashboards/OwnerAdminDashboard";
 import { TechnicianDashboard } from "@/components/technian/TechnicianDashboard";
+import { getTechicianJob } from "@/components/technian/ServerAction";
 
 const Page = async () => {
   const session = await auth();
+  const technician = await getTechicianJob();
 
-  console.log(session);
+  console.log(technician, "the data tech");
 
   return (
     <div>
