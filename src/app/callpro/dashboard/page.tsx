@@ -56,12 +56,13 @@ import { auth } from "@/auth";
 import OwnerAdminDashboard from "@/components/RoleBasedDashboards/OwnerAdminDashboard";
 import { TechnicianDashboard } from "@/components/technian/TechnicianDashboard";
 import { getTechicianJob } from "@/components/technian/ServerAction";
+import { DispatcherDashboard } from "@/components/Dashboard/DispatcherDashboard";
 
 const Page = async () => {
   const session = await auth();
-  const technician = await getTechicianJob();
+  const technicianData = await getTechicianJob();
 
-  console.log(technician, "the data tech");
+  console.log(technicianData, "the data tech");
 
   return (
     <div>
@@ -75,9 +76,13 @@ const Page = async () => {
         {session?.user?.role === "business owner" || session?.user?.role === "business admin" ? (
           <OwnerAdminDashboard />
         ) : session?.user?.role === "technician" ? (
-          <TechnicianDashboard />
-        ) : (
-          <div>No access</div> 
+          <TechnicianDashboard technicianData={technicianData}/>
+          
+
+        ) : session?.user?.role === "dispatcher" ?(
+          <DispatcherDashboard/>
+        ) :(
+          <div> You have No Dashboard</div> 
         )}
       </Suspense>
     </div>

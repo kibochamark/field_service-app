@@ -93,12 +93,7 @@ const TestSidebar = () => {
       ],
       
     },
-    // {
-    //   label: "workflow",
-    //   name: "Work Flow",
-    //   icon: <Workflow className="" />,
-    //   href: "/callpro/workflow",
-    // },
+
     {
       label: "workflow",
       name: "Technician",
@@ -106,8 +101,8 @@ const TestSidebar = () => {
         <Image
           src={Technician}  // Use the imported image here
           alt="Technician Icon"
-          width={18}         // Set desired width
-          height={18}        // Set desired height
+          width={20}         // Set desired width
+          height={20}        // Set desired height
           className="mr-2"   // Add className for styling if needed
         />
       ),

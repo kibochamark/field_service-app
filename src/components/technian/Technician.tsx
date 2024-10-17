@@ -54,7 +54,7 @@ export default function Technician() {
     const technicianJobs = async () => {
       try {
         const response = await getTechicianJob();
-        console.log(response, "the data");
+        // console.log(response, "the data");
 
         if (Array.isArray(response.data)) {
           const formattedJobs = response.data.map((job: any) => ({

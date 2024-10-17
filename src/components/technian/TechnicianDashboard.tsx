@@ -1,28 +1,148 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/ui/avatar"
-import { Badge } from "@/shadcn/ui/badge"
-import { Button } from "@/shadcn/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shadcn/ui/card"
-import { Progress } from "@/shadcn/ui/progress"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/ui/table"
-import { CalendarDays, CheckCircle, Clock, MapPin, Phone, Star, Truck, User } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/ui/avatar";
+import { Badge } from "@/shadcn/ui/badge";
+import { Button } from "@/shadcn/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shadcn/ui/card";
+import { Progress } from "@/shadcn/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shadcn/ui/table";
+import {
+  CalendarCheck,
+  CalendarDays,
+  CheckCircle,
+  Clock,
+  Clock1,
+  Clock10,
+  MapPin,
+  Phone,
+  Star,
+  Truck,
+  User,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+interface Location {
+  city: string;
+  zip: string;
+  state: string;
+  otherinfo: string | null;
+}
 
-export function TechnicianDashboard() {
-  const [selectedJob, setSelectedJob] = useState("JOB001")
-  const [jobStatus, setJobStatus] = useState("accepted")
+interface JobSchedule {
+  startDate: string;
+  endDate: string;
+  recurrence: string;
+}
 
-  const {data: session} = useSession()
+interface Client {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
+interface Technician {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface TechnicianWrapper {
+  technician: Technician;
+}
+
+interface JobType {
+  id: string;
+  name: string;
+}
+
+interface Job {
+  location: Location;
+  jobschedule: JobSchedule;
+  id: string;
+  name: string;
+  description: string;
+  jobTypeId: string;
+  status: string;
+  dispatcherId: string;
+  clientId: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+  clients: Client;
+  technicians: TechnicianWrapper[];
+  jobType: JobType;
+}
+
+interface DataResponse {
+  data: Job[];
+}
+
+export function TechnicianDashboard({
+  technicianData,
+}: {
+  technicianData: DataResponse;
+}) {
+  const [selectedJob, setSelectedJob] = useState("JOB001");
+  const [jobStatus, setJobStatus] = useState("accepted");
+
+  const { data: session } = useSession();
+  const completedJobs = technicianData.data.filter(
+    (job: Job) => job.status === "COMPLETED"
+  ).length;
+  const totalJobs = technicianData.data.length;
+
+  const ongoing = technicianData.data.filter(
+    (job: Job) => job.status === "ONGOING"
+  ).length;
+  const accepted = technicianData.data.filter(
+    (job: Job) => job.status === "SCHEDULED"
+  ).length;
+  // const assigned = technicianData.data.filter((job:Job) => job.status === "ACCEPTED").length;
+  //calculating the pancentages of the job status
+  const JobPercentages = () => {
+   
+  
+    // Calculate total jobs
+    const total = accepted + ongoing + completedJobs;
+  
+    // Guard against division by zero if no jobs
+    if (total === 0) return { acceptedPercentage: 0, ongoingPercentage: 0, completedPercentage: 0 };
+  
+    // Calculate percentages
+    const acceptedPercentage = (accepted / total) * 100;
+    const ongoingPercentage = (ongoing / total) * 100;
+    const completedPercentage = (completedJobs / total) * 100;
+  
+    // Return the calculated percentages
+    return {
+      acceptedPercentage: acceptedPercentage.toFixed(2),  // limiting to 2 decimal points
+      ongoingPercentage: ongoingPercentage.toFixed(2),
+      completedPercentage: completedPercentage.toFixed(2),
+    };
+  };
+  const { acceptedPercentage, ongoingPercentage, completedPercentage } = JobPercentages();
 
   const jobStatusData = [
-    { status: "Accepted", count: 4, percentage: 26.7, color: "bg-blue-500" },
-    { status: "Ongoing", count: 3, percentage: 20, color: "bg-yellow-500" },
-    { status: "Completed", count: 8, percentage: 53.3, color: "bg-green-500" },
-  ]
+    { status: "Accepted", count: accepted, percentage: acceptedPercentage, color: "bg-blue-500" },
+    { status: "Ongoing", count: ongoing, percentage: ongoingPercentage, color: "bg-yellow-500" },
+    { status: "Completed", count: completedJobs, percentage: completedPercentage, color: "bg-green-500" },
+  ];
 
   const weeklyJobsData = [
     { day: "Mon", jobs: 3 },
@@ -32,13 +152,13 @@ export function TechnicianDashboard() {
     { day: "Fri", jobs: 6 },
     { day: "Sat", jobs: 3 },
     { day: "Sun", jobs: 1 },
-  ]
+  ];
 
   const getHeatmapColor = (jobs: number) => {
-    const maxJobs = Math.max(...weeklyJobsData.map(d => d.jobs))
-    const intensity = (jobs / maxJobs) * 100
-    return `bg-purple-${Math.round(intensity / 10) * 100}`
-  }
+    const maxJobs = Math.max(...weeklyJobsData.map((d) => d.jobs));
+    const intensity = (jobs / maxJobs) * 100;
+    return `bg-purple-${Math.round(intensity / 10) * 100}`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-8">
@@ -46,18 +166,25 @@ export function TechnicianDashboard() {
         <header className="bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src="/placeholder.svg?height=64&width=64" alt="Technician" />
+              <AvatarImage
+                src="/placeholder.svg?height=64&width=64"
+                alt="Technician"
+              />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Welcome, {session?.user?.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Welcome, {session?.user?.name}
+              </h1>
               <p className="text-gray-600">{session?.user?.email}</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm text-gray-600">Current Date</p>
-              <p className="text-lg font-semibold text-gray-800">{new Date().toLocaleDateString()}</p>
+              <p className="text-lg font-semibold text-gray-800">
+                {new Date().toLocaleDateString()}
+              </p>
             </div>
             {/* <Button variant="outline" className="flex items-center space-x-2">
               <Phone className="h-4 w-4" />
@@ -66,14 +193,14 @@ export function TechnicianDashboard() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
             <CardHeader>
               <CardTitle className="text-lg">Total Jobs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">24</div>
-              <p className="text-blue-100">This week</p>
+              <div className="text-4xl font-bold">{totalJobs}</div>
+              {/* <p className="text-blue-100">This week</p> */}
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
@@ -81,7 +208,7 @@ export function TechnicianDashboard() {
               <CardTitle className="text-lg">Completed Jobs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">18</div>
+              <div className="text-4xl font-bold">{completedJobs}</div>
               <p className="text-green-100">This week</p>
             </CardContent>
           </Card>
@@ -90,11 +217,11 @@ export function TechnicianDashboard() {
               <CardTitle className="text-lg">Ongoing Jobs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">3</div>
+              <div className="text-4xl font-bold">{ongoing}</div>
               <p className="text-yellow-100">Currently</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+          {/* <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
             <CardHeader>
               <CardTitle className="text-lg">Efficiency Rate</CardTitle>
             </CardHeader>
@@ -102,13 +229,13 @@ export function TechnicianDashboard() {
               <div className="text-4xl font-bold">95%</div>
               <p className="text-purple-100">This month</p>
             </CardContent>
-          </Card>
+          </Card> */}
           <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
             <CardHeader>
               <CardTitle className="text-lg">Assigned Jobs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">27</div>
+              <div className="text-4xl font-bold">{accepted}</div>
               <p className="text-indigo-100">Total assigned</p>
             </CardContent>
           </Card>
@@ -117,7 +244,9 @@ export function TechnicianDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-2 bg-white">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-800">Update Job Status</CardTitle>
+              <CardTitle className="text-xl font-semibold text-gray-800">
+                Update Job Status
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -142,10 +271,14 @@ export function TechnicianDashboard() {
                       <SelectItem value="completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button className="bg-green-500 hover:bg-green-600 text-white">Update Status</Button>
+                  <Button className="bg-green-500 hover:bg-green-600 text-white">
+                    Update Status
+                  </Button>
                 </div>
                 <div className="bg-gray-100 p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-800 mb-2">Job Details: {selectedJob}</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">
+                    Job Details: {selectedJob}
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center space-x-2">
                       <User className="h-5 w-5 text-blue-500" />
@@ -171,17 +304,26 @@ export function TechnicianDashboard() {
 
           <Card className="bg-white">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-800">Job Distribution</CardTitle>
+              <CardTitle className="text-xl font-semibold text-gray-800">
+                Job Distribution
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {jobStatusData.map((status) => (
                   <div key={status.status} className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm font-medium text-gray-600">{status.status}</span>
-                      <span className="text-sm font-medium text-gray-900">{status.count} ({status.percentage}%)</span>
+                      <span className="text-sm font-medium text-gray-600">
+                        {status.status}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {status.count} ({status.percentage}%)
+                      </span>
                     </div>
-                    <Progress value={status.percentage} className={status.color} />
+                    <Progress
+                      value={Number(status.percentage)}
+                      className={status.color}
+                    />
                   </div>
                 ))}
               </div>
@@ -192,39 +334,96 @@ export function TechnicianDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
           <Card className="lg:col-span-2 bg-white">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-800">Upcoming Jobs</CardTitle>
+              <CardTitle className="text-xl font-semibold text-gray-800">
+                Upcoming Jobs
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Job ID</TableHead>
+                    {/* <TableHead>Job ID</TableHead> */}
                     <TableHead>Client</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
+                {""}
                 <TableBody>
-                  {[
-                    { id: "JOB004", client: "XYZ Corp", location: "456 Elm St", status: "Accepted" },
-                    { id: "JOB005", client: "123 Industries", location: "789 Oak Rd", status: "Pending" },
-                    { id: "JOB006", client: "Tech Solutions", location: "101 Pine Ave", status: "Accepted" },
-                  ].map((job) => (
-                    <TableRow key={job.id}>
-                      <TableCell>{job.id}</TableCell>
-                      <TableCell>{job.client}</TableCell>
-                      <TableCell>{job.location}</TableCell>
-                      <TableCell>
-                        <Badge variant={job.status === "Accepted" ? "default" : "secondary"}>{job.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
+                  {technicianData.data
+                    .filter(
+                      (job) =>
+                        job.status === "ONGOING" ||
+                        job.status === "SCHEDULED" ||
+                        job.status === "ACCEPTED"
+                    )
+                    .map((job) => (
+                      <TableRow key={job.id}>
+                        {/* <TableCell>{job.id}</TableCell> */}
+                        <TableCell>{job.clients.firstName}</TableCell>
+                        <TableCell>
+                          <div
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            <MapPin style={{ marginRight: "8px" }} />
+                            {job.location.city}{" "}
+                            {job.location.otherinfo
+                              ? job.location.otherinfo + ", "
+                              : ""}
+                            {job.location.state}, {job.location.zip}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            {job.status === "ONGOING" && (
+                              <Clock1
+                                className="animate-spin"
+                                style={{ marginRight: "8px" }}
+                              />
+                            )}
+                            {job.status === "SCHEDULED" && (
+                              <CalendarCheck
+                                className="animate-pulse"
+                                style={{ marginRight: "8px" }}
+                              />
+                            )}
+                            <Badge
+                              variant={
+                                job.status === "ACCEPTED"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {job.status}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Link href={"/callpro/technician"}>
+                            <Button variant="outline" size="sm">
+                              View Details
+                            </Button>
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                  {/* Check if there are no upcoming jobs */}
+                  {technicianData.data.filter(
+                    (job) =>
+                      job.status === "ONGOING" ||
+                      job.status === "SCHEDULED" ||
+                      job.status === "ACCEPTED"
+                  ).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} style={{ textAlign: "center" }}>
+                        No upcoming jobs
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -232,27 +431,39 @@ export function TechnicianDashboard() {
 
           <Card className="bg-white">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-gray-800">Weekly Overview</CardTitle>
+              <CardTitle className="text-xl font-semibold text-gray-800">
+                Weekly Overview
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-2">
                 {weeklyJobsData.map((day) => (
                   <div key={day.day} className="text-center">
-                    <div className={`w-full aspect-square rounded-md ${getHeatmapColor(day.jobs)}`}></div>
+                    <div
+                      className={`w-full aspect-square rounded-md ${getHeatmapColor(
+                        day.jobs
+                      )}`}
+                    ></div>
                     <p className="text-xs font-medium mt-1">{day.day}</p>
                     <p className="text-sm font-bold">{day.jobs}</p>
                   </div>
                 ))}
               </div>
               <div className="mt-4 space-y-2">
-                <p className="text-sm text-gray-600">Total Jobs This Week: 24</p>
-                <p className="text-sm text-gray-600">Busiest Day: Friday (6 jobs)</p>
-                <p className="text-sm text-gray-600">Average Jobs Per Day: 3.4</p>
+                <p className="text-sm text-gray-600">
+                  Total Jobs This Week: 24
+                </p>
+                <p className="text-sm text-gray-600">
+                  Busiest Day: Friday (6 jobs)
+                </p>
+                <p className="text-sm text-gray-600">
+                  Average Jobs Per Day: 3.4
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }
