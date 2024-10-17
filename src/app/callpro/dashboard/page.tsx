@@ -77,8 +77,6 @@ const Page = async () => {
           <OwnerAdminDashboard />
         ) : session?.user?.role === "technician" ? (
           <TechnicianDashboard technicianData={technicianData}/>
-          
-
         ) : session?.user?.role === "dispatcher" ?(
           <DispatcherDashboard/>
         ) :(
