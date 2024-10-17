@@ -14,7 +14,7 @@ const page = async () => {
 
   // Detailed logging to debug issues
   console.log({ customers }, "customers data (should be an array)");
-  console.log({ technician }, "technician data (should be an array)");
+  console.log({ technician }, "technician data");
   console.log({ jobTypes }, "jobTypes data (should be an array)");
 
   // Check if customers is an array before calling map

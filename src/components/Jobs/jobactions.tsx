@@ -24,7 +24,7 @@ export async function getTechnicians() {
 
     // Check for a successful response
     if (res.ok) {
-      return data?.data || []; // Return the data or an empty array if no data is found
+      return data || []; // Return the data or an empty array if no data is found
     } else {
       console.error(`Error fetching technicians: ${res.status} - ${res.statusText}`);
       return [];
