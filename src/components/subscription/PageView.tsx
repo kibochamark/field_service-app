@@ -101,7 +101,7 @@ export default function Subscribe({ plans }: { plans: any }) {
         setTimeout(() => {
 
           router.push("/callpro/dashboard")
-        }, 4000)
+        }, 8000)
 
       } else {
         toast.error("Failed to create subscription, please try again")
