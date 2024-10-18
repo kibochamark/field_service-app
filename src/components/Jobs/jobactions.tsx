@@ -20,7 +20,8 @@ export async function getTechnicians() {
     });
 
     const data = await res.json();
-    console.log(data, "Technicians data"); // Debug API response
+    console.log(data, "Technicians API response"); // Debug API response
+
 
     // Check for a successful response
     if (res.ok) {
@@ -34,6 +35,9 @@ export async function getTechnicians() {
     return []; // Return an empty array in case of error
   }
 }
+
+
+
 
 
 export async function getJobTypes() {

@@ -1,25 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  CheckCircle2,
-  Send,
-  FileText,
-  CreditCard,
-  Check,
-  Search,
-  SortAsc,
-  SortDesc,
-} from "lucide-react";
-import { Button } from "@/shadcn/ui/button";
+import { CheckCircle2, Send, FileText, CreditCard, Check, Search, SortDesc, SortAsc } from "lucide-react";
 import { Input } from "@/shadcn/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shadcn/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/ui/select";
+import { Button } from "@/shadcn/ui/button";
 
 type Status = "DRAFT" | "SENT" | "APPROVED" | "PAID";
 
@@ -124,213 +109,55 @@ const WorkflowComponent = ({ workflow }: { workflow: Workflow }) => {
   );
 };
 
-export default function WorkflowPage() {
-  const [workflows] = useState<Workflow[]>([
-    {
-      id: "1",
-      name: "Job Application",
-      currentStatus: "PAID",
-      steps: [
-        {
-          status: "DRAFT",
-          description: "Application created",
-          date: "2023-05-01",
-          color: "bg-yellow-500",
-        },
-        {
-          status: "SENT",
-          description: "Application sent to employer",
-          date: "2023-05-03",
-          color: "bg-blue-500",
-        },
-        {
-          status: "APPROVED",
-          description: "Application approved",
-          date: "2023-05-07",
-          color: "bg-green-500",
-        },
-        {
-          status: "PAID",
-          description: "First paycheck received",
-          date: "2023-05-15",
-          color: "bg-purple-500",
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Project Completion",
-      currentStatus: "APPROVED",
-      steps: [
-        {
-          status: "DRAFT",
-          description: "Project outline drafted",
-          date: "2023-05-01",
-          color: "bg-yellow-500",
-        },
-        {
-          status: "SENT",
-          description: "Project proposal sent",
-          date: "2023-05-03",
-          color: "bg-blue-500",
-        },
-        {
-          status: "APPROVED",
-          description: "Project approved",
-          date: "2023-05-07",
-          color: "bg-green-500",
-        },
-        {
-          status: "PAID",
-          description: "Final payment received",
-          date: "2023-05-15",
-          color: "bg-purple-500",
-        },
-      ],
-    },
-    {
-      id: "1",
-      name: "Job ",
-      currentStatus: "DRAFT",
-      steps: [
-        {
-          status: "DRAFT",
-          description: "Application created",
-          date: "2023-05-01",
-          color: "bg-yellow-500",
-        },
-        {
-          status: "SENT",
-          description: "Application sent to employer",
-          date: "2023-05-03",
-          color: "bg-blue-500",
-        },
-        {
-          status: "APPROVED",
-          description: "Application approved",
-          date: "2023-05-07",
-          color: "bg-green-500",
-        },
-        {
-          status: "PAID",
-          description: "First paycheck received",
-          date: "2023-05-15",
-          color: "bg-purple-500",
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Project ",
-      currentStatus: "APPROVED",
-      steps: [
-        {
-          status: "DRAFT",
-          description: "Project outline drafted",
-          date: "2023-05-01",
-          color: "bg-yellow-500",
-        },
-        {
-          status: "SENT",
-          description: "Project proposal sent",
-          date: "2023-05-03",
-          color: "bg-blue-500",
-        },
-        {
-          status: "APPROVED",
-          description: "Project approved",
-          date: "2023-05-07",
-          color: "bg-green-500",
-        },
-        {
-          status: "PAID",
-          description: "Final payment received",
-          date: "2023-05-15",
-          color: "bg-purple-500",
-        },
-      ],
-    },
-    {
-      id: "1",
-      name: "Job Appli",
-      currentStatus: "SENT",
-      steps: [
-        {
-          status: "DRAFT",
-          description: "Application created",
-          date: "2023-05-01",
-          color: "bg-yellow-500",
-        },
-        {
-          status: "SENT",
-          description: "Application sent to employer",
-          date: "2023-05-03",
-          color: "bg-blue-500",
-        },
-        {
-          status: "APPROVED",
-          description: "Application approved",
-          date: "2023-05-07",
-          color: "bg-green-500",
-        },
-        {
-          status: "PAID",
-          description: "First paycheck received",
-          date: "2023-05-15",
-          color: "bg-purple-500",
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Project Completion",
-      currentStatus: "DRAFT",
-      steps: [
-        {
-          status: "DRAFT",
-          description: "Project outline drafted",
-          date: "2023-05-01",
-          color: "bg-yellow-500",
-        },
-        {
-          status: "SENT",
-          description: "Project proposal sent",
-          date: "2023-05-03",
-          color: "bg-blue-500",
-        },
-        {
-          status: "APPROVED",
-          description: "Project approved",
-          date: "2023-05-07",
-          color: "bg-green-500",
-        },
-        {
-          status: "PAID",
-          description: "Final payment received",
-          date: "2023-05-15",
-          color: "bg-purple-500",
-        },
-      ],
-    },
-    // Additional workflows can be added here...
-  ]);
+export default function MultipleWorkFlow({ getInvoice }: { getInvoice: any }) {
+  // Map getInvoice data to workflows format
+  const workflows = (getInvoice?.invoices || []).map((invoice: any) => ({
+    id: invoice.id,
+    name: `${invoice.client.firstName} ${invoice.client.lastName} - ${invoice.type}`,
+    currentStatus: invoice.status,
+    steps: [
+      {
+        status: "DRAFT" as Status,
+        description: "Invoice created",
+        date: new Date(invoice.issueDate).toLocaleDateString(),
+        color: "bg-yellow-500",
+      },
+      {
+        status: "SENT" as Status,
+        description: "Invoice sent",
+        date: new Date(invoice.issueDate).toLocaleDateString(),
+        color: "bg-blue-500",
+      },
+      {
+        status: "APPROVED" as Status,
+        description: "Invoice approved",
+        date: new Date(invoice.issueDate).toLocaleDateString(),
+        color: "bg-green-500",
+      },
+      {
+        status: "PAID" as Status,
+        description: "Payment received",
+        date: new Date(invoice.dueDate).toLocaleDateString(),
+        color: "bg-purple-500",
+      },
+    ],
+  }));
+  
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filterStatus, setFilterStatus] = useState<Status | "ALL">("ALL");
-  
-  // Pagination state
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredAndSortedWorkflows = useMemo(() => {
     return workflows
       .filter(
-        (workflow) =>
+        (workflow: any) =>
           workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
           (filterStatus === "ALL" || workflow.currentStatus === filterStatus)
       )
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         if (sortOrder === "asc") {
           return a.name.localeCompare(b.name);
         } else {
@@ -338,7 +165,6 @@ export default function WorkflowPage() {
         }
       });
   }, [workflows, searchTerm, sortOrder, filterStatus]);
-
   // Paginated workflows
   const indexOfLastWorkflow = currentPage * itemsPerPage;
   const indexOfFirstWorkflow = indexOfLastWorkflow - itemsPerPage;
@@ -351,8 +177,10 @@ export default function WorkflowPage() {
   const totalPages = Math.ceil(filteredAndSortedWorkflows.length / itemsPerPage);
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Job Tracking</h1>
+    <div className="w-full max-w-6xl mx-auto p-4 bg-white rounded-md">
+      <h1 className="text-3xl font-bold mb-6 text-center">Invoice Tracking</h1>
+
+      {/* Search, filter, and sort UI */}
       <div className="mb-4 flex flex-wrap space-y-2 sm:space-y-0 sm:space-x-2">
         <div className="relative flex-grow">
           <Input
@@ -391,14 +219,13 @@ export default function WorkflowPage() {
           <span>Sort</span>
         </Button>
       </div>
-      
-      {/* Render current workflows */}
-      {currentWorkflows.map((workflow) => (
+
+      {/* Render workflows */}
+      {filteredAndSortedWorkflows.map((workflow: any) => (
         <WorkflowComponent key={workflow.id} workflow={workflow} />
       ))}
-
-      {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-6 bg-white p-3">
+       {/* Pagination Controls */}
+       <div className="flex justify-between items-center mt-6 bg-white p-3">
         <div className="flex items-center space-x-2">
           <label htmlFor="itemsPerPage" className="text-sm">
             Items per page:
@@ -420,6 +247,7 @@ export default function WorkflowPage() {
 
         <div className="flex items-center space-x-2">
           <Button
+          className="bg-primary700"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
           >
@@ -429,6 +257,7 @@ export default function WorkflowPage() {
             Page {currentPage} of {totalPages}
           </span>
           <Button
+          className="bg-primary700"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
           >
