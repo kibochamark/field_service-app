@@ -246,7 +246,7 @@ const Stepper = ({
               }`}
             >
               {i < currentStep ? (
-                <Check className="w-6 h-6" />
+                <Check className="w-6 h-6 " />
               ) : (
                 stepIcons[i].icon
               )}
@@ -300,8 +300,8 @@ const SelectClientStep = ({
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={onNext} disabled={!selectedClient}>
-          Next <ChevronRight className="ml-2 h-4 w-4" />
+        <Button onClick={onNext} disabled={!selectedClient} className="bg-primary600 border-none">
+          Next <ChevronRight className="ml-2 h-4 w-4 " />
         </Button>
       </CardFooter>
     </Card>
@@ -454,7 +454,7 @@ const CreateInvoiceStep = ({
           <Button variant="outline" onClick={onPrev}>
             Previous
           </Button>
-          <Button type="submit">Next</Button>
+          <Button type="submit" className="bg-primary600">Next</Button>
         </CardFooter>
       </Card>
     </form>
@@ -629,15 +629,15 @@ const ViewEditInvoiceStep = ({
         </div>
         <div className="grid grid-cols-2">
           {isEditing ? (
-            <Button onClick={handleSave} className="mr-2">
+            <Button onClick={handleSave} className="mr-2 bg-primary600">
               Save
             </Button>
           ) : (
-            <Button onClick={() => setIsEditing(true)} className="mr-2">
+            <Button onClick={() => setIsEditing(true)} className="mr-2 bg-primary600">
               <Edit className="mr-2 h-4 w-4" /> Edit
             </Button>
           )}
-          <Button onClick={onNext}>
+          <Button onClick={onNext} className="bg-primary600">
             Next <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -817,7 +817,7 @@ const ViewPDFInvoiceStep = ({
         <Button variant="outline" onClick={onPrev}>
           Previous
         </Button>
-        <Button onClick={onNext}>
+        <Button onClick={onNext} className="bg-primary600">
           Next <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>
@@ -869,7 +869,7 @@ const SendInvoiceStep = ({
         <Button variant="outline" onClick={onPrev}>
           Previous
         </Button>
-        <Button onClick={handleSubmit}>
+        <Button onClick={handleSubmit} className="bg-primary600">
           <Send className="mr-2 h-4 w-4" /> Send Invoice
         </Button>
       </CardFooter>
