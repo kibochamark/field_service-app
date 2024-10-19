@@ -600,7 +600,7 @@ const ViewEditInvoiceStep = ({
         </div>
       </CardContent>
       <CardFooter className="flex flex-col md:flex-row justify-between">
-        <div className="mb-4 md:mb-0">
+        <div className=" grid grid-cols-2 mb-4 md:mb-0">
           <Button variant="outline" className="mr-2" onClick={onPrev}>
             Previous
           </Button>
@@ -627,7 +627,7 @@ const ViewEditInvoiceStep = ({
             </AlertDialogContent>
           </AlertDialog>
         </div>
-        <div>
+        <div className="grid grid-cols-2">
           {isEditing ? (
             <Button onClick={handleSave} className="mr-2">
               Save

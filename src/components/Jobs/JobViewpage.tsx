@@ -145,7 +145,9 @@ export default function JobManagementSystem({
                   <TableHead>Job Type</TableHead>
                   <TableHead>Technician</TableHead>
                   <TableHead>Location</TableHead>
+                  {session?.user?.role === "business owner" || session?.user?.role === "business admin" && (
                   <TableHead>Actions</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -175,6 +177,7 @@ export default function JobManagementSystem({
                         {job?.location?.otherinfo ? ` (${job?.location.otherinfo})` : ''}
                       </p>
                     </TableCell>
+                    {session?.user?.role === "business owner" || session?.user?.role === "business admin" && (
                     <TableCell>
                       <Button variant="ghost" size="icon" onClick={() => handleDelete(job.id)}>
                         <Trash className="h-4 w-4 text-red-600" />
@@ -183,6 +186,7 @@ export default function JobManagementSystem({
                         <MoreVertical className="h-4 w-4" />
                       </Button> */}
                     </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

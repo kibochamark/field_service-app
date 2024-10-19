@@ -85,6 +85,7 @@ const JobComponent = ({ job }: { job: Job }) => {
   const currentStepIndex = steps.findIndex(
     (step) => step.status.toLowerCase() === job.status.toLowerCase()
   )
+  const { data: session } = useSession();
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md mb-4 w-full">
@@ -147,13 +148,17 @@ const JobComponent = ({ job }: { job: Job }) => {
       </div>
 
       {job.status.toLowerCase() === "completed" && (
-        <div className="w-full justify-end flex">
+        <span>
+        {(session?.user?.role === "business admin" || session?.user?.role === "business owner") && (
+          <div className="w-full justify-end flex">
           <Link href={`/callpro/createinvoice`}>
             <Button className="mt-2 bg-primary800">
               Generate Invoice
             </Button>
           </Link>
         </div>
+        )}
+        </span>
       )}
     </div>
   )
