@@ -137,6 +137,12 @@ export default function JobManagement({
   });
 
 
+  const [jobDescription, setJobDescription] = useState<any>()
+
+
+
+
+
   const router = useRouter();
 
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
@@ -479,6 +485,9 @@ export default function JobManagement({
       const result = await response.json();
       console.log("Job updated successfully:", result);
 
+      setJobDescription(result?.data)
+
+
       toast({
         title: "Job Updated",
         description: "The job has been successfully updated.",
@@ -575,17 +584,17 @@ export default function JobManagement({
                 <SelectTrigger>
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
-             <SelectContent>
-  {Array.isArray(jobtype) ? (
-    jobtype.map((type: any) => (
-      <SelectItem key={type.id} value={type.id}>
-        {type.name}
-      </SelectItem>
-    ))
-  ) : (
-    <div>No job types available</div> // Fallback in case jobtype is not an array or is empty
-  )}
-</SelectContent>
+                <SelectContent>
+                  {Array.isArray(jobtype) ? (
+                    jobtype.map((type: any) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div>No job types available</div> // Fallback in case jobtype is not an array or is empty
+                  )}
+                </SelectContent>
 
               </Select>
             </div>
@@ -604,9 +613,9 @@ export default function JobManagement({
                   >
                     {selectedClient
                       ? customers.find(
-                          (client: { id: string; name: string }) =>
-                            client.id === selectedClient
-                        )?.name
+                        (client: { id: string; name: string }) =>
+                          client.id === selectedClient
+                      )?.name
                       : "Select client..."}
                     <User className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -648,9 +657,9 @@ export default function JobManagement({
               <div className="mt-2">
                 {selectedClient
                   ? customers.find(
-                      (client: { id: string; name: string }) =>
-                        client.id === selectedClient
-                    )?.name
+                    (client: { id: string; name: string }) =>
+                      client.id === selectedClient
+                  )?.name
                   : "No client selected."}
               </div>
             </div>
@@ -782,7 +791,7 @@ export default function JobManagement({
                       className={cn(
                         "w-[280px] justify-start text-left font-normal",
                         !currentJob.jobSchedule.startDate &&
-                          "text-muted-foreground"
+                        "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -814,7 +823,7 @@ export default function JobManagement({
                       className={cn(
                         "w-[280px] justify-start text-left font-normal",
                         !currentJob.jobSchedule.endDate &&
-                          "text-muted-foreground"
+                        "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -874,12 +883,12 @@ export default function JobManagement({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="font-semibold">Job Name</p>
-                  <p>{currentJob.name}</p>
+                  <p>{jobDescription?.name}</p>
                 </div>
                 <div>
                   <p className="font-semibold">Job Type</p>
                   <p>
-                    {jobtype.find((type: any) => type.id === currentJob.type)
+                    {jobtype.find((type: any) => type.id === jobDescription?.jobTypeId)
                       ?.name || "No job type selected"}
                   </p>
                 </div>
@@ -930,12 +939,12 @@ export default function JobManagement({
                 </div>
                 <div>
                   <p className="font-semibold">Recurrence</p>
-                  <p>{currentJob.jobSchedule.recurrence}</p>
+                  <p>{jobDescription?.jobschedule?.recurrence}</p>
                 </div>
               </div>
               <div className="mt-4">
                 <p className="font-semibold">Description</p>
-                <p>{currentJob.description}</p>
+                <p>{jobDescription?.description}</p>
               </div>
             </CardContent>
           </Card>

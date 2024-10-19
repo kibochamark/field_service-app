@@ -14,7 +14,7 @@ const page = async () => {
 
   // Detailed logging to debug issues
   console.log({ customers }, "customers data (should be an array)");
-  console.log({ technician }, "technician data (should be an array)");
+  console.log({ technician }, "technician data");
   console.log({ jobTypes }, "jobTypes data (should be an array)");
 
   // Check if customers is an array before calling map
@@ -25,12 +25,15 @@ const page = async () => {
       }))
     : [];
 
+  // Ensure technician data is mapped correctly
   const techdata = Array.isArray(technician)
-    ? technician.map((technician: any) => ({
-        id: technician.id,
-        name: `${technician.firstName} ${technician.lastName}`,
+    ? technician.map((tech: any) => ({
+        id: tech.id,
+        name: `${tech.firstName} ${tech.lastName}`,
       }))
     : [];
+
+  console.log({ techdata }, "Mapped Technician Data"); // Log the mapped technician data
 
   const jobTypeData = Array.isArray(jobTypes)
     ? jobTypes.map((jobType: any) => ({

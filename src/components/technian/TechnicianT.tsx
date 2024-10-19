@@ -22,70 +22,92 @@ import { getTechicianJob } from "./ServerAction";
 import { useSession } from "next-auth/react";
 import { baseUrl } from "@/utils/constants";
 import { toast } from "react-toastify";
+import { Revalidate } from "@/utils/Revalidate";
 
-interface Job {
-  id: string;
-  mapLink: string;
-  name: string;
-  client: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  location: {
-    city: string;
-    zip: string;
-    state: string;
-  };
-  scheduled: {
-    startDate: string;
-    endDate: string;
-  };
-  status: string;
+// interface Job {
+//   id: string;
+//   mapLink: string;
+//   name: string;
+//   client: {
+//     firstName: string;
+//     lastName: string;
+//     email: string;
+//   };
+//   location: {
+//     city: string;
+//     zip: string;
+//     state: string;
+//   };
+//   scheduled: {
+//     startDate: string;
+//     endDate: string;
+//   };
+//   status: string;
+// }
+interface Location {
+  city: string;
+  zip: string;
+  state: string;
+  otherinfo: string | null;
 }
 
-export default function Technician() {
+interface JobSchedule {
+  startDate: string;
+  endDate: string;
+  recurrence: string;
+}
+
+interface Client {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+interface Technician {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface TechnicianWrapper {
+  technician: Technician;
+}
+
+interface JobType {
+  id: string;
+  name: string;
+}
+
+interface Job {
+  location: Location;
+  jobschedule: JobSchedule;
+  id: string;
+  name: string;
+  description: string;
+  jobTypeId: string;
+  status: string;
+  dispatcherId: string;
+  clientId: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+  clients: Client;
+  technicians: TechnicianWrapper[];
+  jobType: JobType;
+  mapLink:string;
+}
+
+interface DataResponse {
+  data: Job[];
+}
+
+export default function Technician({technicianData}:{technicianData:DataResponse;}) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("assigned");
   const [jobs, setJobs] = useState<Job[]>([]);
   const { data: session } = useSession();
 
-  useEffect(() => {
-    const technicianJobs = async () => {
-      try {
-        const response = await getTechicianJob();
-        // console.log(response, "the data");
-
-        if (Array.isArray(response.data)) {
-          const formattedJobs = response.data.map((job: any) => ({
-            id: job.id,
-            name: job.name,
-            client: {
-              firstName: job.clients.firstName || "Unknown First Name", // fallback to 'Unknown First Name' if firstName is undefined or null
-              lastName: job.clients.lastName || "Unknown Last Name", // fallback to 'Unknown Last Name' if lastName is undefined or null
-              email: job.clients.email || "Unknown Email", // fallback to 'Unknown Email' if email is undefined or null
-            },
-            location: {
-              city: job.location?.city || "Unknown City", // fallback to 'Unknown City' if city is undefined or null
-              zip: job.location?.zip || "Unknown Zip", // fallback to 'Unknown Zip' if zip is undefined or null
-              state: job.location?.state || "Unknown State", // fallback to 'Unknown State' if state is undefined or null
-            },
-            scheduled: {
-              startDate: job.jobschedule.startDate || "Unknown Start Date", // fallback to 'Unknown Start Date' if startDate is undefined or null
-              endDate: job.jobschedule.endDate || "Unknown End Date", // fallback to 'Unknown End Date' if endDate is undefined or null
-            },
-            status: job.status || "Unknown Status", // fallback to 'Unknown Status' if status is undefined or null
-          }));
-          setJobs(formattedJobs);
-        } else {
-          console.log("Response is not an array");
-        }
-      } catch (error) {
-        console.error("Error in technicianJobs:", error);
-      }
-    };
-    technicianJobs();
-  }, []);
 
   // const acceptJob = async (jobId: string) => {
   //   try {
@@ -116,16 +138,18 @@ export default function Technician() {
   // };
   const acceptJob = async (jobId: string) => {
     // Check if there is any job with status ACCEPTED or ONGOING
-    const hasAcceptedOrOngoingJob = jobs.some(
+    const hasAcceptedOrOngoingJob = technicianData.data.some(
       (job) => job.status === "ACCEPTED" || job.status === "ONGOING"
     );
-  
+
     if (hasAcceptedOrOngoingJob) {
       // Prevent accepting a new job if there's already an accepted or ongoing job
-      toast.error("You cannot accept a new job while you have an ongoing or accepted job.");
+      toast.error(
+        "You cannot accept a new job while you have an ongoing or accepted job."
+      );
       return;
     }
-  
+
     try {
       const response = await fetch(baseUrl + `${jobId}/updatejobstatus`, {
         method: "PATCH",
@@ -135,16 +159,17 @@ export default function Technician() {
         },
         body: JSON.stringify({ status: "ACCEPTED" }),
       });
-  
+
       if (response.ok) {
         setJobs((prevJobs) =>
           prevJobs.map((job) =>
             job.id === jobId ? { ...job, status: "ACCEPTED" } : job
           )
         );
-  
+
         // Redirect to the accepted jobs tab
         setActiveTab("accepted");
+        Revalidate("getupdates")
       } else {
         console.error("Failed to accept job:", await response.json());
       }
@@ -152,7 +177,6 @@ export default function Technician() {
       console.error("Error accepting job:", error);
     }
   };
-  
 
   const updateJobStatus = async (jobId: string, newStatus: string) => {
     try {
@@ -179,7 +203,8 @@ export default function Technician() {
           newStatus === "ONGOING" ||
           newStatus === "ACCEPTED"
         ) {
-          router.push(`/callpro/technician/technicianworkflow/${jobId}`);
+            Revalidate("getupdates")
+            router.push(`/callpro/technician/technicianworkflow/${jobId}`);
         }
       } else {
         console.error("Failed to update job status:", await response.json());
@@ -189,8 +214,8 @@ export default function Technician() {
     }
   };
 
-  const assignedJobs = jobs.filter((job) => job.status === "SCHEDULED");
-  const acceptedJobs = jobs.filter(
+  const assignedJobs = technicianData.data.filter((job) => job.status === "SCHEDULED");
+  const acceptedJobs = technicianData.data.filter(
     (job) =>
       job.status === "ACCEPTED" ||
       job.status === "ONGOING" ||
@@ -198,8 +223,8 @@ export default function Technician() {
   );
 
   const totalAssigned = assignedJobs.length;
-  const inProgress = jobs.filter((job) => job.status === "ONGOING").length;
-  const completed = jobs.filter((job) => job.status === "COMPLETED").length;
+  const inProgress = technicianData.data.filter((job) => job.status === "ONGOING").length;
+  const completed = technicianData.data.filter((job) => job.status === "COMPLETED").length;
 
   return (
     <div className="container mx-auto p-4">
@@ -252,8 +277,8 @@ export default function Technician() {
                   </CardHeader>
                   <CardContent>
                     <p>
-                      <strong>Client:</strong> {job.client.firstName}{" "}
-                      {job.client.lastName}
+                      <strong>Client:</strong> {job.clients.firstName}{" "}
+                      {job.clients.lastName}
                     </p>
                     <p>
                       <strong>Location:</strong> {job.location.city},{" "}
@@ -269,8 +294,8 @@ export default function Technician() {
                     </p>
                     <p>
                       <strong>Scheduled Time:</strong>{" "}
-                      {new Date(job.scheduled.startDate).toLocaleString()} -{" "}
-                      {new Date(job.scheduled.endDate).toLocaleString()}
+                      {new Date(job.jobschedule.startDate).toLocaleString()} -{" "}
+                      {new Date(job.jobschedule.endDate).toLocaleString()}
                     </p>
                     <Button onClick={() => acceptJob(job.id)} className="mt-2">
                       Accept Job
@@ -305,15 +330,15 @@ export default function Technician() {
                   <TableRow key={job.id}>
                     <TableCell>{job.name}</TableCell>
                     <TableCell>
-                      {job.client.firstName} {job.client.lastName}
+                      {job.clients.firstName} {job.clients.lastName}
                     </TableCell>
                     <TableCell>
                       {job.location.city}, {job.location.state}{" "}
                       {job.location.zip}
                     </TableCell>
                     <TableCell>
-                      {new Date(job.scheduled.startDate).toLocaleString()} -{" "}
-                      {new Date(job.scheduled.endDate).toLocaleString()}
+                      {new Date(job.jobschedule.startDate).toLocaleString()} -{" "}
+                      {new Date(job.jobschedule.endDate).toLocaleString()}
                     </TableCell>
                     <TableCell>
                       {job.status === "ACCEPTED" && (

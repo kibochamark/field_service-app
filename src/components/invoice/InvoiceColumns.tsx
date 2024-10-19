@@ -141,6 +141,7 @@ import axios from "axios";
 import ConfirmationModal from "./ConfirmationModal";
 import { baseUrl } from "@/utils/constants";
 import { toast } from "react-toastify";
+import { Revalidate } from "@/utils/Revalidate";
 
 const Action = ({ row }: { row: any }) => {
   const router = useRouter();
@@ -158,10 +159,12 @@ const Action = ({ row }: { row: any }) => {
         },
       });
       // You can add a notification or UI update here, like refetching data
-      console.log("Invoice deleted successfully.");
+      // console.log("Invoice deleted successfully.");
+
       toast.success("Invoice deleted successfully.");
+      Revalidate("deleted successfuly")
       setShowModal(false);
-      router.refresh(); // Refresh the page or re-fetch the data
+      // router.refresh(); // Refresh the page or re-fetch the data
     } catch (error) {
       console.error("Error deleting invoice:", error);
     } finally {

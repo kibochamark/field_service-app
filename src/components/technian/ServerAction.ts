@@ -18,10 +18,7 @@ export async function getTechicianJob() {
     }
   );
   
-  console.log(
-    response,
-    "-----------------------------------tech-------------------------------------------"
-  );
+  
 
   if (response.ok) {
     const data = await response.json();
@@ -30,7 +27,7 @@ export async function getTechicianJob() {
   } else {
     const data = await response.json();
     console.log(data, "dataa2222");
-    alert(`Error: ${data.message}`);
+    // alert(`Error: ${data.message}`);
     return null; // Return null or handle error as needed
   }
 }
