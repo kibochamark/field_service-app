@@ -36,7 +36,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
     startDate: '',
     endDate: '',
     location: { city: '', state: '', zip: '', otherinfo: '' },
-    clients: [],
+    clientId: '',
     technicians: [],
   });
   const { data: session } = useSession();
@@ -64,6 +64,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
         ]);
 
         const jobData = jobResponse.data?.data || {};
+        console.log(jobData, "data from the api")
         setJobTypes(jobTypesResponse.data?.data || []);
         setClients(clientsResponse.data?.data || []);
         setTechnicians(techniciansResponse.data || []);
@@ -82,7 +83,7 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
             zip: jobData.location?.zip || '',
             otherinfo: jobData.location?.otherinfo || '',
           },
-          clients: jobData.clients ? [jobData.clients.id] : [],
+          clientId: jobData.clients ? jobData.clients.id : '',
           technicians: jobData.technicians ? jobData.technicians.map((tech: any) => tech.technician.id) : [],
         });
       } catch (error) {
@@ -95,41 +96,47 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
       fetchJobData();
     }
   }, [params.id, session]);
+
+
+  console.log(initialValues)
+
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     try {
       // Debugging: Log the values being submitted
       console.debug('Submitting job update with values:', values);
-  
       const payload = {
         name: values.name,
         description: values.description,
-        status: values.status,
-        jobType: values.jobType,
-        jobschedule: {
-          startDate: values.startDate,
-          endDate: values.endDate,
+        jobTypeId: values.jobType,
+        location: {
+          city: values.location.city,
+          state: values.location.state,
+          zip: values.location.zip,
+          otherinfo: values.location.otherinfo,
         },
-        location: values.location,
-        clients: values.clients.map((clientId: string) => ({ id: clientId })),
+        status: values.status,
+        clientId: values.clientId,
         technicians: values.technicians.map((techId: string) => ({ id: techId })),
+        dispatcherId: session?.user?.userId,
+        companyId: session?.user?.companyId || '',
       };
-  
+
       // Debugging: Log the payload being sent to the server
-      console.debug('Payload for API request:', payload);
-  
+      console.log(payload, "payload");
+
       const response = await axios.put(`${baseUrl}${params.id}/editjob`, payload, {
         headers: { Authorization: `Bearer ${session?.user?.access_token}` },
       });
-  
+
       // Debugging: Log the server response
-      console.debug('Response from server:', response.data);
-  
+      console.log(response.data, "server");
+
       toast.success('Job updated successfully');
       router.push('/callpro/jobs');
     } catch (error) {
       // Debugging: Log the error object
       console.error('Failed to update job details:', error);
-  
+
       // Check if error is an Axios error and log response if available
       if (axios.isAxiosError(error)) {
         console.error('Error response from server:', error.response);
@@ -141,14 +148,14 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
       } else {
         console.error('Unexpected error:', error);
       }
-  
+
       toast.error('Failed to update job details.');
     } finally {
       setSubmitting(false);
     }
   };
-  
-  
+
+
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -163,75 +170,75 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                 <Label htmlFor="name">Job Name</Label>
                 <Field name="name" as={Input} id="name" />
               </div>
-  
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Field name="description" as={Textarea} id="description" />
               </div>
-  
-              <div className="space-y-2">
-  <Label htmlFor="status">Status</Label>
-  <Select 
-    onValueChange={(value) => setFieldValue('status', value)} 
-    value={values.status} // Set the current value
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select a status" />
-    </SelectTrigger>
-    <SelectContent>
-      {/* List of statuses */}
-      {['CREATED', 'ASSIGNED', 'SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'].map((status) => (
-        <SelectItem key={status} value={status}>
-          {status}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-  {/* Display the selected status below the Select component */}
-  <div className="border p-2 rounded">
-    {values.status || 'No status selected'}
-  </div>
-</div>
 
-  
               <div className="space-y-2">
-  <Label htmlFor="jobType">Job Type</Label>
-  <Select 
-    onValueChange={(value) => setFieldValue('jobType', value)} 
-    value={values.jobType} // Set the current value
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select a job type" />
-    </SelectTrigger>
-    <SelectContent>
-      {jobTypes.map((jobType) => (
-        <SelectItem key={jobType.id} value={jobType.id}>
-          {jobType.name}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-  {/* Display the selected job type name below the Select component */}
-  <div className="border p-2 rounded">
-    {jobTypes.find(jobType => jobType.id === values.jobType)?.name || 'No job type selected'}
-  </div>
-</div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  onValueChange={(value) => setFieldValue('status', value)}
+                  value={values.status} // Set the current value
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* List of statuses */}
+                    {['CREATED', 'ASSIGNED', 'SCHEDULED', 'ONGOING', 'COMPLETED', 'CANCELLED'].map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Display the selected status below the Select component */}
+                <div className="border p-2 rounded">
+                  {values.status || 'No status selected'}
+                </div>
+              </div>
 
-  
+
+              <div className="space-y-2">
+                <Label htmlFor="jobType">Job Type</Label>
+                <Select
+                  onValueChange={(value) => setFieldValue('jobType', value)}
+                  value={values.jobType} // Set the current value
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTypes.map((jobType) => (
+                      <SelectItem key={jobType.id} value={jobType.id}>
+                        {jobType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Display the selected job type name below the Select component */}
+                <div className="border p-2 rounded">
+                  {jobTypes.find(jobType => jobType.id === values.jobType)?.name || 'No job type selected'}
+                </div>
+              </div>
+
+
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
                 <Field name="startDate" type="date" as={Input} id="startDate" />
               </div>
-  
+
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>
                 <Field name="endDate" type="date" as={Input} id="endDate" />
               </div>
-  
+
               <div className="space-y-2">
                 <Label>Clients</Label>
                 <div className="border p-2 rounded">
-                  {clients.map((client) => (
+                  {/* {clients.map((client) => (
                     <div key={client.id} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
@@ -246,10 +253,27 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
                       />
                       <span>{client.firstName} {client.lastName}</span>
                     </div>
-                  ))}
+                  ))} */}
+                  {/* <Label htmlFor="jobType">Job Type</Label> */}
+                  <Select
+                    onValueChange={(value) => setFieldValue('clientId', value)}
+                    defaultValue={values.clientId} // Set the current value
+                    
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.firstName} {client.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-  
+
               <div className="space-y-2">
                 <Label>Technicians</Label>
                 <div className="border p-2 rounded">
@@ -273,18 +297,18 @@ export default function EditJobPage({ params }: { params: { id: string } }) {
               </div>
             </CardContent>
             <CardFooter className="flex justify-end space-x-2">
-            <Button variant="ghost" onClick={() => router.push('/callpro/jobs')}>
+              <Button variant="ghost" onClick={() => router.push('/callpro/jobs')}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
-              
+
             </CardFooter>
           </Form>
         )}
       </Formik>
     </Card>
   );
-  
+
 }
