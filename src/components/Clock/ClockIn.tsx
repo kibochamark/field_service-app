@@ -221,7 +221,7 @@ function StatusBar({ status }: { status: Status }) {
         }`}
       >
         <User className="h-5 w-5" />
-        <span className="font-semibold text-gray-700">Employee Status:</span>
+        <span className="font-semibold text-gray-700">Status:</span>
         <span
           className={`px-2 py-1 rounded-full text-sm font-bold ${
             status === "Clocked In"
