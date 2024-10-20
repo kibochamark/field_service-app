@@ -4,6 +4,7 @@ import { SidebarMenu } from '@/app/sidebar'
 import NextAuthProvider from '../NexAuthProvider'
 import { Toaster } from 'react-hot-toast'
 import TestSidebar from '@/components/layout/TestSidebar'
+import ClockIn from '@/components/Clock/ClockIn'
 
 function layout({ children }: { children: ReactNode }) {
     return (
@@ -32,6 +33,8 @@ function layout({ children }: { children: ReactNode }) {
             <div className="h-screen flex flex-col w-full">
                 {/* Navbar at the top */}
                 <NavbarComponent />
+                  
+              
 
                 <div className="flex flex-1">
                     {/* Sidebar on the left */}
@@ -41,6 +44,7 @@ function layout({ children }: { children: ReactNode }) {
                     </div>
                     {/* Main content (Dashboard) on the right/center */}
                     <div className="flex-1 mt-16 overflow-y-auto lg:ml-64 p-4 bg-gray-100">
+                    <ClockIn/>
                         {children}
                     </div>
                 </div>
