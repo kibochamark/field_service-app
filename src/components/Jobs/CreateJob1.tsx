@@ -995,22 +995,22 @@ export default function JobManagement({
                     : ""}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <p className="font-semibold">Start Date</p>
                 <p>
                   {job?.jobSchedule?.startDate
-                    ? format(new Date(job?.jobSchedule.startDate), "PPP")
+                    ? format(new Date(job?.jobschedule.startDate), "PPP")
                     : "Not set"}
                 </p>
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <p className="font-semibold">End Date</p>
                 <p>
                   {job?.jobSchedule?.endDate
-                    ? format(new Date(job?.jobSchedule.endDate), "PPP")
+                    ? format(new Date(job?.jobschedule.endDate), "PPP")
                     : "Not set"}
                 </p>
-              </div>
+              </div> */}
               <div>
                 <p className="font-semibold">Clients</p>
                 {/* Display client names */}

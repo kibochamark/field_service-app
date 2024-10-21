@@ -62,7 +62,7 @@ const Page = async () => {
   const session = await auth();
   const technicianData = await getTechicianJob();
 
-  console.log(technicianData, "the data tech");
+  //console.log(technicianData, "the data tech");
 
   return (
     <div>
