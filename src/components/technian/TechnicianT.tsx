@@ -24,26 +24,7 @@ import { baseUrl } from "@/utils/constants";
 import { toast } from "react-toastify";
 import { Revalidate } from "@/utils/Revalidate";
 
-// interface Job {
-//   id: string;
-//   mapLink: string;
-//   name: string;
-//   client: {
-//     firstName: string;
-//     lastName: string;
-//     email: string;
-//   };
-//   location: {
-//     city: string;
-//     zip: string;
-//     state: string;
-//   };
-//   scheduled: {
-//     startDate: string;
-//     endDate: string;
-//   };
-//   status: string;
-// }
+
 interface Location {
   city: string;
   zip: string;
@@ -108,7 +89,12 @@ export default function Technician({technicianData}:{technicianData:DataResponse
   const [jobs, setJobs] = useState<Job[]>([]);
   const { data: session } = useSession();
 
+  const technicianId = session?.user?.userId; // Get the current technician's ID
 
+  // Filter jobs by technician's ID
+  const technicianJobs = technicianData.data.filter((job) =>
+    job.technicians.some((tech) => tech.technician.id === technicianId)
+  )
   // const acceptJob = async (jobId: string) => {
   //   try {
   //     const response = await fetch(baseUrl + `${jobId}/updatejobstatus`, {
@@ -138,12 +124,13 @@ export default function Technician({technicianData}:{technicianData:DataResponse
   // };
   const acceptJob = async (jobId: string) => {
     // Check if there is any job with status ACCEPTED or ONGOING
-    const hasAcceptedOrOngoingJob = technicianData.data.some(
+    const hasAcceptedOrOngoingJob = technicianJobs.some(
       (job) => job.status === "ACCEPTED" || job.status === "ONGOING"
     );
 
     if (hasAcceptedOrOngoingJob) {
       // Prevent accepting a new job if there's already an accepted or ongoing job
+        
       toast.error(
         "You cannot accept a new job while you have an ongoing or accepted job."
       );
@@ -160,7 +147,7 @@ export default function Technician({technicianData}:{technicianData:DataResponse
         body: JSON.stringify({ status: "ACCEPTED" }),
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         setJobs((prevJobs) =>
           prevJobs.map((job) =>
             job.id === jobId ? { ...job, status: "ACCEPTED" } : job
@@ -168,6 +155,7 @@ export default function Technician({technicianData}:{technicianData:DataResponse
         );
 
         // Redirect to the accepted jobs tab
+        toast.success("job has been accepted")
         setActiveTab("accepted");
         Revalidate("getupdates")
       } else {
@@ -189,7 +177,7 @@ export default function Technician({technicianData}:{technicianData:DataResponse
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         // Update the job status in the state
         setJobs((prevJobs) =>
           prevJobs.map((job) =>
@@ -204,7 +192,10 @@ export default function Technician({technicianData}:{technicianData:DataResponse
           newStatus === "ACCEPTED"
         ) {
             Revalidate("getupdates")
+            toast.success(`status updated to ${newStatus}`)
             router.push(`/callpro/technician/technicianworkflow/${jobId}`);
+            toast.success(`status updated to---22 ${newStatus}`)
+
         }
       } else {
         console.error("Failed to update job status:", await response.json());
@@ -214,8 +205,8 @@ export default function Technician({technicianData}:{technicianData:DataResponse
     }
   };
 
-  const assignedJobs = technicianData.data.filter((job) => job.status === "SCHEDULED");
-  const acceptedJobs = technicianData.data.filter(
+  const assignedJobs = technicianJobs.filter((job) => job.status === "SCHEDULED");
+  const acceptedJobs = technicianJobs.filter(
     (job) =>
       job.status === "ACCEPTED" ||
       job.status === "ONGOING" ||
@@ -223,10 +214,11 @@ export default function Technician({technicianData}:{technicianData:DataResponse
   );
 
   const totalAssigned = assignedJobs.length;
-  const inProgress = technicianData.data.filter((job) => job.status === "ONGOING").length;
-  const completed = technicianData.data.filter((job) => job.status === "COMPLETED").length;
+  const inProgress = technicianJobs.filter((job) => job.status === "ONGOING").length;
+  const completed = technicianJobs.filter((job) => job.status === "COMPLETED").length;
 
   return (
+    
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Technician Dashboard</h1>
 
