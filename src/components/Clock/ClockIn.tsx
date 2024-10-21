@@ -204,19 +204,42 @@ export default function ClockIn() {
   )
 }
 
+
+
 function StatusBar({ status }: { status: Status }) {
   return (
-    <div className="bg-primary600 text-primary-foreground p-2 z-50 mb-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <User className="h-5 w-5" />
-          <span className="font-semibold">Employee Status:</span>
-        </div>
-        <div className="font-bold">{status}</div>
+    <div className="flex justify-end items-center p-2 z-50 mb-4">
+      <div
+        className={`inline-flex items-center px-4 py-2 rounded-full space-x-2 border ${
+          status === "Clocked In"
+            ? "bg-green-100 border-green-500 text-green-800"
+            : status === "Lunch Break"
+            ? "bg-yellow-100 border-yellow-500 text-yellow-800"
+            : status === "Clocked Out"
+            ? "bg-red-100 border-red-500 text-red-800"
+            : "bg-gray-100 border-gray-500 text-gray-800"
+        }`}
+      >
+        <User className="h-5 w-5" />
+        <span className="font-semibold text-gray-700">Status:</span>
+        <span
+          className={`px-2 py-1 rounded-full text-sm font-bold ${
+            status === "Clocked In"
+              ? "bg-green-500 text-white"
+              : status === "Lunch Break"
+              ? "bg-yellow-500 text-black"
+              : status === "Clocked Out"
+              ? "bg-red-500 text-white"
+              : "bg-gray-500 text-white"
+          }`}
+        >
+          {status}
+        </span>
       </div>
     </div>
   )
 }
+
 
 function AttendanceHistoryDialog({ attendanceHistory }: { attendanceHistory: DailyAttendance[] }) {
   return (
