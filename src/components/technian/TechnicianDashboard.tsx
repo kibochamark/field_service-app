@@ -1,5 +1,5 @@
 "use client";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/ui/avatar";
 import { Badge } from "@/shadcn/ui/badge";
@@ -104,21 +104,31 @@ export function TechnicianDashboard({
 }: {
   technicianData: DataResponse;
 }) {
+
+
+  const { data: session } = useSession();
+  const technicianId = session?.user?.userId; // Get the current technician's ID
+
+  // Filter jobs by technician's ID
+  const technicianJobs = technicianData.data.filter((job) =>
+    job.technicians.some((tech) => tech.technician.id === technicianId)
+  );
   const [selectedJob, setSelectedJob] = useState(
-    technicianData.data.length > 0 ? technicianData.data[0].id : ""
+    technicianJobs.length > 0 ? technicianJobs[0].id : ""
   );
   const [jobStatus, setJobStatus] = useState("");
 
-  const { data: session } = useSession();
-  const completedJobs = technicianData.data.filter(
+
+
+  const completedJobs = technicianJobs.filter(
     (job: Job) => job.status === "COMPLETED"
   ).length;
-  const totalJobs = technicianData.data.length;
+  const totalJobs = technicianJobs.length;
 
-  const ongoing = technicianData.data.filter(
+  const ongoing = technicianJobs.filter(
     (job: Job) => job.status === "ONGOING"
   ).length;
-  const accepted = technicianData.data.filter(
+  const accepted = technicianJobs.filter(
     (job: Job) => job.status === "SCHEDULED"
   ).length;
   // const assigned = technicianData.data.filter((job:Job) => job.status === "ACCEPTED").length;
@@ -171,7 +181,6 @@ export function TechnicianDashboard({
     },
   ];
 
-
   // Calculate weekly job counts
   // Calculate weekly job counts
   const calculateWeeklyJobs = (): WeeklyJobData[] => {
@@ -185,7 +194,7 @@ export function TechnicianDashboard({
       Sun: 0,
     };
 
-    technicianData.data.forEach((job: Job) => {
+    technicianJobs.forEach((job: Job) => {
       const startDate = new Date(job.jobschedule.startDate);
       const day = format(startDate, "EEE"); // Get the abbreviated day of the week
       if (weeklyData[day] !== undefined) {
@@ -207,8 +216,7 @@ export function TechnicianDashboard({
     0
   );
   const busiestDayData: WeeklyJobData = weeklyJobsData.reduce(
-    (busiest, current) =>
-      current.jobs > busiest.jobs ? current : busiest
+    (busiest, current) => (current.jobs > busiest.jobs ? current : busiest)
   );
   const averageJobsPerDay: string = (totalJobsThisWeek / 7).toFixed(1);
 
@@ -218,15 +226,12 @@ export function TechnicianDashboard({
       return "bg-red-500"; // Busy day (high number of jobs)
     } else if (jobs >= 3) {
       return "bg-yellow-400"; // Medium number of jobs
-
-    }else if( jobs >=1){
-      return "bg-gray-300"
+    } else if (jobs >= 1) {
+      return "bg-gray-300";
     } else {
       return "bg-green-300"; // Fewer jobs
     }
   };
-  
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-8">
@@ -324,10 +329,11 @@ export function TechnicianDashboard({
                     <SelectTrigger className="w-[180px] border-gray-300">
                       <SelectValue placeholder="Select Job" />
                     </SelectTrigger>
+                    
                     <SelectContent>
-                      {technicianData.data.map((job) => (
+                      {technicianJobs.map((job) => (
                         <SelectItem key={job.id} value={job.id}>
-                          {job.name}
+                          {job.name} 
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -359,7 +365,7 @@ export function TechnicianDashboard({
                     </h3> */}
                     <div className="grid grid-cols-2 gap-4">
                       {/* Fetch job details dynamically from techdata */}
-                      {technicianData.data
+                      {technicianJobs
                         .filter((job) => job.id === selectedJob)
                         .map((job) => (
                           <>
@@ -386,8 +392,10 @@ export function TechnicianDashboard({
                             </div> */}
                             <div className="flex items-center space-x-2">
                               <CalendarCheck2 className="h-5 w-5 text-green-500" />
-                              <span>Job Status: {job.status.toLowerCase()}</span>
-                              </div>
+                              <span>
+                                Job Status: {job.status.toLowerCase()}
+                              </span>
+                            </div>
                           </>
                         ))}
                     </div>
@@ -446,7 +454,7 @@ export function TechnicianDashboard({
                 </TableHeader>
                 {""}
                 <TableBody>
-                  {technicianData.data
+                  {technicianJobs
                     .filter(
                       (job) =>
                         job.status === "ONGOING" ||
@@ -510,7 +518,7 @@ export function TechnicianDashboard({
                     ))}
 
                   {/* Check if there are no upcoming jobs */}
-                  {technicianData.data.filter(
+                  {technicianJobs.filter(
                     (job) =>
                       job.status === "ONGOING" ||
                       job.status === "SCHEDULED" ||
@@ -527,36 +535,38 @@ export function TechnicianDashboard({
             </CardContent>
           </Card>
           <Card className="bg-white">
-  <CardHeader>
-    <CardTitle className="text-xl font-semibold text-gray-800">
-      Weekly Overview
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="grid grid-cols-7 gap-2">
-      {weeklyJobsData.map((day) => (
-        <div key={day.day} className="text-center">
-          <div
-            className={`w-full aspect-square rounded-md ${getHeatmapColor(day.jobs)}`}
-          ></div>
-          <p className="text-xs font-medium mt-1">{day.day}</p>
-          <p className="text-sm font-bold">{day.jobs}</p>
-        </div>
-      ))}
-    </div>
-    <div className="mt-4 space-y-2">
-      <p className="text-sm text-gray-600">Total Jobs This Week: {totalJobsThisWeek}</p>
-      <p className="text-sm text-gray-600">
-        Busiest Day: {busiestDayData.day} ({busiestDayData.jobs} jobs)
-      </p>
-      <p className="text-sm text-gray-600">
-        Average Jobs Per Day: {averageJobsPerDay}
-      </p>
-    </div>
-  </CardContent>
-</Card>
-
-
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-gray-800">
+                Weekly Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-7 gap-2">
+                {weeklyJobsData.map((day) => (
+                  <div key={day.day} className="text-center">
+                    <div
+                      className={`w-full aspect-square rounded-md ${getHeatmapColor(
+                        day.jobs
+                      )}`}
+                    ></div>
+                    <p className="text-xs font-medium mt-1">{day.day}</p>
+                    <p className="text-sm font-bold">{day.jobs}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-gray-600">
+                  Total Jobs This Week: {totalJobsThisWeek}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Busiest Day: {busiestDayData.day} ({busiestDayData.jobs} jobs)
+                </p>
+                <p className="text-sm text-gray-600">
+                  Average Jobs Per Day: {averageJobsPerDay}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
