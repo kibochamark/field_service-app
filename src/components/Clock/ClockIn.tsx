@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/shadcn/ui/button"
 import { Card, CardContent } from "@/shadcn/ui/card"
-import { Clock, X, ChevronUp, Coffee, LogOut, User, Calendar } from "lucide-react"
+import { Clock, X, ChevronUp, Coffee, LogOut, User, Calendar, Loader } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shadcn/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shadcn/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/ui/table"
+import { useMutation } from "@tanstack/react-query"
+import { clockin, clockout, lunchend, lunchstart } from "./ClockinActions"
+import toast from "react-hot-toast"
 
 type Status = "Not Clocked In" | "Clocked In" | "Lunch Break" | "Clocked Out"
 
@@ -29,6 +32,7 @@ export default function ClockIn() {
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [elapsedTime, setElapsedTime] = useState<number>(0)
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([])
+  const [clockindata, setclockindata] = useState("")
   const [attendanceHistory, setAttendanceHistory] = useState<DailyAttendance[]>([])
 
   useEffect(() => {
@@ -89,27 +93,30 @@ export default function ClockIn() {
   }
 
   const handleClockIn = () => {
-    setStatus("Clocked In")
-    setStartTime(new Date())
-    setElapsedTime(0)
-    logAction("Clocked In")
+
+    clockinmutation.mutate()
+
+
   }
 
   const handleLunchBreak = () => {
+    lunchstartmutation.mutate()
     setStatus("Lunch Break")
     logAction("Started Lunch Break")
   }
 
   const handleReturnFromLunch = () => {
+    lunchendmutation.mutate()
     setStatus("Clocked In")
     logAction("Ended Lunch Break")
   }
 
   const handleClockOut = () => {
+    clockoutmutation.mutate()
     setStatus("Clocked Out")
     setStartTime(null)
     logAction("Clocked Out")
-    
+
     // Add today's attendance to history
     const today = new Date().toISOString().split('T')[0]
     const todayLogs = timeLogs.reduce((acc, log) => {
@@ -123,6 +130,88 @@ export default function ClockIn() {
     setAttendanceHistory([todayLogs, ...attendanceHistory])
     setTimeLogs([])
   }
+
+
+  // mutations
+
+  const clockinmutation = useMutation({
+    mutationFn: async () => {
+      const data = await clockin()
+      return data
+    },
+    onSuccess(data, variables, context) {
+      if (data[1] == 201) {
+        toast.success("clocked in successfully")
+        setStatus("Clocked In")
+        setStartTime(new Date())
+        setclockindata(data[0]?.data?.id)
+        setElapsedTime(0)
+        logAction("Clocked In")
+      } else {
+        toast.error("Failed to clock in")
+      }
+    },
+    onError(error, variables, context) {
+      toast.error("Something went wrong")
+    },
+  })
+
+
+  const clockoutmutation = useMutation({
+    mutationFn: async () => {
+      const data = await clockout(clockindata as string)
+      return data
+    },
+    onSuccess(data, variables, context) {
+      if (data[1] == 201) {
+        toast.success("clocked out successfully")
+        setStatus("Clocked Out")
+        setStartTime(null)
+        logAction("Clocked Out")
+      } else {
+        toast.error("Failed to clock out")
+      }
+    },
+    onError(error, variables, context) {
+      toast.error("Something went wrong")
+    },
+  })
+  const lunchstartmutation = useMutation({
+    mutationFn: async () => {
+      const data = await lunchstart(clockindata as string)
+      return data
+    },
+    onSuccess(data, variables, context) {
+      if (data[1] == 200) {
+        toast.success("lunch start successfully")
+        setStatus("Lunch Break")
+        logAction("Started Lunch Break")
+      } else {
+        toast.error("Failed to start lunch")
+      }
+    },
+    onError(error, variables, context) {
+      toast.error("Something went wrong")
+    },
+  })
+  const lunchendmutation = useMutation({
+    mutationFn: async () => {
+      const data = await lunchend(clockindata as string)
+      return data
+    },
+    onSuccess(data, variables, context) {
+      if (data[1] == 200) {
+        toast.success("lunch end successful")
+        setStatus("Clocked In")
+        logAction("Ended Lunch Break")
+      } else {
+        toast.error("Failed to end lunch")
+      }
+    },
+    onError(error, variables, context) {
+      toast.error("Something went wrong")
+    },
+  })
 
   return (
     <>
@@ -149,21 +238,42 @@ export default function ClockIn() {
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-2">
-                  <Button onClick={handleClockIn} disabled={status !== "Not Clocked In" && status !== "Clocked Out"}>
-                    <Clock className="mr-2 h-4 w-4" />
-                    Clock In
+                  <Button onClick={handleClockIn} disabled={(status !== "Not Clocked In" && status !== "Clocked Out") || clockinmutation.isPending}>
+                    {clockinmutation.isPending ? <Loader className="animate animate-spin text-white" /> : (
+                      <>
+                        <Clock className="mr-2 h-4 w-4" />
+                        Clock In
+                      </>
+                    )}
+
                   </Button>
-                  <Button onClick={handleLunchBreak} disabled={status !== "Clocked In"}>
-                    <Coffee className="mr-2 h-4 w-4" />
-                    Start Lunch
+                  <Button onClick={handleLunchBreak} disabled={status !== "Clocked In" || lunchstartmutation.isPending}>
+
+
+                    {lunchstartmutation.isPending ? <Loader className="animate animate-spin text-white" /> : (
+                      <>
+                        <Coffee className="mr-2 h-4 w-4" />
+                        Start Lunch
+                      </>
+                    )}
                   </Button>
-                  <Button onClick={handleReturnFromLunch} disabled={status !== "Lunch Break"}>
-                    <Coffee className="mr-2 h-4 w-4" />
-                    End Lunch
+                  <Button onClick={handleReturnFromLunch} disabled={status !== "Lunch Break" || lunchendmutation.isPending}>
+
+
+                    {lunchendmutation.isPending ? <Loader className="animate animate-spin text-white" /> : (
+                      <>
+                        <Coffee className="mr-2 h-4 w-4" />
+                        End Lunch
+                      </>
+                    )}
                   </Button>
-                  <Button onClick={handleClockOut} disabled={status === "Not Clocked In" || status === "Clocked Out"}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Clock Out
+                  <Button onClick={handleClockOut} disabled={status === "Not Clocked In" || status === "Clocked Out" || clockoutmutation.isPending}>
+                    {clockoutmutation.isPending ? <Loader className="animate animate-spin text-white" /> : (
+                      <>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Clock Out
+                      </>
+                    )}
                   </Button>
                 </div>
                 <div className="mt-4">
@@ -210,28 +320,26 @@ function StatusBar({ status }: { status: Status }) {
   return (
     <div className="flex justify-end items-center  p-2 z-50 mb-4">
       <div
-        className={`inline-flex items-center px-4 py-2 rounded-full space-x-2 border ${
-          status === "Clocked In"
-            ? "bg-green-100 border-green-500 text-green-800"
-            : status === "Lunch Break"
+        className={`inline-flex items-center px-4 py-2 rounded-full space-x-2 border ${status === "Clocked In"
+          ? "bg-green-100 border-green-500 text-green-800"
+          : status === "Lunch Break"
             ? "bg-yellow-100 border-yellow-500 text-yellow-800"
             : status === "Clocked Out"
-            ? "bg-red-100 border-red-500 text-red-800"
-            : "bg-gray-100 border-gray-500 text-gray-800"
-        }`}
+              ? "bg-red-100 border-red-500 text-red-800"
+              : "bg-gray-100 border-gray-500 text-gray-800"
+          }`}
       >
         <User className="h-5 w-5" />
         <span className="font-semibold text-gray-700">Status:</span>
         <span
-          className={`px-2 py-1 rounded-full text-sm font-bold ${
-            status === "Clocked In"
-              ? "bg-green-500 text-white"
-              : status === "Lunch Break"
+          className={`px-2 py-1 rounded-full text-sm font-bold ${status === "Clocked In"
+            ? "bg-green-500 text-white"
+            : status === "Lunch Break"
               ? "bg-yellow-500 text-black"
               : status === "Clocked Out"
-              ? "bg-red-500 text-white"
-              : "bg-gray-500 text-white"
-          }`}
+                ? "bg-red-500 text-white"
+                : "bg-gray-500 text-white"
+            }`}
         >
           {status}
         </span>

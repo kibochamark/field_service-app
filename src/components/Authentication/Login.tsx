@@ -57,7 +57,9 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    await signIn("google");
+    const data =await signIn("google");
+
+
   };
 
   return (
