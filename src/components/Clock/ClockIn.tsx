@@ -186,7 +186,7 @@ export default function ClockIn() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="rounded-full w-12 h-12 shadow-lg"
+                  className="rounded-full w-12 h-12 animate animate-pulse shadow-lg"
                   onClick={() => setIsExpanded(true)}
                   variant="default"
                 >
@@ -208,7 +208,7 @@ export default function ClockIn() {
 
 function StatusBar({ status }: { status: Status }) {
   return (
-    <div className="flex justify-end items-center p-2 z-50 mb-4">
+    <div className="flex justify-end items-center  p-2 z-50 mb-4">
       <div
         className={`inline-flex items-center px-4 py-2 rounded-full space-x-2 border ${
           status === "Clocked In"
