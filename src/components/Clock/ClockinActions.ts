@@ -14,7 +14,7 @@ export const clockin = async()=>{
         }
 
         const res= await axios.post(baseUrl + "clockin", {
-            date:new Date()
+            date:new Date().toLocaleTimeString()
         },{
             headers:{
                 Authorization: "Bearer " + session?.user?.access_token
@@ -48,7 +48,7 @@ export const clockout = async(id:string)=>{
 
         const res= await axios.post(baseUrl + "clockout", {
             id:id,
-            clockout:new Date()
+            clockout:new Date().toLocaleTimeString()
         },{
             headers:{
                 Authorization: "Bearer " + session?.user?.access_token
@@ -79,7 +79,7 @@ export const lunchstart = async(id:string)=>{
 
         const res= await axios.post(baseUrl + "lunchStart", {
             id:id,
-            lunchStart:new Date()
+            lunchStart:new Date().toLocaleTimeString()
         },{
             headers:{
                 Authorization: "Bearer " + session?.user?.access_token
@@ -110,7 +110,7 @@ export const lunchend = async(id:string)=>{
 
         const res= await axios.post(baseUrl + "lunchbreak", {
             id:id,
-            lunchBreak:new Date()
+            lunchBreak:new Date().toLocaleTimeString()
         },{
             headers:{
                 Authorization: "Bearer " + session?.user?.access_token
