@@ -10,6 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useMutation } from "@tanstack/react-query"
 import { clockin, clockout, lunchend, lunchstart } from "./ClockinActions"
 import toast from "react-hot-toast"
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "../../../store/Store"
+import { handledata } from "../../../store/ClockSlice"
 
 type Status = "Not Clocked In" | "Clocked In" | "Lunch Break" | "Clocked Out"
 
@@ -32,7 +35,13 @@ export default function ClockIn() {
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [elapsedTime, setElapsedTime] = useState<number>(0)
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([])
-  const [clockindata, setclockindata] = useState("")
+
+
+
+  const clockindata = useSelector((state:RootState) => state.clock.data)
+  const dispatch = useDispatch()
+
+
   const [attendanceHistory, setAttendanceHistory] = useState<DailyAttendance[]>([])
 
   useEffect(() => {
@@ -144,7 +153,7 @@ export default function ClockIn() {
         toast.success("clocked in successfully")
         setStatus("Clocked In")
         setStartTime(new Date())
-        setclockindata(data[0]?.data?.id)
+        dispatch(handledata({data:data[0]?.data?.id}))
         setElapsedTime(0)
         logAction("Clocked In")
       } else {

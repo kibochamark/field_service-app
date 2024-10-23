@@ -16,6 +16,7 @@ import { handleOpen } from "../../store/SidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/Store";
 import { signOut, useSession } from "next-auth/react";
+import { clockout } from "@/components/Clock/ClockinActions";
 
 
 
@@ -27,6 +28,9 @@ export default function NavbarComponent() {
     const theme = useContext(ThemeContext);
     const { setTheme } = useTheme()
 
+    // get clock in id for this session
+    const currentclockinsession = useSelector((state:RootState)=> state.clock.data)
+
     const onDarkModeToggle = (e: boolean) => {
         setTheme(e ? 'dark' : 'light');
         theme?.setTheme(e ? 'dark' : 'light');
@@ -34,6 +38,7 @@ export default function NavbarComponent() {
 
 
     const logout = async () => {
+        await clockout(currentclockinsession)
         await signOut()
     }
 
