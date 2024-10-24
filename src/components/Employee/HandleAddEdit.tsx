@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/Store";
@@ -13,6 +14,7 @@ import {
   MoreHorizontal,
   PlusCircle,
   Trash,
+  Calendar,
 } from "lucide-react";
 import {
   Card,
@@ -45,19 +47,15 @@ import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { Revalidate } from "@/utils/Revalidate";
 import BulkImportButton from "./Bulkimport";
+import Link from "next/link";
 
 interface HandleAddEditProps {
   roles: any[];
   employees: any[];
 }
 
-const HandleAddEdit: React.FC<HandleAddEditProps> = ({
-  roles = [],
-  employees = [],
-}) => {
-  const { isAdd, isEdit, currentEmployee } = useSelector(
-    (state: RootState) => state.employee
-  );
+const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [] }) => {
+  const { isAdd, isEdit, currentEmployee } = useSelector((state: RootState) => state.employee);
   const dispatch = useDispatch();
   const { data: session } = useSession();
 
@@ -73,26 +71,16 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
           employee.email.toLowerCase().includes(searchValue) ||
           employee.role?.name.toLowerCase().includes(searchValue);
 
-        const matchesRoleFilter =
-          !selectedRole || employee.role?.name === selectedRole;
+        const matchesRoleFilter = !selectedRole || employee.role?.name === selectedRole;
 
         return matchesGlobalFilter && matchesRoleFilter;
       })
     : [];
 
-  const fieldsToDisplay = [
-    "firstName",
-    "lastName",
-    "email",
-    "role",
-    "createdAt",
-    "permissions",
-  ];
+  const fieldsToDisplay = ["firstName", "lastName", "email", "role", "createdAt", "permissions", ];
 
   const getPermissionsForRole = (roleName: string) => {
-    const role = Array.isArray(roles)
-      ? roles.find((r) => r.name === roleName)
-      : null;
+    const role = Array.isArray(roles) ? roles.find((r) => r.name === roleName) : null;
     return role && role.permissions
       ? role.permissions.map((permission: { value: any }) => permission.value)
       : [];
@@ -161,8 +149,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
                   ))}
               </select>
             </div>
-            {session?.user.role === "business owner" ||
-            session?.user.role === "business admin" ? (
+            {session?.user.role === "business owner" || session?.user.role === "business admin" ? (
               <Button
                 size="sm"
                 className="h-8 gap-1 w-full sm:w-auto"
@@ -171,14 +158,10 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
                 }}
               >
                 <PlusCircle className="h-3.5 w-3.5" />
-
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Add Employee
-                </span>
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Employee</span>
               </Button>
             ) : null}
-            {session?.user.role === "business owner" ||
-            session?.user.role === "business admin" ? (
+            {session?.user.role === "business owner" || session?.user.role === "business admin" ? (
               <BulkImportButton />
             ) : null}
           </div>
@@ -186,9 +169,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
             <Card>
               <CardHeader>
                 <CardTitle>Employees</CardTitle>
-                <CardDescription>
-                  Manage your Employees and view their performance.
-                </CardDescription>
+                <CardDescription>Manage your Employees and view their performance.</CardDescription>
               </CardHeader>
               <CardContent>
                 {filteredEmployees.length > 0 ? (
@@ -201,9 +182,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
                               {field.charAt(0).toUpperCase() + field.slice(1)}
                             </TableHead>
                           ))}
-                          <TableHead>
-                            <span className="sr-only">Actions</span>
-                          </TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -213,14 +192,10 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
                               <TableCell key={field}>
                                 {field === "permissions" ? (
                                   <Badge variant="outline">
-                                    {getPermissionsForRole(
-                                      employee.role?.name
-                                    ).join(", ") || "No Permissions"}
+                                    {getPermissionsForRole(employee.role?.name).join(", ") || "No Permissions"}
                                   </Badge>
                                 ) : field === "role" ? (
-                                  <Badge variant="outline">
-                                    {employee[field]?.name || "No Role"}
-                                  </Badge>
+                                  <Badge variant="outline">{employee[field]?.name || "No Role"}</Badge>
                                 ) : field === "createdAt" ? (
                                   formatDate(employee[field])
                                 ) : (
@@ -228,53 +203,45 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
                                 )}
                               </TableCell>
                             ))}
-                            {session?.user.role === "business owner" ||
-                            session?.user.role === "business admin" ? (
-                              <TableCell>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      aria-haspopup="true"
-                                      size="icon"
-                                      variant="ghost"
-                                    >
-                                      <MoreHorizontal className="h-4 w-4" />
-                                      <span className="sr-only">
-                                        Toggle menu
-                                      </span>
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>
-                                      Actions
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        dispatch(
-                                          handleEdit({
-                                            isEdit: true,
-                                            employee,
-                                          })
-                                        )
-                                      }
-                                      className="text-blue-600"
-                                    >
-                                      <Edit className="mr-2 h-4 w-4" />
-                                      Edit
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        handleDeleteEmployee(employee.id);
-                                      }}
-                                      className="text-red-600"
-                                    >
-                                      <Trash className="mr-2 h-4 w-4" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </TableCell>
-                            ) : null}
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <Button asChild size="sm" variant="outline">
+                                  <Link href={`/callpro/attendance/${employee.id}`}>
+                                    <Calendar className="h-4 w-4 mr-2" />
+                                    View Attendance
+                                  </Link>
+                                </Button>
+                                {session?.user.role === "business owner" || session?.user.role === "business admin" ? (
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                        <span className="sr-only">Toggle menu</span>
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                      <DropdownMenuItem
+                                        onClick={() => dispatch(handleEdit({ isEdit: true, employee }))}
+                                        className="text-blue-600"
+                                      >
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          handleDeleteEmployee(employee.id);
+                                        }}
+                                        className="text-red-600"
+                                      >
+                                        <Trash className="mr-2 h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                ) : null}
+                              </div>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -282,8 +249,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({
                   </div>
                 ) : (
                   <div className="text-center text-muted-foreground">
-                    No employees found. Please adjust your filters or add new
-                    employees.
+                    No employees found. Please adjust your filters or add new employees.
                   </div>
                 )}
               </CardContent>
