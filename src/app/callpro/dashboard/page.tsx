@@ -78,7 +78,7 @@ const Page = async () => {
         ) : session?.user?.role === "technician" ? (
           <TechnicianDashboard technicianData={technicianData}/>
         ) : session?.user?.role === "dispatcher" ?(
-          <DispatcherDashboard/>
+          <DispatcherDashboard technicianData={technicianData}/>
         ) :(
           <div> You have No Dashboard</div> 
         )}
