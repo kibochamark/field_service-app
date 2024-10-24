@@ -206,7 +206,7 @@ const HandleAddEdit: React.FC<HandleAddEditProps> = ({ roles = [], employees = [
                             <TableCell>
                               <div className="flex items-center space-x-2">
                                 <Button asChild size="sm" variant="outline">
-                                  <Link href={`/attendance/${employee.id}`}>
+                                  <Link href={`/callpro/attendance/${employee.id}`}>
                                     <Calendar className="h-4 w-4 mr-2" />
                                     View Attendance
                                   </Link>
