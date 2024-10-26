@@ -57,12 +57,15 @@ import OwnerAdminDashboard from "@/components/RoleBasedDashboards/OwnerAdminDash
 import { TechnicianDashboard } from "@/components/technian/TechnicianDashboard";
 import { getTechicianJob } from "@/components/technian/ServerAction";
 import { DispatcherDashboard } from "@/components/Dashboard/DispatcherDashboard";
+import { getAdminDashboardData } from "@/components/RoleBasedDashboards/Adminactions";
 
 const Page = async () => {
   const session = await auth();
   const technicianData = await getTechicianJob();
+  const adminDashboardData = await getAdminDashboardData();
 
-  //console.log(technicianData, "the data tech");
+
+  console.log(adminDashboardData, "admin dash");
 
   return (
     <div>
@@ -74,7 +77,7 @@ const Page = async () => {
         }
       >
         {session?.user?.role === "business owner" || session?.user?.role === "business admin" ? (
-          <OwnerAdminDashboard />
+          <OwnerAdminDashboard adminData={adminDashboardData} />
         ) : session?.user?.role === "technician" ? (
           <TechnicianDashboard technicianData={technicianData}/>
         ) : session?.user?.role === "dispatcher" ?(
