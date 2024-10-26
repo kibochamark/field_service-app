@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   Card,
   CardContent,
@@ -47,12 +47,20 @@ interface AdminDashboardData {
   pendingInvoicesCount: number;
   ongoingJobsCount: number;
   averageJobDuration: string;
+  jobName: string;
+  client: string;
+  status: string;
+  date: string;
+  technician:[]
   recentJobs: Array<{
+    jobName: string;
+    technician: ReactNode;
     id: string;
     name: string;
     client: string;
     status: string;
     date: string;
+  
   }>;
   jobTypeDistribution: Array<{
     type: string;
@@ -247,52 +255,57 @@ export default function OwnerAdminDashboard({ adminData }: OwnerAdminDashboardPr
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Jobs</CardTitle>
-          <CardDescription>Overview of the latest job activities</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Job Name</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sampleData.recentJobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">{job.name}</TableCell>
-                  <TableCell>{job.client}</TableCell>
-                  <TableCell>
-  <Badge
-    variant={
-      job.status === "Completed"
-        ? "default"  // Replace with existing variant or create custom styles
-        : job.status === "In Progress"
-        ? "secondary"
-        : "outline"
-    }
-  >
-    {job.status}
-  </Badge>
-</TableCell>
+  <CardHeader>
+    <CardTitle>Recent Jobs</CardTitle>
+    <CardDescription>Overview of the latest job activities</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Job Name</TableHead>
+          <TableHead>Client</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Technician</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {adminData.recentJobs && adminData.recentJobs.length > 0 ? (
+          adminData.recentJobs.map((job) => (
+            <TableRow key={job.jobName}>
+              <TableCell className="font-medium">{job.jobName}</TableCell>
+              <TableCell>{job.client}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    job.status === "Completed"
+                      ? "default"
+                      : job.status === "In Progress"
+                      ? "secondary"
+                      : "outline"
+                  }
+                >
+                  {job.status}
+                </Badge>
+              </TableCell>
+              <TableCell>{new Date(job.date).toLocaleDateString()}</TableCell>
+              <TableCell>{job.technician}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={5} className="text-center">
+              No recent jobs found.
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </CardContent>
+</Card>
 
-                  <TableCell>{job.date}</TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+
       
     </div>
   );

@@ -58,11 +58,13 @@ import { TechnicianDashboard } from "@/components/technian/TechnicianDashboard";
 import { getTechicianJob } from "@/components/technian/ServerAction";
 import { DispatcherDashboard } from "@/components/Dashboard/DispatcherDashboard";
 import { getAdminDashboardData } from "@/components/RoleBasedDashboards/Adminactions";
+import { getJobsByCompanyId } from "@/components/Jobs/jobactions";
 
 const Page = async () => {
   const session = await auth();
   const technicianData = await getTechicianJob();
   const adminDashboardData = await getAdminDashboardData();
+
 
 
   console.log(adminDashboardData, "admin dash");
