@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   Card,
   CardContent,
@@ -43,16 +43,24 @@ interface AdminDashboardData {
   subscriptionStatus: string;
   scheduledJobsCount: number;
   completedJobsCount: number;
-  activeClientsCount: number;
+  totalClients: number;
   pendingInvoicesCount: number;
   ongoingJobsCount: number;
   averageJobDuration: string;
+  jobName: string;
+  client: string;
+  status: string;
+  date: string;
+  technician:[]
   recentJobs: Array<{
+    jobName: string;
+    technician: ReactNode;
     id: string;
     name: string;
     client: string;
     status: string;
     date: string;
+  
   }>;
   jobTypeDistribution: Array<{
     type: string;
@@ -117,46 +125,96 @@ export default function OwnerAdminDashboard({ adminData }: OwnerAdminDashboardPr
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Total Revenue</CardTitle>
+          <CardDescription>Total earnings from invoices</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <DollarSign className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">${adminData.totalRevenue.toLocaleString()}</span>
+        </CardContent>
+      </Card>
+        
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${sampleData.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-          </CardContent>
-        </Card>
+        <CardHeader>
+          <CardTitle>Active Clients</CardTitle>
+          <CardDescription>Number of current active clients</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <UserCheck className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">{adminData.totalClients}</span>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pending Invoices</CardTitle>
+          <CardDescription>Number of unpaid invoices</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <FileText className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">{adminData.pendingInvoicesCount}</span>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ongoing Jobs</CardTitle>
+          <CardDescription>Number of jobs in progress</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <Clock className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">{adminData.ongoingJobsCount}</span>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Completed Jobs</CardTitle>
+          <CardDescription>Jobs completed to date</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <Briefcase className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">{adminData.completedJobsCount}</span>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Scheduled Jobs</CardTitle>
+          <CardDescription>Jobs planned for future dates</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <CalendarCheck className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">{adminData.scheduledJobsCount}</span>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Subscription Status</CardTitle>
+          <CardDescription>Current subscription level</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <Package2 className="text-primary w-8 h-8" />
+          <Badge
+            className={`${
+              adminData.subscriptionStatus.toLowerCase() === "active"
+                ? "bg-green-500 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            {adminData.subscriptionStatus}
+          </Badge>
+        </CardContent>
+      </Card>
+        
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sampleData.activeClientsCount}</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sampleData.pendingInvoicesCount}</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ongoing Jobs</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sampleData.ongoingJobsCount}</div>
-            <p className="text-xs text-muted-foreground">+201 since last hour</p>
-          </CardContent>
-        </Card>
+        <CardHeader>
+          <CardTitle>Total Employees</CardTitle>
+          <CardDescription>Number of active employees</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <Users className="text-primary w-8 h-8" />
+          <span className="text-2xl font-semibold">{adminData.totalEmployees}</span>
+        </CardContent>
+      </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
@@ -197,85 +255,58 @@ export default function OwnerAdminDashboard({ adminData }: OwnerAdminDashboardPr
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Jobs</CardTitle>
-          <CardDescription>Overview of the latest job activities</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Job Name</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sampleData.recentJobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">{job.name}</TableCell>
-                  <TableCell>{job.client}</TableCell>
-                  <TableCell>
-  <Badge
-    variant={
-      job.status === "Completed"
-        ? "default"  // Replace with existing variant or create custom styles
-        : job.status === "In Progress"
-        ? "secondary"
-        : "outline"
-    }
-  >
-    {job.status}
-  </Badge>
-</TableCell>
+  <CardHeader>
+    <CardTitle>Recent Jobs</CardTitle>
+    <CardDescription>Overview of the latest job activities</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Job Name</TableHead>
+          <TableHead>Client</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Technician</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {adminData.recentJobs && adminData.recentJobs.length > 0 ? (
+          adminData.recentJobs.map((job) => (
+            <TableRow key={job.jobName}>
+              <TableCell className="font-medium">{job.jobName}</TableCell>
+              <TableCell>{job.client}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    job.status === "Completed"
+                      ? "default"
+                      : job.status === "In Progress"
+                      ? "secondary"
+                      : "outline"
+                  }
+                >
+                  {job.status}
+                </Badge>
+              </TableCell>
+              <TableCell>{new Date(job.date).toLocaleDateString()}</TableCell>
+              <TableCell>{job.technician}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={5} className="text-center">
+              No recent jobs found.
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </CardContent>
+</Card>
 
-                  <TableCell>{job.date}</TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">Subscription Status</CardTitle>
-            <Package2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sampleData.subscriptionStatus}</div>
-            <p className="text-xs text-muted-foreground">Next renewal in 14 days</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">Average Job Duration</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sampleData.averageJobDuration}</div>
-            <p className="text-xs text-muted-foreground">Across completed jobs</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sampleData.totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">+100 new hires this year</p>
-          </CardContent>
-        </Card>
-      </div>
+      
     </div>
   );
 }
