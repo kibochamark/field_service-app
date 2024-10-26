@@ -46,7 +46,15 @@ const OwnerAdminDashboard: React.FC<OwnerAdminDashboardProps> = ({ adminData }) 
         </CardHeader>
         <CardContent className="flex items-center justify-between">
           <Package2 className="text-primary w-8 h-8" />
-          <Badge variant="secondary">{adminData.subscriptionStatus}</Badge>
+          <Badge
+            className={`${
+              adminData.subscriptionStatus.toLowerCase() === "active"
+                ? "bg-green-500 text-white"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+            {adminData.subscriptionStatus}
+          </Badge>
         </CardContent>
       </Card>
 
