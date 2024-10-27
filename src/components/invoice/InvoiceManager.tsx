@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import { DataTable } from './data-table'
 import InvoiceColumns from './InvoiceColumns'
 import { useSession } from 'next-auth/react'
+import { FormatCurrency } from '@/utils/FormatCurrency'
 interface Client {
   firstName: string;
   lastName: string;
@@ -70,7 +71,8 @@ const mockFetchDashboardMetrics = async (): Promise<{
   };
 }
 
-export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
+export default function EnhancedInvoiceManager({ getInvoice, dashboarddata }: { getInvoice: any; dashboarddata: any }) {
+
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -87,7 +89,7 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
   const router = useRouter();
 
   // console.log(getInvoice, "----------------getInvoice server page client-----------------------");
-  
+
 
   //session
   const { data: session } = useSession()
@@ -162,12 +164,12 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
       setIsCreating(false);
     }
   };
- 
+
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Invoice Manager</h1>
-      
+
       {/* Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <Card>
@@ -176,7 +178,7 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${dashboardMetrics.overdueAmount.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{FormatCurrency(dashboarddata?.overdueamount)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -185,7 +187,7 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${dashboardMetrics.draftTotal.toFixed(2)}</div>
+            <div className="text-2xl font-bold">${FormatCurrency(dashboarddata?.drafttotal)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -194,7 +196,7 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${dashboardMetrics.unpaidTotal.toFixed(2)}</div>
+            <div className="text-2xl font-bold">${FormatCurrency(dashboarddata?.unpaidtotal)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -203,7 +205,7 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardMetrics.averagePaidTime} days</div>
+            <div className="text-2xl font-bold">{dashboarddata?.averagedays ?? 0} days</div>
           </CardContent>
         </Card>
         <Card>
@@ -212,21 +214,21 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardMetrics.invoicesDueToday}</div>
+            <div className="text-2xl font-bold">{dashboarddata?.overduecount ?? 0}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Create New Invoice Button */}
-      {session?.user.role === "business owner" ||  session?.user.role === "business admin" ?(
+      {session?.user.role === "business owner" || session?.user.role === "business admin" ? (
         <div className=" flex justify-end mb-6">
-        <Button onClick={handleCreate} disabled={isCreating} className='bg-primary800'>
-          <Plus className="mr-2 h-4 w-4" /> Create New Invoice
-        </Button>
-      </div>
+          <Button onClick={handleCreate} disabled={isCreating} className='bg-primary800'>
+            <Plus className="mr-2 h-4 w-4" /> Create New Invoice
+          </Button>
+        </div>
 
-      ) : null }
-      
+      ) : null}
+
       {/* All Invoices Table */}
       <Card className="mb-6">
         <CardHeader>
@@ -234,11 +236,11 @@ export default function EnhancedInvoiceManager({getInvoice}:{getInvoice:any}) {
         </CardHeader>
         <CardContent>
           <DataTable columns={InvoiceColumns} data={getInvoice?.invoices || []} />
-          
+
         </CardContent>
       </Card>
 
-     
+
     </div>
   )
 }
