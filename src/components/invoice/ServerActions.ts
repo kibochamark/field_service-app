@@ -69,3 +69,37 @@ export async function getInvoiceDetails() {
     }
 }
 
+
+
+export async function getInvoiceDashboardData() {
+
+    const session= await auth()
+    try{
+
+        if(session){
+            const res= await fetch(baseUrl + `${session.user.companyId}/invoicedata`, {
+                method:"GET",
+                headers:{
+                    Authorization:"Bearer " + session.user.access_token
+                },
+                next:{tags:["getinvoicedashboarddata"]}
+            })
+
+            if(res.status !== 200){
+                return new Error("Failed to fetch")
+            }
+
+            const data= await res.json()
+
+            return data
+
+        }else{
+            return "Unauthorized"
+        }
+
+    }catch(e:any){
+        return e?.message
+    }
+    
+}
+

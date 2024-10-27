@@ -1,16 +1,25 @@
 import InvoiceManager from '@/components/invoice/InvoiceManager'
-import { getInvoiceDetails } from '@/components/invoice/ServerActions';
-import React from 'react'
+import { getInvoiceDashboardData, getInvoiceDetails } from '@/components/invoice/ServerActions';
+import { Loader } from 'lucide-react';
+import React, { Suspense } from 'react'
+
+export const dynamic = "force-dynamic"
 
 const page = async() => {
 
   const getInvoice = await getInvoiceDetails();
+
+  const dashboarddata = await getInvoiceDashboardData() ?? {}
   
-  console.log(getInvoice, "----------------getInvoice server page-----------------------");
+  // console.log(getInvoice, "----------------getInvoice server page-----------------------");
   
   return (
     <div>
-        <InvoiceManager getInvoice={getInvoice}/>
+      <Suspense fallback={<div className='flex items-center justify-center my-2'>
+        <Loader className='text-primary700 animate animate-spin'/>
+      </div>}>
+        <InvoiceManager getInvoice={getInvoice} dashboarddata={dashboarddata}/>
+        </Suspense>
     </div>
   )
 }
