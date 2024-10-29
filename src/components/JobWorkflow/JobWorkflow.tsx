@@ -68,7 +68,7 @@ const statusColors: Record<JobStatus, string> = {
 
 export default function JobWorkflow({ jobWorkflowData }: { jobWorkflowData: JobWorkflowData[] }) {
   if (!jobWorkflowData || jobWorkflowData.length === 0) {
-    return <div>No job workflows available</div>; // Handle the case where no data is available
+    return <div>No job workflows available</div>; 
   }
 
   const [selectedWorkflowId, setSelectedWorkflowId] = useState(jobWorkflowData[0]?.id || "");
@@ -105,11 +105,12 @@ export default function JobWorkflow({ jobWorkflowData }: { jobWorkflowData: JobW
       <SelectValue placeholder="Select a job" />
     </SelectTrigger>
     <SelectContent>
-      {jobWorkflowData.map((workflow) => (
-        <SelectItem key={workflow.id} value={workflow.id}>
-          {workflow.job.name}
-        </SelectItem>
-      ))}
+    {jobWorkflowData.filter(workflow => workflow.job).map((workflow) => (
+  <SelectItem key={workflow.id} value={workflow.id}>
+    {workflow.job.name}
+  </SelectItem>
+))}
+
     </SelectContent>
   </Select>
 </div>

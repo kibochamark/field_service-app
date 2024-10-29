@@ -87,12 +87,7 @@ export default function OwnerAdminDashboard({ adminData }: OwnerAdminDashboardPr
     activeClientsCount: 20,
     pendingInvoicesCount: 5,
     ongoingJobsCount: 8,
-    averageJobDuration: "4 hours",
-    recentJobs: [
-      { id: "1", name: "Job A", client: "Client X", status: "Completed", date: "2024-01-10" },
-      { id: "2", name: "Job B", client: "Client Y", status: "In Progress", date: "2024-02-14" },
-      { id: "3", name: "Job C", client: "Client Z", status: "Scheduled", date: "2024-03-20" },
-    ],
+    averageJobDuration: "4 hours",    
     jobTypeDistribution: [
       { type: "Installation", count: 10 },
       { type: "Maintenance", count: 5 },
